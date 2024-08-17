@@ -1,0 +1,8 @@
+{
+  "STAGE": "sandbox",
+  "AWS_PROFILE_REGION": "ap-northeast-2",
+  "AWS_IAM_ROLE": "arn:aws:iam::123456788:role/noit-api-user-role",
+  "DEPLOY_BUCKET": "bucket-deployment",
+  "SERVICE_NAME": "demo-fastapi",
+  "PUBLIC_API": "false"
+}

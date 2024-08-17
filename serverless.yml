@@ -1,0 +1,83 @@
+service: ${self:custom.env.SERVICE_NAME}
+frameworkVersion: '4'
+
+package:
+  individually: true
+  exclude:
+    - node_modules/**
+    - .serverless/**
+
+custom:
+  prune:
+    automatic: true
+    number: 5
+  env: ${file(./serverless-env/${opt:stage,'local'}.json)}
+  pythonRequirements:
+    dockerizePip: true
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: ${self:custom.env.AWS_PROFILE_REGION}
+  profile: noit
+  stage: ${opt:stage, 'sandbox'}
+  apiGateway:
+    binaryMediaTypes:
+      - '*/*'
+  memorySize: 1024
+  timeout: 30
+  iam:
+    role: ${self:custom.env.AWS_IAM_ROLE}
+  deploymentBucket:
+    name: ${self:custom.env.DEPLOY_BUCKET}
+  environment:
+    DEPLOYMENT_ENVIRONMENT: ${self:custom.env.STAGE}
+  logRetentionInDays: 30
+  ecr:
+    images:
+      demo-fastapi:
+        platform: linux/amd64
+        path: ./
+
+functions:
+  main:
+    image:
+      name: demo-fastapi
+    name: ${self:custom.env.SERVICE_NAME}-${self:custom.env.STAGE}
+    maximumRetryAttempts: 0
+    events:
+      - http:
+          method: GET
+          path: /docs
+          private: false
+      - http:
+          method: GET
+          path: '/docs/{proxy+}'
+          private: false
+      - http:
+          method: ANY
+          path: /
+          cors:
+            origin: '*' # 모든 도메인에서의 요청을 허용
+            headers: # 허용할 특정 헤더를 지정
+              - Content-Type
+              - Authorization
+              - AuthorizationR
+            allowCredentials: false
+          private: ${self:custom.env.PUBLIC_API}
+      - http:
+          method: ANY
+          path: '{proxy+}'
+          cors:
+            origin: '*' # 모든 도메인에서의 요청을 허용
+            headers: # 허용할 특정 헤더를 지정
+              - Content-Type
+              - Authorization
+              - AuthorizationR
+            allowCredentials: false
+          private: ${self:custom.env.PUBLIC_API}
+
+plugins:
+  - serverless-prune-plugin
+  - serverless-python-requirements
+
