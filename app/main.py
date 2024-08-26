@@ -68,6 +68,7 @@ if settings.deployment_environment in ("local", "sandbox", "qa"):
         f"| **{x.id}** | {x.name} | {x.platforms} | {x.use_flag} |" for x in services
     ]
     app = FastAPI(
+        default_response_class=ORJSONResponse,
         title="NO-IT SERVICE ADMIN API",
         docs_url="/docs",
         description="### 로그인 후 사용자 인증을 위해 헤더에 `Authorization`, `AuthorizationR` 값이 필요함\n\n"
@@ -77,7 +78,7 @@ if settings.deployment_environment in ("local", "sandbox", "qa"):
         "### 테스트을 위한 JWT 토큰은 아래 값을 사용하세요."
         f"""
         {(
-            create_access_token(
+            create_access_token( 
                 AccessTokenClaims(
                     id=1,
                     login_id="no-reply@no-it.io",
