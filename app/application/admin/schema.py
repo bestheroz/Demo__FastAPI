@@ -1,4 +1,4 @@
-from pydantic import AwareDatetime, EmailStr, Field, SecretStr
+from pydantic import AwareDatetime, Field, SecretStr
 
 from app.common.schema import Schema, IdCreatedUpdatedDto, TokenBase
 from app.common.type import AuthorityEnum
@@ -8,7 +8,6 @@ class AdminBase(Schema):
     login_id: str = Field(..., description="로그인 아이디")
     name: str = Field(..., description="관리자 이름")
     use_flag: bool = Field(True, description="사용 여부")
-    email_id: EmailStr = Field(..., description="이메일")
     manager_flag: bool = Field(..., description="매니저 여부(모든 권한 소유)")
     authorities: set[AuthorityEnum] = Field([], description="권한 목록")
 

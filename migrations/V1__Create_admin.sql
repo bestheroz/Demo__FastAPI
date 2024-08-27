@@ -34,6 +34,6 @@ login_id, password,
 authorities, joined_at, removed_flag,
 created_at, created_by_id, created_object_type, updated_at, updated_by_id, updated_object_type)
 VALUES (1, '시스템', 1, 1,
-'system', '0xA96896D3EB721A6D9E8D21205F1422405E72BFC855903E74DEB27EB5302EED66900519C7D3E0BA1FE9BCB6881AF48531C9339D4704E0C9815B3C65214A2F694BAC2447B1A2A544E15A2423AF97443DFA1C7B6B81C4F26B2ED92675276D88FB93',
+'system', '$2b$12$oquiOuftjG94Nepvwm1s3OJe5mt40rNI2VuDRaIlL11NDbaYzKIN2',
 '[]', now(), 0,
  now(), 1, 'admin', now(), 1, 'admin');

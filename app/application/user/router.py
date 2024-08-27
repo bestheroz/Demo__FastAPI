@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
-from pydantic import AwareDatetime
 
 from app.apdapter.auth import AuthorityChecker, get_operator_id
 from app.application.user.command import (
@@ -38,8 +37,6 @@ def _get_users(
     page_size: Annotated[int, Query()],
     search: Annotated[str | None, Query()] = None,
     ids: Annotated[set[int] | None, Query()] = None,
-    joined_start_at: Annotated[AwareDatetime | None, Query()] = None,
-    joined_end_at: Annotated[AwareDatetime | None, Query()] = None,
 ) -> ListApiResult[UserResponse]:
     return get_users(
         page,
@@ -47,8 +44,6 @@ def _get_users(
         "-id",
         search,
         ids,
-        joined_start_at,
-        joined_end_at,
     )
 
 

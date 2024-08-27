@@ -1,4 +1,3 @@
-from pydantic import AwareDatetime
 from sqlalchemy import or_, select
 from sqlalchemy.sql.functions import count
 
@@ -19,21 +18,9 @@ def get_users(
     ordering: str | None = None,
     search: str | None = None,
     ids: set[int] | None = None,
-    joined_start_at: AwareDatetime | None = None,
-    joined_end_at: AwareDatetime | None = None,
 ) -> ListApiResult[UserResponse]:
-    initial_query = (
-        select(User)
-        .filter_by(removed_flag=False)
-        .filter_by(withdraw_flag=False)
-        .filter_by(verify_flag=True)
-    )
-    count_query = (
-        select(count(User.id))
-        .filter_by(removed_flag=False)
-        .filter_by(withdraw_flag=False)
-        .filter_by(verify_flag=True)
-    )
+    initial_query = select(User).filter_by(removed_flag=False)
+    count_query = select(count(User.id)).filter_by(removed_flag=False)
 
     if search:
         initial_query = initial_query.filter(
@@ -46,14 +33,6 @@ def get_users(
     if ids:
         initial_query = initial_query.filter(User.id.in_(ids))
         count_query = count_query.filter(User.id.in_(ids))
-
-    if joined_start_at:
-        initial_query = initial_query.filter(User.joined_at >= joined_start_at)
-        count_query = count_query.filter(User.joined_at >= joined_start_at)
-
-    if joined_end_at:
-        initial_query = initial_query.filter(User.joined_at <= joined_end_at)
-        count_query = count_query.filter(User.joined_at <= joined_end_at)
 
     return get_pagination_list(
         initial_query=initial_query,

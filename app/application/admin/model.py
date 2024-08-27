@@ -64,6 +64,10 @@ class Admin(IdCreatedUpdated, Base):
     )
 
     @property
+    def type(self):
+        return UserTypeEnum.admin
+
+    @property
     def authorities(self):
         return (
             {item for item in AuthorityEnum} if self.manager_flag else self._authorities

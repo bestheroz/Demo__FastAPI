@@ -1,6 +1,6 @@
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict, AwareDatetime, Field, EmailStr
+from pydantic import BaseModel, ConfigDict, AwareDatetime, Field
 from pydantic.alias_generators import to_camel
 
 from app.common.type import UserTypeEnum, AuthorityEnum
@@ -42,8 +42,6 @@ class UserSimpleDto(Schema):
     id: int = Field(..., description="ID(KEY)")
     type: UserTypeEnum = Field(..., description="관리자 or 유저")
     login_id: str = Field(..., description="관리자 ID or 유저 계정 ID")
-    email_id: EmailStr = Field(..., description="이메일 ID")
-    image_url: str | None = Field(None, description="프로필 이미지 URL")
     name: str = Field(..., description="관리자 이름 or 유저 이름")
 
 
@@ -81,6 +79,5 @@ class AccessTokenClaims(Schema):
     id: int = Field(..., description="관리자 ID")
     login_id: str = Field(..., description="로그인 아이디")
     name: str = Field(..., description="관리자 이름")
-    image_url: str | None = Field(None, description="프로필 이미지 URL")
     manager_flag: bool = Field(..., description="매니저 여부(모든 권한 소유)")
     authorities: list[AuthorityEnum] = Field([], description="권한 목록")

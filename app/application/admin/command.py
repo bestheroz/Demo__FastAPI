@@ -98,9 +98,6 @@ def login_admin(
         if admin is None:
             raise RequestException400(Code.UNJOINED_ACCOUNT)
 
-        if admin.verify_flag is False:
-            raise RequestException400(Code.NOT_VERIFIED_ACCOUNT)
-
         if admin.use_flag is False:
             raise RequestException400(Code.UNKNOWN_ADMIN)
 
@@ -125,7 +122,6 @@ def renew_token(refresh_token: str, uow: AdminRDBUow) -> AdminToken:
             if (
                 admin is None
                 or admin.removed_flag is True
-                or admin.verify_flag is False
                 or admin.token is None
                 or not is_validated_jwt(admin.token)
             ):

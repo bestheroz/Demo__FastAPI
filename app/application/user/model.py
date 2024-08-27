@@ -53,6 +53,10 @@ class User(IdCreatedUpdated, Base):
     )
 
     @property
+    def type(self):
+        return UserTypeEnum.user
+
+    @property
     def created_by(self):
         if self.created_object_type == UserTypeEnum.user:
             return self.created_by_user

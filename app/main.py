@@ -1,4 +1,3 @@
-
 from fastapi import Depends, FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
@@ -50,7 +49,6 @@ if settings.sentry_dsn and settings.deployment_environment not in ("local", "tes
     )
 
 
-
 app = None
 if settings.deployment_environment in ("local", "sandbox", "qa"):
     app = FastAPI(
@@ -69,7 +67,6 @@ if settings.deployment_environment in ("local", "sandbox", "qa"):
                     id=1,
                     login_id="no-reply@no-it.io",
                     name="시스템",
-                    image_url=None,
                     manager_flag=True,
                     authorities=[],
                 )
