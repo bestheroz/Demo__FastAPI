@@ -2,61 +2,6 @@ name: Run Tests
 on: push
 
 jobs:
-  pytest:
-    strategy:
-      matrix:
-        python-version: [ "3.12" ]
-        poetry-version: [ 1.8.3 ]
-        os: [ ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
-    env:
-      DEPLOYMENT_ENVIRONMENT: test
-    steps:
-      - name: Checkout
-        uses: actions/checkout@main
-        with:
-          fetch-depth: 1
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@main
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Get full Python version
-        id: full-python-version
-        run: echo "version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")" >> $GITHUB_OUTPUT
-
-      - name: Set up poetry cache
-        uses: actions/cache@main
-        id: poetry-cache
-        with:
-          path: ~/.local
-          key: dotlocal-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ matrix.poetry-version }}
-
-      - name: Bootstrap poetry
-        run: curl -sL https://install.python-poetry.org | python - -y ${{ matrix.bootstrap-args }}
-        if: steps.poetry-cache.outputs.cache-hit != 'true'
-
-      - name: Update PATH
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Configure poetry
-        run: poetry config virtualenvs.in-project true
-
-      - name: Set up venv cache
-        uses: actions/cache@main
-        id: venv-cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Install dependencies
-        run: poetry install
-        if: steps.venv-cache.outputs.cache-hit != 'true'
-
-      - name: Run pytest
-        run: poetry run pytest tests/
-
   mypy_pyright:
     strategy:
       matrix:

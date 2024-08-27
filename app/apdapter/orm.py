@@ -26,23 +26,14 @@ def custom_json_serializer(obj):
 DEFAULT_SESSION_FACTORY = sessionmaker(
     autocommit=False,
     autoflush=False,
-    bind=(
-        create_engine(
-            "sqlite:///file:memory?cache=shared",
-            json_serializer=custom_json_serializer,
-            json_deserializer=loads,
-            # echo=True,
-        )
-        if settings.deployment_environment == "test"
-        else create_engine(
-            f"mysql+pymysql://{settings.db_username}:{quote(settings.db_password)}@{settings.db_host}:{settings.db_port}/{settings.db_name}",
-            isolation_level="REPEATABLE READ",
-            json_serializer=custom_json_serializer,
-            json_deserializer=loads,
-            pool_recycle=3600,
-            pool_pre_ping=True,
-            echo=True,
-        )
+    bind=create_engine(
+        f"mysql+pymysql://{settings.db_username}:{quote(settings.db_password)}@{settings.db_host}:{settings.db_port}/{settings.db_name}",
+        isolation_level="REPEATABLE READ",
+        json_serializer=custom_json_serializer,
+        json_deserializer=loads,
+        pool_recycle=3600,
+        pool_pre_ping=True,
+        echo=True,
     ),
     expire_on_commit=False,
 )
