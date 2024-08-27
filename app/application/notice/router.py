@@ -25,7 +25,7 @@ def get_uow():
         Depends(AuthorityChecker([AuthorityEnum.NOTICE_VIEW])),
     ],
 )
-def _get_notices(
+async def _get_notices(
     page: Annotated[int, Query()],
     page_size: Annotated[int, Query()],
     search: Annotated[str | None, Query()] = None,
@@ -33,7 +33,7 @@ def _get_notices(
     created_start_at: Annotated[AwareDatetime | None, Query()] = None,
     created_end_at: Annotated[AwareDatetime | None, Query()] = None,
 ) -> ListApiResult[NoticeResponse]:
-    return get_notices(
+    return await get_notices(
         page,
         page_size,
         "-id",
@@ -51,10 +51,10 @@ def _get_notices(
         Depends(AuthorityChecker([AuthorityEnum.NOTICE_VIEW])),
     ],
 )
-def _get_notice(
+async def _get_notice(
     notice_id: int,
 ) -> NoticeResponse:
-    return get_notice(notice_id)
+    return await get_notice(notice_id)
 
 
 @notice_router.delete(
@@ -65,9 +65,9 @@ def _get_notice(
     ],
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def _delete_notice(
+async def _delete_notice(
     notice_id: int,
     uow: Annotated[NoticeRDBUow, Depends(get_uow)],
     x_operator_id: Annotated[int, Depends(get_operator_id)],
 ) -> None:
-    remove_notice(notice_id, x_operator_id, uow)
+    await remove_notice(notice_id, x_operator_id, uow)

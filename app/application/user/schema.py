@@ -1,6 +1,6 @@
 from pydantic import AwareDatetime, Field
 
-from app.common.schema import Schema, IdCreatedUpdatedDto
+from app.common.schema import IdCreatedUpdatedDto, Schema
 
 
 class UserBase(Schema):

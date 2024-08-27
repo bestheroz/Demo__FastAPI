@@ -13,26 +13,26 @@ class NoticeRDBUow(AbstractUnitOfWork, ABC):
         self.session_factory = session_factory
         self.event_handler = NoticeEventHandler()
 
-    def __enter__(self, *args):
+    async def __aenter__(self, *args):
         self.session = self.session_factory()
         self.notice_repo = CommonRDBRepository[Notice](self.session, Notice)  # type: ignore
-        return super().__enter__(*args)
+        return await super().__aenter__(*args)
 
-    def __exit__(self, *args):
-        super().__exit__(*args)
-        self.session.close()
+    async def __aexit__(self, *args):
+        await super().__aexit__(*args)
+        await self.session.close()
 
-    def _handle_events(self):
+    async def _handle_events(self):
         for notice in self.notice_repo.seen:
             while notice.events:
                 event = notice.events.popleft()
-                self.event_handler.handle(event, self, self.session)
+                await self.event_handler.handle(event, self, self.session)
 
-    def _commit(self):
-        self.session.commit()
+    async def _commit(self):
+        await self.session.commit()
 
-    def _rollback(self):
-        self.session.rollback()
+    async def _rollback(self):
+        await self.session.rollback()
 
-    def _flush(self):
-        self.session.flush()
+    async def _flush(self):
+        await self.session.flush()

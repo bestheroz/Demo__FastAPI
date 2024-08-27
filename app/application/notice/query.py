@@ -12,7 +12,7 @@ from app.common.type import UserTypeEnum
 from app.utils.pagination import get_pagination_list
 
 
-def get_notices(
+async def get_notices(
     page: int,
     page_size: int,
     ordering: str | None = None,
@@ -44,7 +44,7 @@ def get_notices(
         initial_query = initial_query.filter(Notice.created_at <= created_end_at)
         count_query = count_query.filter(Notice.created_at <= created_end_at)
 
-    return get_pagination_list(
+    return await get_pagination_list(
         initial_query=initial_query,
         count_query=count_query,
         schema_cls=NoticeResponse,
@@ -54,9 +54,9 @@ def get_notices(
     )
 
 
-def get_notice(notice_id: int) -> NoticeResponse:
-    with session_scope() as session:
-        result = session.scalar(select(Notice).filter_by(id=notice_id))
+async def get_notice(notice_id: int) -> NoticeResponse:
+    async with session_scope() as session:
+        result = await session.scalar(select(Notice).filter_by(id=notice_id))
         if result is None:
             raise RequestException400(Code.UNKNOWN_NOTICE)
         return NoticeResponse.model_validate(result)

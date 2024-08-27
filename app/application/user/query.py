@@ -12,7 +12,7 @@ from app.common.schema import ListApiResult
 from app.utils.pagination import get_pagination_list
 
 
-def get_users(
+async def get_users(
     page: int,
     page_size: int,
     ordering: str | None = None,
@@ -30,7 +30,7 @@ def get_users(
         initial_query = initial_query.filter(User.id.in_(ids))
         count_query = count_query.filter(User.id.in_(ids))
 
-    return get_pagination_list(
+    return await get_pagination_list(
         initial_query=initial_query,
         count_query=count_query,
         schema_cls=UserResponse,
@@ -40,9 +40,9 @@ def get_users(
     )
 
 
-def get_user(user_id: int) -> UserResponse:
-    with session_scope() as session:
-        result = session.scalar(select(User).filter_by(id=user_id).filter_by(removed_flag=False))
+async def get_user(user_id: int) -> UserResponse:
+    async with session_scope() as session:
+        result = await session.scalar(select(User).filter_by(id=user_id).filter_by(removed_flag=False))
         if result is None:
             raise RequestException400(Code.UNKNOWN_USER)
         return UserResponse.model_validate(result)

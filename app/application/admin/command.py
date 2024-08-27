@@ -26,53 +26,53 @@ from app.utils.jwt import (
 log = get_logger()
 
 
-def create_admin(
+async def create_admin(
     data: AdminCreate,
     operator_id: int,
     uow: AdminRDBUow,
 ) -> AdminResponse:
-    with uow.autocommit():
-        admin = uow.admin_repo.session.scalar(
+    async with uow.autocommit():
+        admin = await uow.admin_repo.session.scalar(
             select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False)
         )
         if admin:
             raise RequestException400(Code.ALREADY_JOINED_ACCOUNT)
 
         admin = Admin.new(data, operator_id)
-        uow.admin_repo.add(admin)
-        return admin.on_created()
+        await uow.admin_repo.add(admin)
+        return await admin.on_created()
 
 
-def update_admin(
+async def update_admin(
     admin_id: int,
     data: AdminCreate,
     operator_id: int,
     uow: AdminRDBUow,
 ) -> AdminResponse:
-    with uow.autocommit():
-        admin = uow.admin_repo.get(admin_id)
+    async with uow.autocommit():
+        admin = await uow.admin_repo.get(admin_id)
         if admin is None or admin.removed_flag is True:
             raise RequestException400(Code.UNKNOWN_USER)
         if admin.manager_flag is False and admin.id == operator_id:
             raise RequestException400(Code.CANNOT_UPDATE_YOURSELF)
 
         admin.update(data, operator_id)
-        return admin.on_updated()
+        return await admin.on_updated()
 
 
-def remove_admin(
+async def remove_admin(
     admin_id: int,
     operator_id: int,
     uow: AdminRDBUow,
 ) -> None:
-    with uow.autocommit():
-        admin = uow.admin_repo.get(admin_id)
+    async with uow.autocommit():
+        admin = await uow.admin_repo.get(admin_id)
         if admin is None:
             raise RequestException400(Code.UNKNOWN_USER)
         if admin.id == operator_id:
             raise RequestException400(Code.CANNOT_REMOVE_YOURSELF)
         admin.remove(operator_id)
-        admin.on_removed()
+        await admin.on_removed()
 
 
 def _create_access_token(admin: Admin):
@@ -83,12 +83,12 @@ def _create_refresh_token(admin: Admin):
     return create_refresh_token(RefreshTokenClaims.model_validate(admin))
 
 
-def login_admin(
+async def login_admin(
     data: AdminLogin,
     uow: AdminRDBUow,
 ) -> AdminToken:
-    with uow.autocommit():
-        admin = uow.admin_repo.session.scalar(
+    async with uow.autocommit():
+        admin = await uow.admin_repo.session.scalar(
             select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False)
         )
         if admin is None:
@@ -105,15 +105,15 @@ def login_admin(
 
         admin.renew_token(_create_refresh_token(admin))
 
-        return admin.on_logged_in()
+        return await admin.on_logged_in()
 
 
-def renew_token(refresh_token: str, uow: AdminRDBUow) -> AdminToken:
-    with uow.autocommit():
+async def renew_token(refresh_token: str, uow: AdminRDBUow) -> AdminToken:
+    async with uow.autocommit():
         try:
             _scheme, credentials = get_authorization_scheme_param(refresh_token)
             admin_id = get_refresh_token_claims(credentials).id
-            admin = uow.admin_repo.get(admin_id)
+            admin = await uow.admin_repo.get(admin_id)
 
             if admin is None or admin.removed_flag is True or admin.token is None or not is_validated_jwt(admin.token):
                 raise AuthenticationException401()
@@ -138,21 +138,21 @@ def renew_token(refresh_token: str, uow: AdminRDBUow) -> AdminToken:
             raise AuthenticationException401() from None
 
 
-def logout(account_id: int, uow: AdminRDBUow):
-    with uow.autocommit():
-        admin = uow.admin_repo.get(account_id)
+async def logout(account_id: int, uow: AdminRDBUow):
+    async with uow.autocommit():
+        admin = await uow.admin_repo.get(account_id)
         if admin is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
         admin.sign_out()
 
 
-def change_password(
+async def change_password(
     admin_id: int,
     data: AdminChangePassword,
     uow: AdminRDBUow,
 ) -> AdminResponse:
-    with uow.autocommit():
-        admin = uow.admin_repo.get(admin_id)
+    async with uow.autocommit():
+        admin = await uow.admin_repo.get(admin_id)
         if admin is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
 
@@ -164,4 +164,4 @@ def change_password(
             raise RequestException400(Code.CHANGE_TO_SAME_PASSWORD)
 
         admin.change_password(data.new_password.get_secret_value())
-        return admin.on_password_changed()
+        return await admin.on_password_changed()

@@ -1,6 +1,7 @@
 from pydantic import AwareDatetime
 from sqlalchemy import JSON
-from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
+from sqlalchemy.ext.asyncio import async_object_session
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.apdapter.orm import Base, TZDateTime
 from app.application.user.event import UserPasswordReset, UserRemoved, UserUpdated
@@ -83,28 +84,31 @@ class User(IdCreatedUpdated, Base):
         self.updated_by_id = operator_id
         self.updated_object_type = UserTypeEnum.admin
 
-    def on_password_reset(self) -> UserResponse:
-        session = object_session(self)
-        if session is None:
+    async def on_password_reset(self) -> UserResponse:
+        session = async_object_session(self)
+        if not session:
             raise SystemException500()
-        session.flush()
+        await session.flush()
+        await session.refresh(self)
         self.events.append(UserPasswordReset(data=UserResponse.model_validate(self)))
         return UserResponse.model_validate(self)
 
-    def on_removed(self) -> UserResponse:
-        session = object_session(self)
-        if session is None:
+    async def on_removed(self) -> UserResponse:
+        session = async_object_session(self)
+        if not session:
             raise SystemException500()
-        session.flush()
+        await session.flush()
+        await session.refresh(self)
         event_data = UserResponse.model_validate(self)
         self.events.append(UserRemoved(data=event_data))
         return event_data
 
-    def on_updated(self) -> UserResponse:
-        session = object_session(self)
-        if session is None:
+    async def on_updated(self) -> UserResponse:
+        session = async_object_session(self)
+        if not session:
             raise SystemException500()
-        session.flush()
+        await session.flush()
+        await session.refresh(self)
         event_data = UserResponse.model_validate(self)
         self.events.append(UserUpdated(data=event_data))
         return event_data

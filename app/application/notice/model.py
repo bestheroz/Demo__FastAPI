@@ -1,12 +1,13 @@
 from pydantic import AwareDatetime
-from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
+from sqlalchemy.ext.asyncio import async_object_session
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.apdapter.orm import Base, TZDateTime
 from app.application.notice.event import NoticeRemoved
 from app.application.notice.schema import NoticeResponse
-from app.common.type import UserTypeEnum
 from app.common.exception import SystemException500
 from app.common.model import IdCreatedUpdated
+from app.common.type import UserTypeEnum
 from app.utils.datetime_utils import utcnow
 
 
@@ -61,11 +62,12 @@ class Notice(IdCreatedUpdated, Base):
         self.updated_by_id = operator_id
         self.updated_object_type = UserTypeEnum.admin
 
-    def on_removed(self) -> NoticeResponse:
-        session = object_session(self)
-        if session is None:
+    async def on_removed(self) -> NoticeResponse:
+        session = async_object_session(self)
+        if not session:
             raise SystemException500()
-        session.flush()
+        await session.flush()
+        await session.refresh(self)
         event_data = NoticeResponse.model_validate(self)
         self.events.append(NoticeRemoved(data=event_data))
         return event_data

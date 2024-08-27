@@ -1,9 +1,9 @@
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict, AwareDatetime, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
-from app.common.type import UserTypeEnum, AuthorityEnum
+from app.common.type import AuthorityEnum, UserTypeEnum
 
 
 class Schema(BaseModel):

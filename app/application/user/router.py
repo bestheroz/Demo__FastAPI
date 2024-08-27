@@ -32,13 +32,13 @@ def get_uow():
         Depends(AuthorityChecker([AuthorityEnum.USER_VIEW])),
     ],
 )
-def _get_users(
+async def _get_users(
     page: Annotated[int, Query()],
     page_size: Annotated[int, Query()],
     search: Annotated[str | None, Query()] = None,
     ids: Annotated[set[int] | None, Query()] = None,
 ) -> ListApiResult[UserResponse]:
-    return get_users(
+    return await get_users(
         page,
         page_size,
         "-id",
@@ -54,8 +54,8 @@ def _get_users(
         Depends(AuthorityChecker([AuthorityEnum.USER_VIEW])),
     ],
 )
-def _get_user(user_id: int) -> UserResponse:
-    return get_user(user_id)
+async def _get_user(user_id: int) -> UserResponse:
+    return await get_user(user_id)
 
 
 @user_router.delete(
@@ -66,12 +66,12 @@ def _get_user(user_id: int) -> UserResponse:
     ],
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def _reset_password(
+async def _reset_password(
     user_id: int,
     uow: Annotated[UserRDBUow, Depends(get_uow)],
     x_operator_id: Annotated[int, Depends(get_operator_id)],
 ) -> None:
-    reset_password(user_id, x_operator_id, uow=uow)
+    await reset_password(user_id, x_operator_id, uow=uow)
 
 
 @user_router.delete(
@@ -82,9 +82,9 @@ def _reset_password(
     ],
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def _remove_user(
+async def _remove_user(
     user_id: int,
     uow: Annotated[UserRDBUow, Depends(get_uow)],
     x_operator_id: Annotated[int, Depends(get_operator_id)],
 ) -> None:
-    remove_user(user_id, x_operator_id, uow=uow)
+    await remove_user(user_id, x_operator_id, uow=uow)

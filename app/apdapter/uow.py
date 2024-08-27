@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from contextlib import contextmanager
+from contextlib import asynccontextmanager
 from typing import TypeVar
 
 T = TypeVar("T", bound="AbstractUnitOfWork")
@@ -13,40 +13,40 @@ class AbstractUnitOfWork(ABC):
     def __init__(self):
         self._run = False
 
-    def __enter__(self, *args):
+    async def __aenter__(self, *args):
         if self._run:
             raise DuplicateUnitOfWork("already in use")
         self._run = True
         return self
 
-    def __exit__(self, *args):
-        self.rollback()
+    async def __aexit__(self, *args):
+        await self.rollback()
         self._run = False
 
-    def commit(self):
-        self._handle_events()
-        self._commit()
+    async def commit(self):
+        await self._handle_events()
+        await self._commit()
 
-    def flush(self):
-        self._flush()
+    async def flush(self):
+        await self._flush()
 
-    def rollback(self):
-        self._rollback()
-
-    @abstractmethod
-    def _handle_events(self): ...
+    async def rollback(self):
+        await self._rollback()
 
     @abstractmethod
-    def _commit(self): ...
+    async def _handle_events(self): ...
 
     @abstractmethod
-    def _flush(self): ...
+    async def _commit(self): ...
 
     @abstractmethod
-    def _rollback(self): ...
+    async def _flush(self): ...
 
-    @contextmanager
-    def autocommit(self):
-        with self as this:
+    @abstractmethod
+    async def _rollback(self): ...
+
+    @asynccontextmanager
+    async def autocommit(self):
+        async with self as this:
             yield this
-            this.commit()
+            await self.commit()

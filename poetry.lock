@@ -123,6 +123,24 @@ yarl = ">=1.0,<2.0"
 speedups = ["Brotli", "aiodns (>=3.2.0)", "brotlicffi"]
 
 [[package]]
+name = "aiomysql"
+version = "0.2.0"
+description = "MySQL driver for asyncio."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "aiomysql-0.2.0-py3-none-any.whl", hash = "sha256:b7c26da0daf23a5ec5e0b133c03d20657276e4eae9b73e040b72787f6f6ade0a"},
+    {file = "aiomysql-0.2.0.tar.gz", hash = "sha256:558b9c26d580d08b8c5fd1be23c5231ce3aeff2dadad989540fee740253deb67"},
+]
+
+[package.dependencies]
+PyMySQL = ">=1.0"
+
+[package.extras]
+rsa = ["PyMySQL[rsa] (>=1.0)"]
+sa = ["sqlalchemy (>=1.3,<1.4)"]
+
+[[package]]
 name = "aiosignal"
 version = "1.3.1"
 description = "aiosignal: a list of registered asynchronous callbacks"
@@ -1961,4 +1979,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "26a5bef52ad85d943a8f601de652e6530b7fbce5dd118e2eafc1c607b2c121a4"
+content-hash = "e949e04211ff6040479de903c021b3a2a11b3ac2be4ffc4036888a7a8bc83fcf"

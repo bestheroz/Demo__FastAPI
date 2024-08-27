@@ -1,23 +1,23 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status, Header
+from fastapi import APIRouter, Depends, Header, Query, status
 
-from app.apdapter.auth import AuthorityChecker, get_operator_id, get_admin_id
+from app.apdapter.auth import AuthorityChecker, get_admin_id, get_operator_id
 from app.application.admin.command import (
-    remove_admin,
-    update_admin,
-    renew_token,
-    logout,
     change_password,
     login_admin,
+    logout,
+    remove_admin,
+    renew_token,
+    update_admin,
 )
 from app.application.admin.query import get_admin, get_admins
 from app.application.admin.schema import (
-    AdminResponse,
-    AdminCreate,
-    AdminToken,
     AdminChangePassword,
+    AdminCreate,
     AdminLogin,
+    AdminResponse,
+    AdminToken,
 )
 from app.application.admin.uow import AdminRDBUow
 from app.common.schema import ListApiResult
@@ -37,11 +37,11 @@ def get_uow():
         Depends(AuthorityChecker([AuthorityEnum.ADMIN_VIEW])),
     ],
 )
-def _get_admins(
+async def _get_admins(
     page: Annotated[int, Query()],
     page_size: Annotated[int, Query()],
 ) -> ListApiResult[AdminResponse]:
-    return get_admins(page, page_size)
+    return await get_admins(page, page_size)
 
 
 @admin_router.get(
@@ -51,8 +51,8 @@ def _get_admins(
         Depends(AuthorityChecker([AuthorityEnum.ADMIN_VIEW])),
     ],
 )
-def _get_admin(admin_id: int) -> AdminResponse:
-    return get_admin(admin_id)
+async def _get_admin(admin_id: int) -> AdminResponse:
+    return await get_admin(admin_id)
 
 
 @admin_router.put(
@@ -62,13 +62,13 @@ def _get_admin(admin_id: int) -> AdminResponse:
         Depends(AuthorityChecker([AuthorityEnum.ADMIN_EDIT])),
     ],
 )
-def _update_admin(
+async def _update_admin(
     admin_id: int,
     payload: AdminCreate,
     uow: Annotated[AdminRDBUow, Depends(get_uow)],
     x_operator_id: Annotated[int, Depends(get_operator_id)],
 ) -> AdminResponse:
-    return update_admin(admin_id, payload, x_operator_id, uow)
+    return await update_admin(admin_id, payload, x_operator_id, uow)
 
 
 @admin_router.delete(
@@ -80,12 +80,12 @@ def _update_admin(
         Depends(AuthorityChecker([AuthorityEnum.ADMIN_EDIT])),
     ],
 )
-def _remove_admin(
+async def _remove_admin(
     admin_id: int,
     uow: Annotated[AdminRDBUow, Depends(get_uow)],
     x_operator_id: Annotated[int, Depends(get_operator_id)],
 ) -> None:
-    remove_admin(admin_id, x_operator_id, uow)
+    await remove_admin(admin_id, x_operator_id, uow)
 
 
 @admin_router.get(
@@ -94,22 +94,22 @@ def _remove_admin(
     description="*어세스 토큰* 만료 시 *리플래시 토큰* 으로 *어세스 토큰* 을 갱신합니다. "
     "(동시에 여러 사용자가 접속하고 있다면 *리플래시 토큰* 값이 달라서 갱신이 안될 수 있습니다.)",
 )
-def _renew_token(
+async def _renew_token(
     uow: Annotated[AdminRDBUow, Depends(get_uow)],
     refresh_token: str = Header(alias="AuthorizationR"),
 ) -> AdminToken:
-    return renew_token(refresh_token, uow)
+    return await renew_token(refresh_token, uow)
 
 
 @admin_router.post(
     "/v1/admin/login",
     name="관리자 로그인",
 )
-def _login_admin(
+async def _login_admin(
     payload: AdminLogin,
     uow: Annotated[AdminRDBUow, Depends(get_uow)],
 ) -> AdminToken:
-    return login_admin(payload, uow)
+    return await login_admin(payload, uow)
 
 
 @admin_router.delete(
@@ -121,11 +121,11 @@ def _login_admin(
         Depends(AuthorityChecker()),
     ],
 )
-def _logout(
+async def _logout(
     uow: Annotated[AdminRDBUow, Depends(get_uow)],
     x_admin_id: Annotated[int, Depends(get_admin_id)],
 ) -> None:
-    logout(x_admin_id, uow)
+    await logout(x_admin_id, uow)
 
 
 @admin_router.patch(
@@ -135,9 +135,9 @@ def _logout(
         Depends(AuthorityChecker()),
     ],
 )
-def _change_password(
+async def _change_password(
     admin_id: int,
     payload: AdminChangePassword,
     uow: Annotated[AdminRDBUow, Depends(get_uow)],
 ) -> AdminResponse:
-    return change_password(admin_id, payload, uow)
+    return await change_password(admin_id, payload, uow)

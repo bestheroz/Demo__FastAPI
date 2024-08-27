@@ -106,11 +106,7 @@ class AuthorityChecker:
         if not claims.authorities:
             return False
 
-        for require_authority in self.require_authorities:
-            if require_authority in claims.authorities:
-                return True
-
-        return False
+        return any(require_authority in claims.authorities for require_authority in self.require_authorities)
 
 
 class SuperManagerOnly(HTTPBearer):
