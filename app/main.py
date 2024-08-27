@@ -1,3 +1,4 @@
+
 from fastapi import Depends, FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
@@ -8,8 +9,7 @@ from sentry_sdk import capture_exception, init
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
-from sqlalchemy import select, text
-from sqlalchemy.orm import Session
+from sqlalchemy import text
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
@@ -19,20 +19,10 @@ from starlette.status import (
 )
 from structlog import get_logger
 
-from app.apdapter.orm import DEFAULT_SESSION_FACTORY, get_session
-from app.application.admin.account.router import admin_account_router
+from app.apdapter.orm import get_session
 from app.application.admin.router import admin_router
-from app.application.file.router import file_router
-from app.application.user.discipline.router import user_discipline_router
-from app.application.user.router import user_router
 from app.application.notice.router import notice_router
-from app.application.service.model import Service
-from app.application.service.router import service_router
-from app.application.terms.history.router import terms_history_router
-from app.application.terms.router import terms_router
-from app.application.user.schema import AccessTokenClaims
-from app.application.version.router import version_router
-from app.application.withdraw_reason.router import withdraw_router
+from app.application.user.router import user_router
 from app.common.code import Code
 from app.common.exception import (
     AuthenticationException401,
@@ -40,6 +30,7 @@ from app.common.exception import (
     RequestException400,
     SystemException500,
 )
+from app.common.schema import AccessTokenClaims
 from app.config.config import get_settings
 from app.utils.jwt import create_access_token
 from app.utils.string import camelize
@@ -47,7 +38,7 @@ from app.utils.string import camelize
 log = get_logger()
 
 settings = get_settings()
-if settings.deployment_environment not in ("local", "test"):
+if settings.sentry_dsn and settings.deployment_environment not in ("local", "test"):
     init(
         settings.sentry_dsn,
         environment=settings.deployment_environment,
@@ -58,18 +49,13 @@ if settings.deployment_environment not in ("local", "test"):
         ],
     )
 
+
+
 app = None
 if settings.deployment_environment in ("local", "sandbox", "qa"):
-    session: Session = DEFAULT_SESSION_FACTORY()
-    services = session.execute(
-        select(Service.id, Service.name, Service.platforms, Service.use_flag)
-    ).all()
-    markdown_service_grid = [
-        f"| **{x.id}** | {x.name} | {x.platforms} | {x.use_flag} |" for x in services
-    ]
     app = FastAPI(
         default_response_class=ORJSONResponse,
-        title="NO-IT SERVICE ADMIN API",
+        title="Demo API",
         docs_url="/docs",
         description="### 로그인 후 사용자 인증을 위해 헤더에 `Authorization`, `AuthorizationR` 값이 필요함\n\n"
         "토큰값을 헤더에서 전달할때는 scheme 정보인 `Bearer ` 를 반드시 붙여줘야 한다. "
@@ -85,27 +71,23 @@ if settings.deployment_environment in ("local", "sandbox", "qa"):
                     name="시스템",
                     image_url=None,
                     manager_flag=True,
-                    service_authorities=[],
+                    authorities=[],
                 )
             )
-        )} """
-        "\n\n### NO-IT 에서 관리하는 서비스 목록입니다.\n\n"
-        "| **서비스 ID** | 서비스명 | 지원 플랫폼 | 사용 중 |\n"
-        "|-------|-------|-------|-------|\n" + "\n".join(markdown_service_grid),
+        )} """,
     )
 else:
     app = FastAPI(
-        title="NO-IT SERVICE ADMIN API",
+        default_response_class=ORJSONResponse,
+        title="DEMO API",
     )
 
 origins = [
     "http://localhost:3000",
-    "https://d19m17vt7yiaa.cloudfront.net",
-    "https://d28o3cjh16dtx4.cloudfront.net",
 ]
 
 app.add_middleware(
-    CORSMiddleware,
+    CORSMiddleware,  # type: ignore
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
@@ -115,15 +97,7 @@ app.add_middleware(
 
 app.include_router(notice_router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
-app.include_router(admin_account_router, prefix="/api")
-app.include_router(version_router, prefix="/api")
-app.include_router(service_router, prefix="/api")
-app.include_router(terms_router, prefix="/api")
-app.include_router(terms_history_router, prefix="/api")
-app.include_router(withdraw_router, prefix="/api")
-app.include_router(file_router, prefix="/api")
 app.include_router(user_router, prefix="/api")
-app.include_router(user_discipline_router, prefix="/api")
 
 for route in app.routes:
     if isinstance(route, APIRoute):

@@ -12,7 +12,7 @@ class Code(StrEnum):
     CANNOT_UPDATE_YOURSELF = "자신의 정보는 변경 불가능"
     CANNOT_REMOVE_YOURSELF = "자신의 정보는 삭제 불가능"
     ALREADY_JOINED_ACCOUNT = "이미 가입된 계정"
-    UNJOINED_ADMIN_ACCOUNT = "가입되지 않은 계정"
+    UNJOINED_ACCOUNT = "가입되지 않은 계정"
     CHANGE_TO_SAME_PASSWORD = "이전과 동일한 비밀번호로 변경 불가능"
     INVALID_VERIFY_TOKEN = "유효하지 않은 인증 토큰"
     NOT_VERIFIED_ACCOUNT = "인증 되지 않은 계정"

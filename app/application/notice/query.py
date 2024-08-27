@@ -1,11 +1,10 @@
 from pydantic import AwareDatetime
-from sqlalchemy import and_, literal, or_, select
+from sqlalchemy import select
 from sqlalchemy.sql.functions import count
 
 from app.apdapter.orm import session_scope
 from app.application.notice.model import Notice
 from app.application.notice.schema import NoticeResponse
-from app.application.notice.type import NoticeStatusEnum
 from app.common.code import Code
 from app.common.exception import RequestException400
 from app.common.schema import ListApiResult
@@ -13,8 +12,7 @@ from app.common.type import UserTypeEnum
 from app.utils.pagination import get_pagination_list
 
 
-def get_notices_by_service_id(
-    service_id: int,
+def get_notices(
     page: int,
     page_size: int,
     ordering: str | None = None,
@@ -22,10 +20,9 @@ def get_notices_by_service_id(
     created_ids: set[int] | None = None,
     created_start_at: AwareDatetime | None = None,
     created_end_at: AwareDatetime | None = None,
-    status: set[NoticeStatusEnum] | None = None,
 ) -> ListApiResult[NoticeResponse]:
-    initial_query = select(Notice).filter_by(service_id=service_id)
-    count_query = select(count(Notice.id)).filter_by(service_id=service_id)
+    initial_query = select(Notice)
+    count_query = select(count(Notice.id))
 
     if search:
         # TODO joony: Implement search
@@ -47,44 +44,6 @@ def get_notices_by_service_id(
         initial_query = initial_query.filter(Notice.created_at <= created_end_at)
         count_query = count_query.filter(Notice.created_at <= created_end_at)
 
-    if status:
-        false_condition = literal(False)
-        status_active_criteria = (
-            Notice.removed_flag.is_(False)
-            if NoticeStatusEnum.ACTIVE in status
-            else false_condition
-        )
-        status_remove_by_admin_criteria = (
-            and_(
-                Notice.removed_flag.is_(True),
-                Notice.updated_object_type == UserTypeEnum.admin,
-            )
-            if NoticeStatusEnum.REMOVED_BY_ADMIN in status
-            else false_condition
-        )
-        status_remove_by_user_criteria = (
-            and_(
-                Notice.removed_flag.is_(True),
-                Notice.updated_object_type == UserTypeEnum.user,
-            )
-            if NoticeStatusEnum.REMOVED_BY_MEMBER in status
-            else false_condition
-        )
-        initial_query = initial_query.filter(
-            or_(
-                status_active_criteria,
-                status_remove_by_admin_criteria,
-                status_remove_by_user_criteria,
-            )
-        )
-        count_query = count_query.filter(
-            or_(
-                status_active_criteria,
-                status_remove_by_admin_criteria,
-                status_remove_by_user_criteria,
-            )
-        )
-
     return get_pagination_list(
         initial_query=initial_query,
         count_query=count_query,
@@ -95,11 +54,9 @@ def get_notices_by_service_id(
     )
 
 
-def get_notice(service_id: int, notice_id: int) -> NoticeResponse:
+def get_notice(notice_id: int) -> NoticeResponse:
     with session_scope() as session:
-        result = session.scalar(
-            select(Notice).filter_by(service_id=service_id).filter_by(id=notice_id)
-        )
+        result = session.scalar(select(Notice).filter_by(id=notice_id))
         if result is None:
             raise RequestException400(Code.UNKNOWN_NOTICE)
         return NoticeResponse.model_validate(result)

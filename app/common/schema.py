@@ -41,7 +41,7 @@ class DisplayOrder(Schema):
 class UserSimpleDto(Schema):
     id: int = Field(..., description="ID(KEY)")
     type: UserTypeEnum = Field(..., description="관리자 or 유저")
-    login_id: str = Field(..., description="관리자 계정 ID or 유저 계정 ID")
+    login_id: str = Field(..., description="관리자 ID or 유저 계정 ID")
     email_id: EmailStr = Field(..., description="이메일 ID")
     image_url: str | None = Field(None, description="프로필 이미지 URL")
     name: str = Field(..., description="관리자 이름 or 유저 이름")
@@ -74,22 +74,13 @@ class IdCreatedUpdatedDto(CreatedUpdateDto):
 
 
 class RefreshTokenClaims(Schema):
-    id: int = Field(..., description="관리자 계정 ID")
-
-
-class ServiceAuthority(Schema):
     id: int = Field(..., description="관리자 ID")
-    service_id: int = Field(..., description="서비스 ID")
-    manager_flag: bool = Field(..., description="매니저 여부(모든 권한 소유)")
-    authorities: list[AuthorityEnum] | None = Field(None, description="권한 목록")
 
 
 class AccessTokenClaims(Schema):
-    id: int = Field(..., description="관리자 계정 ID")
+    id: int = Field(..., description="관리자 ID")
     login_id: str = Field(..., description="로그인 아이디")
-    name: str = Field(..., description="관리자 계정 이름")
+    name: str = Field(..., description="관리자 이름")
     image_url: str | None = Field(None, description="프로필 이미지 URL")
     manager_flag: bool = Field(..., description="매니저 여부(모든 권한 소유)")
-    service_authorities: list[ServiceAuthority] = Field(
-        [], description="서비스별 권한 목록"
-    )
+    authorities: list[AuthorityEnum] = Field([], description="권한 목록")

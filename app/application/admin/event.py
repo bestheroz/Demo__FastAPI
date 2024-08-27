@@ -17,10 +17,19 @@ class AdminRemoved(Event[AdminResponse]):
     pass
 
 
+class AdminLoggedIn(Event[AdminResponse]):
+    pass
+
+
+class AdminPasswordChanged(Event[AdminResponse]):
+    pass
+
+
 class AdminEventHandler(EventHandler):
     def get_handlers(self) -> dict[type[Event], list[Callable]]:
         return {
             AdminCreated: [],
             AdminUpdated: [],
             AdminRemoved: [],
+            AdminLoggedIn: [],
         }
