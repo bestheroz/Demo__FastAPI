@@ -19,8 +19,11 @@ class AbstractUnitOfWork(ABC):
         self._run = True
         return self
 
-    async def __aexit__(self, *args):
-        await self.rollback()
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        if exc_type is None:
+            await self.commit()
+        else:
+            await self.rollback()
         self._run = False
 
     async def commit(self):
@@ -47,6 +50,15 @@ class AbstractUnitOfWork(ABC):
 
     @asynccontextmanager
     async def autocommit(self):
+        if self._run:
+            # 이미 트랜잭션이 실행 중이면, 새로운 트랜잭션을 시작하지 않고 현재 상태를 유지
+            yield self
+            return
+
         async with self as this:
-            yield this
-            await self.commit()
+            try:
+                yield this
+                await self.commit()
+            except Exception:
+                await self.rollback()
+                raise

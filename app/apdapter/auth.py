@@ -24,10 +24,7 @@ async def get_admin_id(request: Request) -> int | None:
     if not credentials:
         raise AuthenticationException401()
     operator_id = get_access_token_claims(credentials).id
-
-    if operator_id is not None:
-        return operator_id
-    return None
+    return operator_id
 
 
 async def get_operator_id(request: Request) -> int | None:

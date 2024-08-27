@@ -8,13 +8,17 @@ from urllib.parse import quote
 from orjson import dumps, loads
 from pydantic import AwareDatetime
 from sqlalchemy import DateTime, ForeignKey, TypeDecorator
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, mapped_column
+from structlog import get_logger
 
 from app.common.event import Event
 from app.config.config import get_settings
 
 settings = get_settings()
+
+log = get_logger()
 
 
 def custom_json_serializer(obj):
@@ -30,8 +34,10 @@ DEFAULT_SESSION_FACTORY = async_sessionmaker(
     bind=create_async_engine(
         f"mysql+aiomysql://{settings.db_username}:{quote(settings.db_password)}@{settings.db_host}:{settings.db_port}/{settings.db_name}",
         isolation_level="REPEATABLE READ",
-        json_serializer=lambda obj: dumps(obj).decode(),
+        json_serializer=custom_json_serializer,
         json_deserializer=loads,
+        pool_size=10,
+        max_overflow=20,
         pool_recycle=3600,
         pool_pre_ping=True,
         echo=True,
@@ -43,24 +49,31 @@ DEFAULT_SESSION_FACTORY = async_sessionmaker(
 
 @asynccontextmanager
 async def session_scope():
-    _session = DEFAULT_SESSION_FACTORY()
-    try:
-        yield _session
-        await _session.commit()
-    except Exception:
-        await _session.rollback()
-        raise
-    finally:
-        await _session.close()
+    async with DEFAULT_SESSION_FACTORY() as session:
+        try:
+            yield session
+            await session.commit()
+        except SQLAlchemyError as e:
+            log.error(f"Database error: {e}")
+            await session.rollback()
+            raise
+        except Exception as e:
+            log.error(f"Unexpected error: {e}")
+            await session.rollback()
+            raise
 
 
 # FastAPI Dependency
 async def get_session():
-    session = DEFAULT_SESSION_FACTORY()
-    try:
-        yield session
-    finally:
-        await session.close()
+    async with session_scope() as session:
+        try:
+            yield session
+        except SQLAlchemyError as e:
+            log.error(f"Database error: {e}")
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
 
 
 class TZDateTime(TypeDecorator, ABC):

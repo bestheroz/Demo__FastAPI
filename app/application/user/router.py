@@ -33,8 +33,8 @@ def get_uow():
     ],
 )
 async def _get_users(
-    page: Annotated[int, Query()],
-    page_size: Annotated[int, Query()],
+    page: Annotated[int, Query(example=1)],
+    page_size: Annotated[int, Query(example=10)],
     search: Annotated[str | None, Query()] = None,
     ids: Annotated[set[int] | None, Query()] = None,
 ) -> ListApiResult[UserResponse]:

@@ -38,10 +38,50 @@ def get_uow():
     ],
 )
 async def _get_admins(
-    page: Annotated[int, Query()],
-    page_size: Annotated[int, Query()],
+    page: Annotated[int, Query(example=1)],
+    page_size: Annotated[int, Query(example=10)],
 ) -> ListApiResult[AdminResponse]:
     return await get_admins(page, page_size)
+
+
+@admin_router.get(
+    "/v1/admin/renew-token",
+    name="관리자 토큰 갱신",
+    description="*어세스 토큰* 만료 시 *리플래시 토큰* 으로 *어세스 토큰* 을 갱신합니다. "
+    "(동시에 여러 사용자가 접속하고 있다면 *리플래시 토큰* 값이 달라서 갱신이 안될 수 있습니다.)",
+)
+async def _renew_token(
+    uow: Annotated[AdminRDBUow, Depends(get_uow)],
+    refresh_token: str = Header(alias="AuthorizationR"),
+) -> AdminToken:
+    return await renew_token(refresh_token, uow)
+
+
+@admin_router.post(
+    "/v1/admin/login",
+    name="관리자 로그인",
+)
+async def _login_admin(
+    payload: AdminLogin,
+    uow: Annotated[AdminRDBUow, Depends(get_uow)],
+) -> AdminToken:
+    return await login_admin(payload, uow)
+
+
+@admin_router.delete(
+    "/v1/admin/logout",
+    name="관리자 로그아웃",
+    description="*리플래시 토큰*을 삭제합니다.",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(AuthorityChecker()),
+    ],
+)
+async def _logout(
+    uow: Annotated[AdminRDBUow, Depends(get_uow)],
+    x_admin_id: Annotated[int, Depends(get_admin_id)],
+) -> None:
+    await logout(x_admin_id, uow)
 
 
 @admin_router.get(
@@ -86,46 +126,6 @@ async def _remove_admin(
     x_operator_id: Annotated[int, Depends(get_operator_id)],
 ) -> None:
     await remove_admin(admin_id, x_operator_id, uow)
-
-
-@admin_router.get(
-    "/v1/admin/renew-token",
-    name="관리자 토큰 갱신",
-    description="*어세스 토큰* 만료 시 *리플래시 토큰* 으로 *어세스 토큰* 을 갱신합니다. "
-    "(동시에 여러 사용자가 접속하고 있다면 *리플래시 토큰* 값이 달라서 갱신이 안될 수 있습니다.)",
-)
-async def _renew_token(
-    uow: Annotated[AdminRDBUow, Depends(get_uow)],
-    refresh_token: str = Header(alias="AuthorizationR"),
-) -> AdminToken:
-    return await renew_token(refresh_token, uow)
-
-
-@admin_router.post(
-    "/v1/admin/login",
-    name="관리자 로그인",
-)
-async def _login_admin(
-    payload: AdminLogin,
-    uow: Annotated[AdminRDBUow, Depends(get_uow)],
-) -> AdminToken:
-    return await login_admin(payload, uow)
-
-
-@admin_router.delete(
-    "/v1/admin/logout",
-    name="관리자 로그아웃",
-    description="*리플래시 토큰*을 삭제합니다.",
-    status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[
-        Depends(AuthorityChecker()),
-    ],
-)
-async def _logout(
-    uow: Annotated[AdminRDBUow, Depends(get_uow)],
-    x_admin_id: Annotated[int, Depends(get_admin_id)],
-) -> None:
-    await logout(x_admin_id, uow)
 
 
 @admin_router.patch(

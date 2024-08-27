@@ -26,8 +26,8 @@ def get_uow():
     ],
 )
 async def _get_notices(
-    page: Annotated[int, Query()],
-    page_size: Annotated[int, Query()],
+    page: Annotated[int, Query(example=1)],
+    page_size: Annotated[int, Query(example=10)],
     search: Annotated[str | None, Query()] = None,
     created_ids: Annotated[set[int] | None, Query()] = None,
     created_start_at: Annotated[AwareDatetime | None, Query()] = None,
