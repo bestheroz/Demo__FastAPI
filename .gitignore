@@ -130,6 +130,7 @@ dmypy.json
 .isorted
 
 package-lock.json
+pnpm-lock.yaml
 .serverless
 node_modules
 
