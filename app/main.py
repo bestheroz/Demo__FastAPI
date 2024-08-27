@@ -111,14 +111,7 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
     return ORJSONResponse(
         status_code=HTTP_422_UNPROCESSABLE_ENTITY,
         content=jsonable_encoder(
-            {
-                "detail": "\n".join(
-                    [
-                        f"{x['loc'][1] if len(x['loc']) > 1 else x['loc'][0]}: {x['msg']}"
-                        for x in details
-                    ]
-                )
-            }
+            {"detail": "\n".join([f"{x['loc'][1] if len(x['loc']) > 1 else x['loc'][0]}: {x['msg']}" for x in details])}
         ),
     )
 

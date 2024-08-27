@@ -4,15 +4,15 @@ from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
 from app.apdapter.orm import Base, TZDateTime
 from app.application.admin.event import (
-    AdminRemoved,
-    AdminUpdated,
     AdminCreated,
     AdminLoggedIn,
     AdminPasswordChanged,
+    AdminRemoved,
+    AdminUpdated,
 )
 from app.application.admin.schema import (
-    AdminResponse,
     AdminCreate,
+    AdminResponse,
     AdminToken,
 )
 from app.common.exception import SystemException500
@@ -21,7 +21,7 @@ from app.common.schema import AccessTokenClaims
 from app.common.type import AuthorityEnum, UserTypeEnum
 from app.utils.datetime_utils import utcnow
 from app.utils.jwt import create_access_token
-from app.utils.password import verify_password, get_password_hash
+from app.utils.password import get_password_hash, verify_password
 
 
 class Admin(IdCreatedUpdated, Base):
@@ -35,16 +35,10 @@ class Admin(IdCreatedUpdated, Base):
     use_flag: Mapped[bool]
     manager_flag: Mapped[bool]
 
-    _authorities: Mapped[set[AuthorityEnum]] = mapped_column(
-        "authorities", JSON, nullable=False
-    )
+    _authorities: Mapped[set[AuthorityEnum]] = mapped_column("authorities", JSON, nullable=False)
 
-    change_password_at: Mapped[AwareDatetime | None] = mapped_column(
-        TZDateTime, nullable=True
-    )
-    latest_active_at: Mapped[AwareDatetime | None] = mapped_column(
-        TZDateTime, nullable=False
-    )
+    change_password_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=True)
+    latest_active_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=False)
 
     joined_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=True)
     removed_flag: Mapped[bool]
@@ -69,9 +63,7 @@ class Admin(IdCreatedUpdated, Base):
 
     @property
     def authorities(self):
-        return (
-            {item for item in AuthorityEnum} if self.manager_flag else self._authorities
-        )
+        return {item for item in AuthorityEnum} if self.manager_flag else self._authorities
 
     @staticmethod
     def new(

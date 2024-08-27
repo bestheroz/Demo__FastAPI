@@ -3,7 +3,7 @@ from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
 from app.apdapter.orm import Base, TZDateTime
-from app.application.user.event import UserUpdated, UserRemoved, UserPasswordReset
+from app.application.user.event import UserPasswordReset, UserRemoved, UserUpdated
 from app.application.user.schema import UserResponse
 from app.common.exception import SystemException500
 from app.common.model import IdCreatedUpdated
@@ -20,12 +20,8 @@ class User(IdCreatedUpdated, Base):
 
     token: Mapped[str | None]
     password: Mapped[bytes | None]
-    change_password_at: Mapped[AwareDatetime | None] = mapped_column(
-        TZDateTime, nullable=True
-    )
-    latest_active_at: Mapped[AwareDatetime | None] = mapped_column(
-        TZDateTime, nullable=False
-    )
+    change_password_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=True)
+    latest_active_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=False)
 
     joined_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=True)
 

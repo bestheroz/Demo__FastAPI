@@ -29,12 +29,12 @@ def get_notices(
         pass
 
     if created_ids:
-        initial_query = initial_query.filter_by(
-            created_object_type=UserTypeEnum.user
-        ).filter(Notice.created_by_id.in_(created_ids))
-        count_query = count_query.filter_by(
-            created_object_type=UserTypeEnum.user
-        ).filter(Notice.created_by_id.in_(created_ids))
+        initial_query = initial_query.filter_by(created_object_type=UserTypeEnum.user).filter(
+            Notice.created_by_id.in_(created_ids)
+        )
+        count_query = count_query.filter_by(created_object_type=UserTypeEnum.user).filter(
+            Notice.created_by_id.in_(created_ids)
+        )
 
     if created_start_at:
         initial_query = initial_query.filter(Notice.created_at >= created_start_at)

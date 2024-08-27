@@ -23,12 +23,8 @@ def get_users(
     count_query = select(count(User.id)).filter_by(removed_flag=False)
 
     if search:
-        initial_query = initial_query.filter(
-            or_(User.name.ilike(f"%{search}%"), User.login_id.ilike(f"%{search}%"))
-        )
-        count_query = count_query.filter(
-            or_(User.name.ilike(f"%{search}%"), User.login_id.ilike(f"%{search}%"))
-        )
+        initial_query = initial_query.filter(or_(User.name.ilike(f"%{search}%"), User.login_id.ilike(f"%{search}%")))
+        count_query = count_query.filter(or_(User.name.ilike(f"%{search}%"), User.login_id.ilike(f"%{search}%")))
 
     if ids:
         initial_query = initial_query.filter(User.id.in_(ids))
@@ -46,9 +42,7 @@ def get_users(
 
 def get_user(user_id: int) -> UserResponse:
     with session_scope() as session:
-        result = session.scalar(
-            select(User).filter_by(id=user_id).filter_by(removed_flag=False)
-        )
+        result = session.scalar(select(User).filter_by(id=user_id).filter_by(removed_flag=False))
         if result is None:
             raise RequestException400(Code.UNKNOWN_USER)
         return UserResponse.model_validate(result)

@@ -10,9 +10,7 @@ from app.common.schema import ListApiResult
 from app.utils.pagination import get_pagination_list
 
 
-def get_admins(
-    page: int, page_size: int, ordering: str | None = None
-) -> ListApiResult[AdminResponse]:
+def get_admins(page: int, page_size: int, ordering: str | None = None) -> ListApiResult[AdminResponse]:
     initial_query = select(Admin).filter_by(removed_flag=False)
     count_query = select(count(Admin.id)).filter_by(removed_flag=False)
 
@@ -28,9 +26,7 @@ def get_admins(
 
 def get_admin(admin_id: int) -> AdminResponse:
     with session_scope() as session:
-        result = session.scalar(
-            select(Admin).filter_by(id=admin_id).filter_by(removed_flag=False)
-        )
+        result = session.scalar(select(Admin).filter_by(id=admin_id).filter_by(removed_flag=False))
         if result is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
         return AdminResponse.model_validate(result)

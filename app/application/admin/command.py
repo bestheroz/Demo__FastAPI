@@ -5,15 +5,15 @@ from structlog import get_logger
 
 from app.application.admin.model import Admin
 from app.application.admin.schema import (
-    AdminResponse,
+    AdminChangePassword,
     AdminCreate,
     AdminLogin,
+    AdminResponse,
     AdminToken,
-    AdminChangePassword,
 )
 from app.application.admin.uow import AdminRDBUow
 from app.common.code import Code
-from app.common.exception import RequestException400, AuthenticationException401
+from app.common.exception import AuthenticationException401, RequestException400
 from app.common.schema import AccessTokenClaims, RefreshTokenClaims
 from app.utils.jwt import (
     create_access_token,
@@ -33,9 +33,7 @@ def create_admin(
 ) -> AdminResponse:
     with uow.autocommit():
         admin = uow.admin_repo.session.scalar(
-            select(Admin)
-            .filter_by(login_id=data.login_id)
-            .filter_by(removed_flag=False)
+            select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False)
         )
         if admin:
             raise RequestException400(Code.ALREADY_JOINED_ACCOUNT)
@@ -91,9 +89,7 @@ def login_admin(
 ) -> AdminToken:
     with uow.autocommit():
         admin = uow.admin_repo.session.scalar(
-            select(Admin)
-            .filter_by(login_id=data.login_id)
-            .filter_by(removed_flag=False)
+            select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False)
         )
         if admin is None:
             raise RequestException400(Code.UNJOINED_ACCOUNT)
@@ -119,12 +115,7 @@ def renew_token(refresh_token: str, uow: AdminRDBUow) -> AdminToken:
             admin_id = get_refresh_token_claims(credentials).id
             admin = uow.admin_repo.get(admin_id)
 
-            if (
-                admin is None
-                or admin.removed_flag is True
-                or admin.token is None
-                or not is_validated_jwt(admin.token)
-            ):
+            if admin is None or admin.removed_flag is True or admin.token is None or not is_validated_jwt(admin.token):
                 raise AuthenticationException401()
 
             if admin.token and issued_refresh_token_in_10_seconds(admin.token):
@@ -165,9 +156,7 @@ def change_password(
         if admin is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
 
-        if admin.password and not admin.check_password(
-            data.password.get_secret_value()
-        ):
+        if admin.password and not admin.check_password(data.password.get_secret_value()):
             log.warning("password not match")
             raise RequestException400(Code.UNKNOWN_ADMIN)
 
