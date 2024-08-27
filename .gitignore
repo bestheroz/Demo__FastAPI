@@ -134,3 +134,4 @@ package-lock.json
 node_modules
 
 file:memory
+test.db
