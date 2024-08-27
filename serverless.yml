@@ -35,14 +35,14 @@ provider:
   logRetentionInDays: 30
   ecr:
     images:
-      demo-fastapi:
+      demo-api:
         platform: linux/amd64
         path: ./
 
 functions:
   main:
     image:
-      name: demo-fastapi
+      name: demo-api
     name: ${self:custom.env.SERVICE_NAME}-${self:custom.env.STAGE}
     maximumRetryAttempts: 0
     events:
@@ -58,26 +58,25 @@ functions:
           method: ANY
           path: /
           cors:
-            origin: '*' # 모든 도메인에서의 요청을 허용
-            headers: # 허용할 특정 헤더를 지정
+            origin: '*'
+            headers:
               - Content-Type
               - Authorization
               - AuthorizationR
             allowCredentials: false
-          private: ${self:custom.env.PUBLIC_API}
+          private: ${self:custom.env.PROTECT_API}
       - http:
           method: ANY
           path: '{proxy+}'
           cors:
-            origin: '*' # 모든 도메인에서의 요청을 허용
-            headers: # 허용할 특정 헤더를 지정
+            origin: '*'
+            headers:
               - Content-Type
               - Authorization
               - AuthorizationR
             allowCredentials: false
-          private: ${self:custom.env.PUBLIC_API}
+          private: ${self:custom.env.PROTECT_API}
 
 plugins:
   - serverless-prune-plugin
   - serverless-python-requirements
-
