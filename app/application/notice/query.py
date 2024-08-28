@@ -55,8 +55,8 @@ async def get_notices(
 
 
 async def get_notice(notice_id: int) -> NoticeResponse:
-    async with session_scope() as session:
-        result = await session.scalar(select(Notice).filter_by(id=notice_id))
+    with session_scope() as session:
+        result = session.scalar(select(Notice).filter_by(id=notice_id))
         if result is None:
             raise RequestException400(Code.UNKNOWN_NOTICE)
         return NoticeResponse.model_validate(result)

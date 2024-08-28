@@ -31,5 +31,5 @@ removed_flag, additional_info,
 created_at, created_by_id, created_object_type, updated_at, updated_by_id, updated_object_type)
 values (1, '테스트유저', 1, 'tester', '$2b$12$oquiOuftjG94Nepvwm1s3OJe5mt40rNI2VuDRaIlL11NDbaYzKIN2',
 0, '{}',
- now(), 1, 'user', now(), 1, 'user');
+ now(), 1, 'admin', now(), 1, 'admin');
 

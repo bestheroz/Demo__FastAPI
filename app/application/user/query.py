@@ -41,8 +41,8 @@ async def get_users(
 
 
 async def get_user(user_id: int) -> UserResponse:
-    async with session_scope() as session:
-        result = await session.scalar(select(User).filter_by(id=user_id).filter_by(removed_flag=False))
+    with session_scope() as session:
+        result = session.scalar(select(User).filter_by(id=user_id).filter_by(removed_flag=False))
         if result is None:
             raise RequestException400(Code.UNKNOWN_USER)
         return UserResponse.model_validate(result)

@@ -25,8 +25,8 @@ async def get_admins(page: int, page_size: int, ordering: str | None = None) -> 
 
 
 async def get_admin(admin_id: int) -> AdminResponse:
-    async with session_scope() as session:
-        result = await session.scalar(select(Admin).filter_by(id=admin_id).filter_by(removed_flag=False))
+    with session_scope() as session:
+        result = session.scalar(select(Admin).filter_by(id=admin_id).filter_by(removed_flag=False))
         if result is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
         return AdminResponse.model_validate(result)

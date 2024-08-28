@@ -1,7 +1,6 @@
 from pydantic import AwareDatetime
 from sqlalchemy import JSON
-from sqlalchemy.ext.asyncio import async_object_session
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
 from app.apdapter.orm import Base, TZDateTime
 from app.application.admin.event import (
@@ -117,42 +116,42 @@ class Admin(IdCreatedUpdated, Base):
         self.change_password_at = now
         self.updated_at = now
 
-    async def on_created(self) -> AdminResponse:
-        session = async_object_session(self)
+    def on_created(self) -> AdminResponse:
+        session = object_session(self)
         if not session:
             raise SystemException500()
-        await session.flush()
-        await session.refresh(self)
+        session.flush()
+
         event_data = AdminResponse.model_validate(self)
         self.events.append(AdminCreated(data=event_data))
         return AdminResponse.model_validate(self)
 
-    async def on_updated(self) -> AdminResponse:
-        session = async_object_session(self)
+    def on_updated(self) -> AdminResponse:
+        session = object_session(self)
         if not session:
             raise SystemException500()
-        await session.flush()
-        await session.refresh(self)
+        session.flush()
+
         event_data = AdminResponse.model_validate(self)
         self.events.append(AdminUpdated(data=event_data))
         return event_data
 
-    async def on_removed(self) -> AdminResponse:
-        session = async_object_session(self)
+    def on_removed(self) -> AdminResponse:
+        session = object_session(self)
         if not session:
             raise SystemException500()
-        await session.flush()
-        await session.refresh(self)
+        session.flush()
+
         event_data = AdminResponse.model_validate(self)
         self.events.append(AdminRemoved(data=event_data))
         return event_data
 
-    async def on_logged_in(self) -> AdminToken:
-        session = async_object_session(self)
+    def on_logged_in(self) -> AdminToken:
+        session = object_session(self)
         if not session:
             raise SystemException500()
-        await session.flush()
-        await session.refresh(self)
+        session.flush()
+
         self.events.append(AdminLoggedIn(data=(AdminResponse.model_validate(self))))
         if self.token is None:
             raise SystemException500()
@@ -161,12 +160,12 @@ class Admin(IdCreatedUpdated, Base):
             refresh_token=self.token,
         )
 
-    async def on_password_changed(self) -> AdminResponse:
-        session = async_object_session(self)
+    def on_password_changed(self) -> AdminResponse:
+        session = object_session(self)
         if not session:
             raise SystemException500()
-        await session.flush()
-        await session.refresh(self)
+        session.flush()
+
         event_data = AdminResponse.model_validate(self)
         self.events.append(AdminPasswordChanged(data=event_data))
         return event_data

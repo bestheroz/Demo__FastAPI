@@ -1,7 +1,6 @@
 import inspect
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from types import CoroutineType
 
 from sentry_sdk import capture_exception
 from structlog import get_logger
@@ -15,7 +14,7 @@ class EventHandler(ABC):
     @abstractmethod
     def get_handlers(self) -> dict[type[Event], list[Callable]]: ...
 
-    async def handle(self, event: Event, uow=None, session=None):
+    def handle(self, event: Event, uow=None, session=None):
         try:
             handlers = self.get_handlers()[type(event)]
         except KeyError as e:
@@ -33,6 +32,4 @@ class EventHandler(ABC):
             if params.get("uow"):
                 kwargs["uow"] = uow
 
-            result = handler(event, **kwargs)
-            if isinstance(result, CoroutineType):
-                await result
+            handler(event, **kwargs)

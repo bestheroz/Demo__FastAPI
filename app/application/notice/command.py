@@ -13,9 +13,9 @@ async def remove_notice(
     notice_id: int,
     operator_id: int,
 ) -> None:
-    async with get_uow() as uow, uow.transaction():
-        notice = await uow.repository.get(notice_id)
+    with get_uow() as uow, uow.transaction():
+        notice = uow.repository.get(notice_id)
         if notice is None:
             raise RequestException400(Code.UNKNOWN_NOTICE)
         notice.remove(operator_id)
-        await notice.on_removed()
+        notice.on_removed()

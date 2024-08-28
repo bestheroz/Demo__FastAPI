@@ -35,16 +35,16 @@ async def create_admin(
     data: AdminCreate,
     operator_id: int,
 ) -> AdminResponse:
-    async with get_uow() as uow, uow.transaction():
-        admin = await uow.repository.session.scalar(
+    with get_uow() as uow, uow.transaction():
+        admin = uow.repository.session.scalar(
             select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False)
         )
         if admin:
             raise RequestException400(Code.ALREADY_JOINED_ACCOUNT)
 
         admin = Admin.new(data, operator_id)
-        await uow.repository.add(admin)
-        return await admin.on_created()
+        uow.repository.add(admin)
+        return admin.on_created()
 
 
 async def update_admin(
@@ -52,23 +52,23 @@ async def update_admin(
     data: AdminCreate,
     operator_id: int,
 ) -> AdminResponse:
-    async with get_uow() as uow, uow.transaction():
-        admin = await uow.repository.get(admin_id)
+    with get_uow() as uow, uow.transaction():
+        admin = uow.repository.get(admin_id)
         if admin is None or admin.removed_flag is True:
             raise RequestException400(Code.UNKNOWN_USER)
         if admin.manager_flag is False and admin.id == operator_id:
             raise RequestException400(Code.CANNOT_UPDATE_YOURSELF)
 
         admin.update(data, operator_id)
-        return await admin.on_updated()
+        return admin.on_updated()
 
 
 async def remove_admin(
     admin_id: int,
     operator_id: int,
 ) -> None:
-    async with get_uow() as uow, uow.transaction():
-        admin = await uow.repository.get(admin_id)
+    with get_uow() as uow, uow.transaction():
+        admin = uow.repository.get(admin_id)
         if admin is None:
             raise RequestException400(Code.UNKNOWN_USER)
         if admin.id == operator_id:
@@ -88,8 +88,8 @@ def _create_refresh_token(admin: Admin):
 async def login_admin(
     data: AdminLogin,
 ) -> AdminToken:
-    async with get_uow() as uow, uow.transaction():
-        admin = await uow.repository.session.scalar(
+    with get_uow() as uow, uow.transaction():
+        admin = uow.repository.session.scalar(
             select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False)
         )
         if admin is None:
@@ -106,15 +106,15 @@ async def login_admin(
 
         admin.renew_token(_create_refresh_token(admin))
 
-        return await admin.on_logged_in()
+        return admin.on_logged_in()
 
 
 async def renew_token(refresh_token: str) -> AdminToken:
-    async with get_uow() as uow, uow.transaction():
+    with get_uow() as uow, uow.transaction():
         try:
             _scheme, credentials = get_authorization_scheme_param(refresh_token)
             admin_id = get_refresh_token_claims(credentials).id
-            admin = await uow.repository.get(admin_id)
+            admin = uow.repository.get(admin_id)
 
             if admin is None or admin.removed_flag is True or admin.token is None or not is_validated_jwt(admin.token):
                 raise AuthenticationException401()
@@ -140,8 +140,8 @@ async def renew_token(refresh_token: str) -> AdminToken:
 
 
 async def logout(account_id: int):
-    async with get_uow() as uow, uow.transaction():
-        admin = await uow.repository.get(account_id)
+    with get_uow() as uow, uow.transaction():
+        admin = uow.repository.get(account_id)
         if admin is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
         admin.sign_out()
@@ -151,8 +151,8 @@ async def change_password(
     admin_id: int,
     data: AdminChangePassword,
 ) -> AdminResponse:
-    async with get_uow() as uow, uow.transaction():
-        admin = await uow.repository.get(admin_id)
+    with get_uow() as uow, uow.transaction():
+        admin = uow.repository.get(admin_id)
         if admin is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
 
@@ -164,4 +164,4 @@ async def change_password(
             raise RequestException400(Code.CHANGE_TO_SAME_PASSWORD)
 
         admin.change_password(data.new_password.get_secret_value())
-        return await admin.on_password_changed()
+        return admin.on_password_changed()
