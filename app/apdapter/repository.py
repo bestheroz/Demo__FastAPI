@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+from typing import Generic
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapper
 
-T = TypeVar("T")
+from app.common.schema import T
 
 
 class AbcSeen(ABC, Generic[T]):

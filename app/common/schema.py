@@ -5,6 +5,8 @@ from pydantic.alias_generators import to_camel
 
 from app.common.type import AuthorityEnum, UserTypeEnum
 
+T = TypeVar("T")
+
 
 class Schema(BaseModel):
     model_config = ConfigDict(
@@ -12,9 +14,6 @@ class Schema(BaseModel):
         populate_by_name=True,
         from_attributes=True,
     )
-
-
-T = TypeVar("T")
 
 
 class ListApiResult(Schema, Generic[T]):

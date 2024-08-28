@@ -1,8 +1,8 @@
-from typing import Generic, TypeVar
+from typing import Generic
 
 from pydantic import BaseModel
 
-T = TypeVar("T")
+from app.common.schema import T
 
 
 class Event(BaseModel, Generic[T]):

@@ -1,8 +1,5 @@
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
-from typing import TypeVar
-
-T = TypeVar("T", bound="AbstractUnitOfWork")
 
 
 class DuplicateUnitOfWork(Exception):
