@@ -3,8 +3,11 @@ from typing import Generic
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapper
+from typing_extensions import TypeVar
 
-from app.common.schema import T
+from app.apdapter.orm import Base
+
+T = TypeVar("T", bound=Base)
 
 
 class AbcSeen(ABC, Generic[T]):

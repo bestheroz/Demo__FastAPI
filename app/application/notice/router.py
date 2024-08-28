@@ -7,15 +7,10 @@ from app.apdapter.auth import AuthorityChecker, get_operator_id
 from app.application.notice.command import remove_notice
 from app.application.notice.query import get_notice, get_notices
 from app.application.notice.schema import NoticeResponse
-from app.application.notice.uow import NoticeRDBUow
 from app.common.schema import ListApiResult
 from app.common.type import AuthorityEnum
 
 notice_router = APIRouter(tags=["게시글"])
-
-
-def get_uow():
-    return NoticeRDBUow()
 
 
 @notice_router.get(
@@ -67,7 +62,6 @@ async def _get_notice(
 )
 async def _delete_notice(
     notice_id: int,
-    uow: Annotated[NoticeRDBUow, Depends(get_uow)],
     x_operator_id: Annotated[int, Depends(get_operator_id)],
 ) -> None:
-    await remove_notice(notice_id, x_operator_id, uow)
+    await remove_notice(notice_id, x_operator_id)

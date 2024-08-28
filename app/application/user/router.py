@@ -14,15 +14,10 @@ from app.application.user.query import (
 from app.application.user.schema import (
     UserResponse,
 )
-from app.application.user.uow import UserRDBUow
 from app.common.schema import ListApiResult
 from app.common.type import AuthorityEnum
 
 user_router = APIRouter(tags=["유저"])
-
-
-def get_uow():
-    return UserRDBUow()
 
 
 @user_router.get(
@@ -68,10 +63,9 @@ async def _get_user(user_id: int) -> UserResponse:
 )
 async def _reset_password(
     user_id: int,
-    uow: Annotated[UserRDBUow, Depends(get_uow)],
     x_operator_id: Annotated[int, Depends(get_operator_id)],
 ) -> None:
-    await reset_password(user_id, x_operator_id, uow=uow)
+    await reset_password(user_id, x_operator_id)
 
 
 @user_router.delete(
@@ -84,7 +78,6 @@ async def _reset_password(
 )
 async def _remove_user(
     user_id: int,
-    uow: Annotated[UserRDBUow, Depends(get_uow)],
     x_operator_id: Annotated[int, Depends(get_operator_id)],
 ) -> None:
-    await remove_user(user_id, x_operator_id, uow=uow)
+    await remove_user(user_id, x_operator_id)

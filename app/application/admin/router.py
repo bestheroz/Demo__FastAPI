@@ -19,15 +19,10 @@ from app.application.admin.schema import (
     AdminResponse,
     AdminToken,
 )
-from app.application.admin.uow import AdminRDBUow
 from app.common.schema import ListApiResult
 from app.common.type import AuthorityEnum
 
 admin_router = APIRouter(tags=["관리자"])
-
-
-def get_uow():
-    return AdminRDBUow()
 
 
 @admin_router.get(
@@ -51,10 +46,9 @@ async def _get_admins(
     "(동시에 여러 사용자가 접속하고 있다면 *리플래시 토큰* 값이 달라서 갱신이 안될 수 있습니다.)",
 )
 async def _renew_token(
-    uow: Annotated[AdminRDBUow, Depends(get_uow)],
     refresh_token: str = Header(alias="AuthorizationR"),
 ) -> AdminToken:
-    return await renew_token(refresh_token, uow)
+    return await renew_token(refresh_token)
 
 
 @admin_router.post(
@@ -63,9 +57,8 @@ async def _renew_token(
 )
 async def _login_admin(
     payload: AdminLogin,
-    uow: Annotated[AdminRDBUow, Depends(get_uow)],
 ) -> AdminToken:
-    return await login_admin(payload, uow)
+    return await login_admin(payload)
 
 
 @admin_router.delete(
@@ -78,10 +71,9 @@ async def _login_admin(
     ],
 )
 async def _logout(
-    uow: Annotated[AdminRDBUow, Depends(get_uow)],
     x_admin_id: Annotated[int, Depends(get_admin_id)],
 ) -> None:
-    await logout(x_admin_id, uow)
+    await logout(x_admin_id)
 
 
 @admin_router.get(
@@ -105,10 +97,9 @@ async def _get_admin(admin_id: int) -> AdminResponse:
 async def _update_admin(
     admin_id: int,
     payload: AdminCreate,
-    uow: Annotated[AdminRDBUow, Depends(get_uow)],
     x_operator_id: Annotated[int, Depends(get_operator_id)],
 ) -> AdminResponse:
-    return await update_admin(admin_id, payload, x_operator_id, uow)
+    return await update_admin(admin_id, payload, x_operator_id)
 
 
 @admin_router.delete(
@@ -122,10 +113,9 @@ async def _update_admin(
 )
 async def _remove_admin(
     admin_id: int,
-    uow: Annotated[AdminRDBUow, Depends(get_uow)],
     x_operator_id: Annotated[int, Depends(get_operator_id)],
 ) -> None:
-    await remove_admin(admin_id, x_operator_id, uow)
+    await remove_admin(admin_id, x_operator_id)
 
 
 @admin_router.patch(
@@ -138,6 +128,5 @@ async def _remove_admin(
 async def _change_password(
     admin_id: int,
     payload: AdminChangePassword,
-    uow: Annotated[AdminRDBUow, Depends(get_uow)],
 ) -> AdminResponse:
-    return await change_password(admin_id, payload, uow)
+    return await change_password(admin_id, payload)
