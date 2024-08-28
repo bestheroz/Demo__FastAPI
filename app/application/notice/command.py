@@ -4,14 +4,16 @@ from app.application.notice.model import Notice
 from app.common.code import Code
 from app.common.exception import RequestException400
 
-uow = CommonRDBUow[Notice](NoticeEventHandler)
+
+def get_uow():
+    return CommonRDBUow[Notice](NoticeEventHandler)
 
 
 async def remove_notice(
     notice_id: int,
     operator_id: int,
 ) -> None:
-    async with uow.transaction():
+    async with get_uow() as uow, uow.transaction():
         notice = await uow.repository.get(notice_id)
         if notice is None:
             raise RequestException400(Code.UNKNOWN_NOTICE)
