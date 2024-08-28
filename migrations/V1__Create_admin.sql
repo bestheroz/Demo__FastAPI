@@ -33,7 +33,7 @@ INSERT INTO admin (id, name, use_flag, manager_flag,
 login_id, password,
 authorities, joined_at, removed_flag,
 created_at, created_by_id, created_object_type, updated_at, updated_by_id, updated_object_type)
-VALUES (1, '시스템', 1, 1,
-'system', '$2b$12$oquiOuftjG94Nepvwm1s3OJe5mt40rNI2VuDRaIlL11NDbaYzKIN2',
+VALUES (1, '개발자', 1, 1,
+'developer', '$2b$12$oquiOuftjG94Nepvwm1s3OJe5mt40rNI2VuDRaIlL11NDbaYzKIN2',
 '[]', now(), 0,
  now(), 1, 'admin', now(), 1, 'admin');

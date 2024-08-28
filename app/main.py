@@ -65,8 +65,8 @@ if settings.deployment_environment in ("local", "sandbox", "qa"):
             create_access_token( 
                 AccessTokenClaims(
                     id=1,
-                    login_id="no-reply@no-it.io",
-                    name="시스템",
+                    login_id="developer",
+                    name="개발자",
                     manager_flag=True,
                     authorities=[],
                 )
