@@ -23,9 +23,9 @@ class UserRDBUow(AbstractUnitOfWork, ABC):
         await self.session.close()
 
     async def _handle_events(self):
-        for user in self.user_repo.seen:
-            while user.events:
-                event = user.events.popleft()
+        for seen in self.user_repo.seen:
+            while seen.events:
+                event = seen.events.popleft()
                 await self.event_handler.handle(event, self, self.session)
 
     async def _commit(self):

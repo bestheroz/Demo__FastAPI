@@ -23,9 +23,9 @@ class NoticeRDBUow(AbstractUnitOfWork, ABC):
         await self.session.close()
 
     async def _handle_events(self):
-        for notice in self.notice_repo.seen:
-            while notice.events:
-                event = notice.events.popleft()
+        for seen in self.notice_repo.seen:
+            while seen.events:
+                event = seen.events.popleft()
                 await self.event_handler.handle(event, self, self.session)
 
     async def _commit(self):

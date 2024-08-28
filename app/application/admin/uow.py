@@ -23,9 +23,9 @@ class AdminRDBUow(AbstractUnitOfWork, ABC):
         await self.session.close()
 
     async def _handle_events(self):
-        for admin in self.admin_repo.seen:
-            while admin.events:
-                event = admin.events.popleft()
+        for seen in self.admin_repo.seen:
+            while seen.events:
+                event = seen.events.popleft()
                 await self.event_handler.handle(event, self, self.session)
 
     async def _commit(self):
