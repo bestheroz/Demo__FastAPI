@@ -8,7 +8,7 @@ async def reset_password(
     operator_id: int,
     uow: UserRDBUow,
 ) -> None:
-    async with uow.autocommit():
+    async with uow.transaction():
         user = await uow.user_repo.get(user_id)
         if user is None or user.removed_flag is True:
             raise RequestException400(Code.UNKNOWN_USER)
@@ -21,7 +21,7 @@ async def remove_user(
     operator_id: int,
     uow: UserRDBUow,
 ) -> None:
-    async with uow.autocommit():
+    async with uow.transaction():
         user = await uow.user_repo.get(user_id)
         if user is None or user.removed_flag is True:
             raise RequestException400(Code.UNKNOWN_USER)

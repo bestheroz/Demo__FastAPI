@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from types import CoroutineType
 
+from sentry_sdk import capture_exception
 from structlog import get_logger
 
 from app.common.event import Event
@@ -17,8 +18,10 @@ class EventHandler(ABC):
     async def handle(self, event: Event, uow=None, session=None):
         try:
             handlers = self.get_handlers()[type(event)]
-        except KeyError:
-            print(f"No handler for event {type(event)}")
+        except KeyError as e:
+            capture_exception(e)
+            log.error(f"No handler for event {type(event)}")
+            log.exception(e)
             return
 
         for handler in handlers:

@@ -31,7 +31,7 @@ async def create_admin(
     operator_id: int,
     uow: AdminRDBUow,
 ) -> AdminResponse:
-    async with uow.autocommit():
+    async with uow.transaction():
         admin = await uow.admin_repo.session.scalar(
             select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False)
         )
@@ -49,7 +49,7 @@ async def update_admin(
     operator_id: int,
     uow: AdminRDBUow,
 ) -> AdminResponse:
-    async with uow.autocommit():
+    async with uow.transaction():
         admin = await uow.admin_repo.get(admin_id)
         if admin is None or admin.removed_flag is True:
             raise RequestException400(Code.UNKNOWN_USER)
@@ -65,7 +65,7 @@ async def remove_admin(
     operator_id: int,
     uow: AdminRDBUow,
 ) -> None:
-    async with uow.autocommit():
+    async with uow.transaction():
         admin = await uow.admin_repo.get(admin_id)
         if admin is None:
             raise RequestException400(Code.UNKNOWN_USER)
@@ -87,7 +87,7 @@ async def login_admin(
     data: AdminLogin,
     uow: AdminRDBUow,
 ) -> AdminToken:
-    async with uow.autocommit():
+    async with uow.transaction():
         admin = await uow.admin_repo.session.scalar(
             select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False)
         )
@@ -109,7 +109,7 @@ async def login_admin(
 
 
 async def renew_token(refresh_token: str, uow: AdminRDBUow) -> AdminToken:
-    async with uow.autocommit():
+    async with uow.transaction():
         try:
             _scheme, credentials = get_authorization_scheme_param(refresh_token)
             admin_id = get_refresh_token_claims(credentials).id
@@ -139,7 +139,7 @@ async def renew_token(refresh_token: str, uow: AdminRDBUow) -> AdminToken:
 
 
 async def logout(account_id: int, uow: AdminRDBUow):
-    async with uow.autocommit():
+    async with uow.transaction():
         admin = await uow.admin_repo.get(account_id)
         if admin is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
@@ -151,7 +151,7 @@ async def change_password(
     data: AdminChangePassword,
     uow: AdminRDBUow,
 ) -> AdminResponse:
-    async with uow.autocommit():
+    async with uow.transaction():
         admin = await uow.admin_repo.get(admin_id)
         if admin is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)

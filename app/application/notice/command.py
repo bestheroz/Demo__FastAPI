@@ -8,7 +8,7 @@ async def remove_notice(
     operator_id: int,
     uow: NoticeRDBUow,
 ) -> None:
-    async with uow.autocommit():
+    async with uow.transaction():
         notice = await uow.notice_repo.get(notice_id)
         if notice is None:
             raise RequestException400(Code.UNKNOWN_NOTICE)

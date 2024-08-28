@@ -46,7 +46,7 @@ class AbstractUnitOfWork(ABC):
     async def _rollback(self): ...
 
     @asynccontextmanager
-    async def autocommit(self):
+    async def transaction(self):
         if self._run:
             # 이미 트랜잭션이 실행 중이면, 새로운 트랜잭션을 시작하지 않고 현재 상태를 유지
             yield self
