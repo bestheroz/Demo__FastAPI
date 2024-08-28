@@ -103,6 +103,22 @@ class TZDateTime(TypeDecorator, ABC):
         return value
 
 
+def events_getter(self) -> deque[Event]:
+    """Usage:
+    events = property(events_getter)
+    """
+    if not hasattr(self, "__events"):
+        self.__events = deque()
+
+    return self.__events
+
+
+class Base(DeclarativeBase):
+    __allow_unmapped__ = True
+
+    events = property(events_getter)
+
+
 mapped_intpk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
 mapped_created_at = Annotated[
     AwareDatetime,
@@ -126,19 +142,3 @@ mapped_updated_by_id = Annotated[
     int,
     mapped_column(ForeignKey("admin.id")),
 ]
-
-
-def events_getter(self) -> deque[Event]:
-    """Usage:
-    events = property(events_getter)
-    """
-    if not hasattr(self, "__events"):
-        self.__events = deque()
-
-    return self.__events
-
-
-class Base(DeclarativeBase):
-    __allow_unmapped__ = True
-
-    events = property(events_getter)
