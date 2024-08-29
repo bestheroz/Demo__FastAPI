@@ -67,14 +67,15 @@ class AbstractUnitOfWork(ABC):
 
 
 class CommonRDBUow(AbstractUnitOfWork, ABC, Generic[T]):
-    def __init__(self, event_handler: type[EventHandler], session_factory=DEFAULT_SESSION_FACTORY):
+    def __init__(self, event_handler: type[EventHandler], model_cls: type[T], session_factory=DEFAULT_SESSION_FACTORY):
         super().__init__()
         self.session_factory = session_factory
         self.event_handler = event_handler()
+        self.model_cls = model_cls
 
     def __enter__(self, *args):
         self.session = self.session_factory()
-        self.repository = CommonRDBRepository[T](self.session, T)  # type: ignore
+        self.repository = CommonRDBRepository[T](self.session, self.model_cls)
         return super().__enter__(*args)
 
     def __exit__(self, *args):

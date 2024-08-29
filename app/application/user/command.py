@@ -6,7 +6,7 @@ from app.common.exception import RequestException400
 
 
 def get_uow():
-    return CommonRDBUow[User](UserEventHandler)
+    return CommonRDBUow[User](UserEventHandler, User)
 
 
 async def reset_password(

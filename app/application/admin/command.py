@@ -28,7 +28,7 @@ log = get_logger()
 
 
 def get_uow():
-    return CommonRDBUow[Admin](AdminEventHandler)
+    return CommonRDBUow[Admin](AdminEventHandler, Admin)
 
 
 async def create_admin(

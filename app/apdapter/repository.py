@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic
 
-from sqlalchemy.orm import Mapper, Session
+from sqlalchemy.orm import Session
 from typing_extensions import TypeVar
 
 from app.apdapter.orm import Base
@@ -38,7 +38,7 @@ class AbcGet(AbcSeen[T], ABC, Generic[T]):
 
 
 class CommonRDBRepository(AbcAdd[T], AbcGet[T], Generic[T]):
-    def __init__(self, session: Session, model_cls: Mapper[T]):
+    def __init__(self, session: Session, model_cls: type[T]):
         super().__init__()
         self.session = session
         self.model_cls = model_cls

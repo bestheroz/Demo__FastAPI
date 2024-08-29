@@ -6,7 +6,7 @@ from app.common.exception import RequestException400
 
 
 def get_uow():
-    return CommonRDBUow[Notice](NoticeEventHandler)
+    return CommonRDBUow[Notice](NoticeEventHandler, Notice)
 
 
 async def remove_notice(
