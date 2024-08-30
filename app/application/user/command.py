@@ -1,7 +1,7 @@
 from app.apdapter.uow import CommonRDBUow
 from app.application.user.event import UserEventHandler
 from app.application.user.model import User
-from app.application.user.schema import UserCreate, UserResponse, UserUpdate, UserUpdatePassword
+from app.application.user.schema import UserChangePassword, UserCreate, UserResponse, UserUpdate
 from app.common.code import Code
 from app.common.exception import RequestException400
 from app.common.schema import Operator
@@ -27,12 +27,12 @@ async def update_user(user_id: int, data: UserUpdate, operator: Operator) -> Use
         return user.on_updated()
 
 
-async def update_password(user_id: int, data: UserUpdatePassword, operator: Operator) -> None:
+async def change_password(user_id: int, data: UserChangePassword, operator: Operator) -> None:
     with get_uow() as uow, uow.transaction():
         user = uow.repository.get(user_id)
         if user is None or user.removed_flag is True:
             raise RequestException400(Code.UNKNOWN_USER)
-        user.update_password(data, operator)
+        user.change_password(data, operator)
         user.on_password_updated()
 
 

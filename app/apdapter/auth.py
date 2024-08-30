@@ -105,7 +105,7 @@ class AuthorityChecker:
         return any(require_authority in claims.authorities for require_authority in self.require_authorities)
 
 
-class SuperManagerOnly(HTTPBearer):
+class SuperManagerOnly:
     async def __call__(
         self,
         request: Request,
@@ -115,12 +115,6 @@ class SuperManagerOnly(HTTPBearer):
             return credentials
 
         raise AuthorityException403()
-
-    async def authenticate(self, request: Request) -> HTTPAuthorizationCredentials:
-        credentials = await super().__call__(request)
-        if not credentials:
-            raise AuthenticationException401()
-        return credentials
 
     @staticmethod
     def is_authorized(credentials: HTTPAuthorizationCredentials) -> bool:

@@ -1,4 +1,4 @@
-from pydantic import AwareDatetime, Field
+from pydantic import AwareDatetime, Field, SecretStr
 
 from app.common.schema import IdCreatedUpdatedDto, Schema
 
@@ -10,16 +10,16 @@ class UserBase(Schema):
 
 
 class UserCreate(UserBase):
-    password: str = Field(..., description="비밀번호")
+    password: SecretStr = Field(..., description="비밀번호")
 
 
 class UserUpdate(UserBase):
-    password: str | None = Field(None, description="비밀번호")
+    password: SecretStr | None = Field(None, description="비밀번호")
 
 
-class UserUpdatePassword(Schema):
-    new_password: str = Field(..., description="신규 비밀번호")
-    old_password: str = Field(..., description="기존 비밀번호")
+class UserChangePassword(Schema):
+    new_password: SecretStr = Field(..., description="신규 비밀번호")
+    old_password: SecretStr = Field(..., description="기존 비밀번호")
 
 
 class UserResponse(IdCreatedUpdatedDto, UserBase):

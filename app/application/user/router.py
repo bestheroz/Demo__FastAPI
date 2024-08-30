@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, Query, status
 
 from app.apdapter.auth import AuthorityChecker, get_operator
 from app.application.user.command import (
+    change_password,
     create_user,
     remove_user,
-    update_password,
     update_user,
 )
 from app.application.user.query import (
@@ -14,10 +14,10 @@ from app.application.user.query import (
     get_users,
 )
 from app.application.user.schema import (
+    UserChangePassword,
     UserCreate,
     UserResponse,
     UserUpdate,
-    UserUpdatePassword,
 )
 from app.common.schema import ListApiResult, Operator
 from app.common.type import AuthorityEnum
@@ -95,12 +95,12 @@ async def _update_user(
     ],
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def _update_password(
+async def _change_password(
     user_id: int,
-    data: UserUpdatePassword,
+    data: UserChangePassword,
     x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> None:
-    await update_password(user_id, data, x_operator)
+    await change_password(user_id, data, x_operator)
 
 
 @user_router.delete(

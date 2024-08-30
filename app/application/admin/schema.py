@@ -12,14 +12,18 @@ class AdminBase(Schema):
     authorities: set[AuthorityEnum] = Field([], description="권한 목록")
 
 
+class AdminCreate(AdminBase):
+    pass
+
+
+class AdminUpdate(AdminBase):
+    pass
+
+
 class AdminResponse(IdCreatedUpdatedDto, AdminBase):
     id: int = Field(..., description="관리자 ID")
     joined_at: AwareDatetime | None = Field(None, description="가입 일시")
     latest_active_at: AwareDatetime | None = Field(None, description="최근 활동 일시")
-
-
-class AdminCreate(AdminBase):
-    pass
 
 
 class AdminLogin(Schema):
@@ -28,7 +32,7 @@ class AdminLogin(Schema):
 
 
 class AdminChangePassword(Schema):
-    password: SecretStr = Field(..., description="비밀번호")
+    old_password: SecretStr = Field(..., description="비밀번호")
     new_password: SecretStr = Field(..., description="새 비밀번호")
 
 

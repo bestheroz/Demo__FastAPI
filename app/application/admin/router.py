@@ -2,9 +2,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, Query, status
 
-from app.apdapter.auth import AuthorityChecker, get_admin_id
+from app.apdapter.auth import AuthorityChecker, SuperManagerOnly, get_admin_id
 from app.application.admin.command import (
     change_password,
+    create_admin,
     login_admin,
     logout,
     remove_admin,
@@ -37,6 +38,76 @@ async def _get_admins(
     page_size: Annotated[int, Query(example=10)],
 ) -> ListApiResult[AdminResponse]:
     return await get_admins(page, page_size)
+
+
+@admin_router.get(
+    "/v1/admin/{admin_id}",
+    name="상세 조회",
+    dependencies=[
+        Depends(AuthorityChecker([AuthorityEnum.ADMIN_VIEW])),
+    ],
+)
+async def _get_admin(admin_id: int) -> AdminResponse:
+    return await get_admin(admin_id)
+
+
+@admin_router.post(
+    "/v1/admin",
+    name="관리자 생성",
+    dependencies=[
+        Depends(SuperManagerOnly()),
+    ],
+)
+async def _create_admin(
+    payload: AdminCreate,
+    x_operator_id: Annotated[int, Depends(get_admin_id)],
+) -> AdminResponse:
+    return await create_admin(payload, x_operator_id)
+
+
+@admin_router.put(
+    "/v1/admin/{admin_id}",
+    name="관리자 수정",
+    dependencies=[
+        Depends(AuthorityChecker([AuthorityEnum.ADMIN_EDIT])),
+    ],
+)
+async def _update_admin(
+    admin_id: int,
+    payload: AdminCreate,
+    x_operator_id: Annotated[int, Depends(get_admin_id)],
+) -> AdminResponse:
+    return await update_admin(admin_id, payload, x_operator_id)
+
+
+@admin_router.patch(
+    "/v1/admin/{admin_id}/password",
+    name="관리자 비밀번호 변경",
+    dependencies=[
+        Depends(AuthorityChecker()),
+    ],
+)
+async def _change_password(
+    admin_id: int,
+    payload: AdminChangePassword,
+) -> AdminResponse:
+    return await change_password(admin_id, payload)
+
+
+@admin_router.delete(
+    "/v1/admin/{admin_id}",
+    name="관리자 삭제",
+    description="(Soft delete)",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(SuperManagerOnly()),
+    ],
+)
+async def _remove_admin(
+    admin_id: int,
+    x_operator_id: Annotated[int, Depends(get_admin_id)],
+) -> None:
+    await remove_admin(admin_id, x_operator_id)
 
 
 @admin_router.get(
@@ -74,59 +145,3 @@ async def _logout(
     x_admin_id: Annotated[int, Depends(get_admin_id)],
 ) -> None:
     await logout(x_admin_id)
-
-
-@admin_router.get(
-    "/v1/admin/{admin_id}",
-    name="상세 조회",
-    dependencies=[
-        Depends(AuthorityChecker([AuthorityEnum.ADMIN_VIEW])),
-    ],
-)
-async def _get_admin(admin_id: int) -> AdminResponse:
-    return await get_admin(admin_id)
-
-
-@admin_router.put(
-    "/v1/admin/{admin_id}",
-    name="관리자 수정",
-    dependencies=[
-        Depends(AuthorityChecker([AuthorityEnum.ADMIN_EDIT])),
-    ],
-)
-async def _update_admin(
-    admin_id: int,
-    payload: AdminCreate,
-    x_operator_id: Annotated[int, Depends(get_admin_id)],
-) -> AdminResponse:
-    return await update_admin(admin_id, payload, x_operator_id)
-
-
-@admin_router.delete(
-    "/v1/admin/{admin_id}",
-    name="관리자 삭제",
-    description="(Soft delete)",
-    status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[
-        Depends(AuthorityChecker([AuthorityEnum.ADMIN_EDIT])),
-    ],
-)
-async def _remove_admin(
-    admin_id: int,
-    x_operator_id: Annotated[int, Depends(get_admin_id)],
-) -> None:
-    await remove_admin(admin_id, x_operator_id)
-
-
-@admin_router.patch(
-    "/v1/admin/{admin_id}/change-password",
-    name="관리자 비밀번호 변경",
-    dependencies=[
-        Depends(AuthorityChecker()),
-    ],
-)
-async def _change_password(
-    admin_id: int,
-    payload: AdminChangePassword,
-) -> AdminResponse:
-    return await change_password(admin_id, payload)

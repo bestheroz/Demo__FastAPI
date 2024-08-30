@@ -23,6 +23,7 @@ from app.utils.jwt import (
     is_validated_jwt,
     issued_refresh_token_in_10_seconds,
 )
+from app.utils.password import verify_password
 
 log = get_logger()
 
@@ -58,6 +59,8 @@ async def update_admin(
             raise RequestException400(Code.UNKNOWN_USER)
         if admin.manager_flag is False and admin.id == operator_id:
             raise RequestException400(Code.CANNOT_UPDATE_YOURSELF)
+        if admin.manager_flag != data.manager_flag and admin.manager_flag is False:
+            raise RequestException400(Code.UNKNOWN_AUTHORITY)
 
         admin.update(data, operator_id)
         return admin.on_updated()
@@ -98,7 +101,7 @@ async def login_admin(
         if admin.use_flag is False:
             raise RequestException400(Code.UNKNOWN_ADMIN)
 
-        if admin.check_password(data.password.get_secret_value()) is False:
+        if verify_password(data.password.get_secret_value(), admin.password) is False:
             log.warning("password not match")
             raise RequestException400(Code.UNKNOWN_ADMIN)
 
@@ -156,11 +159,11 @@ async def change_password(
         if admin is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
 
-        if admin.password and not admin.check_password(data.password.get_secret_value()):
+        if admin.password and not verify_password(data.old_password.get_secret_value(), admin.password):
             log.warning("password not match")
             raise RequestException400(Code.UNKNOWN_ADMIN)
 
-        if data.password.get_secret_value() == data.new_password.get_secret_value():
+        if data.old_password.get_secret_value() == data.new_password.get_secret_value():
             raise RequestException400(Code.CHANGE_TO_SAME_PASSWORD)
 
         admin.change_password(data.new_password.get_secret_value())

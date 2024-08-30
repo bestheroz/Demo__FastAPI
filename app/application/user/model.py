@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
 from app.apdapter.orm import Base, TZDateTime
 from app.application.user.event import UserPasswordUpdated, UserRemoved, UserUpdated
-from app.application.user.schema import UserCreate, UserResponse, UserUpdate, UserUpdatePassword
+from app.application.user.schema import UserChangePassword, UserCreate, UserResponse, UserUpdate
 from app.common.code import Code
 from app.common.exception import RequestException400, SystemException500
 from app.common.model import IdCreatedUpdated
@@ -104,12 +104,12 @@ class User(IdCreatedUpdated, Base):
             self.password = get_password_hash(data.password)
             self.change_password_at = now
 
-    def update_password(self, data: UserUpdatePassword, operator: Operator):
-        if verify_password(data.old_password, self.password):
+    def change_password(self, data: UserChangePassword, operator: Operator):
+        if verify_password(data.old_password.get_secret_value(), self.password):
             raise RequestException400(Code.INVALID_PASSWORD)
 
         now = utcnow()
-        self.password = get_password_hash(data.new_password)
+        self.password = get_password_hash(data.new_password.get_secret_value())
         self.change_password_at = now
         self.updated_at = now
         self.updated_by_id = operator.id

@@ -21,7 +21,7 @@ from app.common.schema import AccessTokenClaims
 from app.common.type import AuthorityEnum, UserTypeEnum
 from app.utils.datetime_utils import utcnow
 from app.utils.jwt import create_access_token
-from app.utils.password import get_password_hash, verify_password
+from app.utils.password import get_password_hash
 
 
 class Admin(IdCreatedUpdated, Base):
@@ -106,9 +106,6 @@ class Admin(IdCreatedUpdated, Base):
 
     def sign_out(self):
         self.token = None
-
-    def check_password(self, password: str):
-        return verify_password(password, self.password)
 
     def change_password(self, password: str):
         now = utcnow()
