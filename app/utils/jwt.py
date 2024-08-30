@@ -11,20 +11,20 @@ SECRET_KEY = "JOONY.KIM!!demo-api%%jwt^^secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_TIME = timedelta(
     minutes=(
-        1_800 if settings.deployment_environment in ("sandbox", "local") else 5
-    )  # 개발 환경에서는 swagger-ui 를 통한 테스트를 할 수 있기 때문에 access token 의 시간을 길게 잡는다.
+        1440 if settings.deployment_environment in ("sandbox", "local") else 5
+    )  # 개발 환경에서는 swagger-ui 를 통한 테스트를 할 수 있기 때문에 access token 의 시간을 길게 잡는다.(1일)
 )
 REFRESH_TOKEN_EXPIRE_TIME = timedelta(minutes=30)
 
 
-def create_access_token(data: AccessTokenClaims) -> str:
-    _dict = data.model_dump(by_alias=True)
+def create_access_token(data) -> str:
+    _dict = AccessTokenClaims.model_validate(data).model_dump(by_alias=True)
     _dict.update({"exp": int((datetime.now(UTC) + ACCESS_TOKEN_EXPIRE_TIME).timestamp())})
     return encode(_dict, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def create_refresh_token(data: RefreshTokenClaims) -> str:
-    _dict = data.model_dump(by_alias=True)
+def create_refresh_token(data) -> str:
+    _dict = RefreshTokenClaims.model_validate(data).model_dump(by_alias=True)
     _dict.update({"exp": int((datetime.now(UTC) + REFRESH_TOKEN_EXPIRE_TIME).timestamp())})
     return encode(_dict, SECRET_KEY, algorithm=ALGORITHM)
 

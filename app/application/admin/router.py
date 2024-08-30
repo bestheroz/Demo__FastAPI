@@ -18,9 +18,8 @@ from app.application.admin.schema import (
     AdminCreate,
     AdminLogin,
     AdminResponse,
-    AdminToken,
 )
-from app.common.schema import ListApiResult
+from app.common.schema import ListApiResult, Token
 from app.common.type import AuthorityEnum
 
 admin_router = APIRouter(tags=["관리자"])
@@ -118,7 +117,7 @@ async def _remove_admin(
 )
 async def _renew_token(
     refresh_token: str = Header(alias="AuthorizationR"),
-) -> AdminToken:
+) -> Token:
     return await renew_token(refresh_token)
 
 
@@ -128,7 +127,7 @@ async def _renew_token(
 )
 async def _login_admin(
     payload: AdminLogin,
-) -> AdminToken:
+) -> Token:
     return await login_admin(payload)
 
 

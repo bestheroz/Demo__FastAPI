@@ -13,14 +13,13 @@ from app.application.admin.event import (
 from app.application.admin.schema import (
     AdminCreate,
     AdminResponse,
-    AdminToken,
 )
 from app.common.exception import SystemException500
 from app.common.model import IdCreatedUpdated
-from app.common.schema import AccessTokenClaims
+from app.common.schema import Token
 from app.common.type import AuthorityEnum, UserTypeEnum
 from app.utils.datetime_utils import utcnow
-from app.utils.jwt import create_access_token
+from app.utils.jwt import create_access_token, create_refresh_token
 from app.utils.password import get_password_hash
 
 
@@ -92,6 +91,12 @@ class Admin(IdCreatedUpdated, Base):
         self.updated_by_id = operator_id
         self.updated_object_type = UserTypeEnum.admin
 
+    def change_password(self, password: str):
+        now = utcnow()
+        self.password = get_password_hash(password)
+        self.change_password_at = now
+        self.updated_at = now
+
     def remove(self, operator_id: int):
         now = utcnow()
         self.removed_flag = True
@@ -100,18 +105,12 @@ class Admin(IdCreatedUpdated, Base):
         self.updated_by_id = operator_id
         self.updated_object_type = UserTypeEnum.admin
 
-    def renew_token(self, refresh_token: str):
-        self.token = refresh_token
+    def renew_token(self):
+        self.token = create_refresh_token(self)
         self.latest_active_at = utcnow()
 
     def sign_out(self):
         self.token = None
-
-    def change_password(self, password: str):
-        now = utcnow()
-        self.password = get_password_hash(password)
-        self.change_password_at = now
-        self.updated_at = now
 
     def on_created(self) -> AdminResponse:
         session = object_session(self)
@@ -143,7 +142,7 @@ class Admin(IdCreatedUpdated, Base):
         self.events.append(AdminRemoved(data=event_data))
         return event_data
 
-    def on_logged_in(self) -> AdminToken:
+    def on_logged_in(self) -> Token:
         session = object_session(self)
         if not session:
             raise SystemException500()
@@ -152,8 +151,8 @@ class Admin(IdCreatedUpdated, Base):
         self.events.append(AdminLoggedIn(data=(AdminResponse.model_validate(self))))
         if self.token is None:
             raise SystemException500()
-        return AdminToken(
-            access_token=create_access_token(AccessTokenClaims.model_validate(self)),
+        return Token(
+            access_token=create_access_token(self),
             refresh_token=self.token,
         )
 

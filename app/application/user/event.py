@@ -17,6 +17,10 @@ class UserPasswordUpdated(Event[UserResponse]):
     pass
 
 
+class UserLoggedIn(Event[UserResponse]):
+    pass
+
+
 class UserRemoved(Event[UserResponse]):
     pass
 
@@ -27,5 +31,6 @@ class UserEventHandler(EventHandler):
             UserCreated: [],
             UserUpdated: [],
             UserPasswordUpdated: [],
+            UserLoggedIn: [],
             UserRemoved: [],
         }

@@ -11,6 +11,7 @@ create table user
     token varchar(255) ,
     latest_active_at timestamp ,
 
+    authorities JSON  not null,
     joined_at timestamp,
     additional_info JSON    not null,
 
@@ -27,9 +28,9 @@ create table user
     collate = utf8mb4_general_ci;
 
 insert into user (id, name, use_flag, login_id, password,
-removed_flag, additional_info,
+authorities, removed_flag, additional_info,
 created_at, created_by_id, created_object_type, updated_at, updated_by_id, updated_object_type)
 values (1, '개발자(User)', 1, 'developer', '$2b$12$oquiOuftjG94Nepvwm1s3OJe5mt40rNI2VuDRaIlL11NDbaYzKIN2',
-0, '{}',
+'[]', 0, '{}',
  now(), 1, 'admin', now(), 1, 'admin');
 

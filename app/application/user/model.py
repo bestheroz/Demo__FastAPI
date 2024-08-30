@@ -3,14 +3,15 @@ from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
 from app.apdapter.orm import Base, TZDateTime
-from app.application.user.event import UserPasswordUpdated, UserRemoved, UserUpdated
+from app.application.user.event import UserLoggedIn, UserPasswordUpdated, UserRemoved, UserUpdated
 from app.application.user.schema import UserChangePassword, UserCreate, UserResponse, UserUpdate
 from app.common.code import Code
 from app.common.exception import RequestException400, SystemException500
 from app.common.model import IdCreatedUpdated
-from app.common.schema import Operator
-from app.common.type import UserTypeEnum
+from app.common.schema import Operator, Token
+from app.common.type import AuthorityEnum, UserTypeEnum
 from app.utils.datetime_utils import utcnow
+from app.utils.jwt import create_access_token, create_refresh_token
 from app.utils.password import get_password_hash, verify_password
 
 
@@ -25,6 +26,8 @@ class User(IdCreatedUpdated, Base):
     password: Mapped[str | None]
     change_password_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=True)
     latest_active_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=False)
+
+    authorities: Mapped[set[AuthorityEnum]] = mapped_column("authorities", JSON, nullable=False)
 
     joined_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=True)
 
@@ -96,6 +99,7 @@ class User(IdCreatedUpdated, Base):
         now = utcnow()
         self.name = data.name
         self.use_flag = data.use_flag
+        self.authorities = data.authorities  # type: ignore
         self.login_id = data.login_id
         self.updated_at = now
         self.updated_by_id = operator.id
@@ -122,6 +126,13 @@ class User(IdCreatedUpdated, Base):
         self.updated_at = now
         self.updated_by_id = operator.id
         self.updated_object_type = operator.type
+
+    def renew_token(self):
+        self.token = create_refresh_token(self)
+        self.latest_active_at = utcnow()
+
+    def sign_out(self):
+        self.token = None
 
     def on_created(self) -> UserResponse:
         session = object_session(self)
@@ -162,3 +173,17 @@ class User(IdCreatedUpdated, Base):
         event_data = UserResponse.model_validate(self)
         self.events.append(UserRemoved(data=event_data))
         return event_data
+
+    def on_logged_in(self) -> Token:
+        session = object_session(self)
+        if not session:
+            raise SystemException500()
+        session.flush()
+
+        self.events.append(UserLoggedIn(data=(UserResponse.model_validate(self))))
+        if self.token is None:
+            raise SystemException500()
+        return Token(
+            access_token=create_access_token(self),
+            refresh_token=self.token,
+        )

@@ -1,6 +1,6 @@
 from pydantic import AwareDatetime, Field, SecretStr
 
-from app.common.schema import IdCreatedUpdatedDto, Schema, TokenBase
+from app.common.schema import IdCreatedUpdatedDto, Schema
 from app.common.type import AuthorityEnum
 
 
@@ -27,14 +27,10 @@ class AdminResponse(IdCreatedUpdatedDto, AdminBase):
 
 
 class AdminLogin(Schema):
-    login_id: str = Field(..., description="로그인 아이디")
-    password: SecretStr = Field(..., description="비밀번호")
+    login_id: str = Field(..., description="로그인 아이디", examples=["developer"])
+    password: SecretStr = Field(..., description="비밀번호", examples=["1"])
 
 
 class AdminChangePassword(Schema):
     old_password: SecretStr = Field(..., description="비밀번호")
     new_password: SecretStr = Field(..., description="새 비밀번호")
-
-
-class AdminToken(TokenBase):
-    pass

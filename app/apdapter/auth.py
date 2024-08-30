@@ -18,22 +18,27 @@ settings = get_settings()
 log = get_logger()
 
 
-async def get_admin_id(request: Request) -> int:
-    authorization = request.headers.get("Authorization")
-    scheme, credentials = get_authorization_scheme_param(authorization)
-    if not credentials:
-        raise AuthenticationException401()
-    operator = get_access_token_claims(credentials)
-    if operator.type != UserTypeEnum.admin:
-        raise AuthorityException403()
-    return operator.id
-
-
-async def get_operator(request: Request) -> Operator:
+def get_operator(request: Request) -> Operator:
     authorization = request.headers.get("Authorization")
     scheme, credentials = get_authorization_scheme_param(authorization)
     claims = get_access_token_claims(credentials)
     return Operator.model_validate(claims.model_dump())
+
+
+def get_admin_id(request: Request) -> int:
+    operator = get_operator(request)
+    if operator.type != UserTypeEnum.admin:
+        log.warning(f"You are not admin: {operator}")
+        raise AuthorityException403()
+    return operator.id
+
+
+def get_user_id(request: Request) -> int:
+    operator = get_operator(request)
+    if operator.type != UserTypeEnum.user:
+        log.warning(f"You are not user: {operator}")
+        raise AuthorityException403()
+    return operator.id
 
 
 class JWTToken(HTTPBearer):
@@ -78,7 +83,9 @@ class AuthorityChecker:
     ) -> HTTPAuthorizationCredentials | None:
         if self.require_authorities is None or self.is_authorized(credentials):
             return credentials
-
+        log.warning(
+            f"Need: {self.require_authorities}, Yours: {get_access_token_claims(credentials.credentials).authorities}"
+        )
         raise AuthorityException403()
 
     def is_authorized(
@@ -113,7 +120,6 @@ class SuperManagerOnly:
     ) -> HTTPAuthorizationCredentials | None:
         if self.is_authorized(credentials):
             return credentials
-
         raise AuthorityException403()
 
     @staticmethod
@@ -123,4 +129,7 @@ class SuperManagerOnly:
             raise AuthenticationException401(Code.EXPIRED_TOKEN)
 
         claims = get_access_token_claims(access_token)
-        return bool(claims.manager_flag)
+        result = bool(claims.manager_flag)
+        if not result:
+            log.warning(f"You are not super admin: {claims}")
+        return result

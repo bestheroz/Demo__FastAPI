@@ -27,7 +27,7 @@ class AvailableFlag(Schema):
     available_flag: bool
 
 
-class TokenBase(Schema):
+class Token(Schema):
     access_token: str
     refresh_token: str
 
@@ -79,7 +79,7 @@ class AccessTokenClaims(Schema):
     login_id: str = Field(..., description="로그인 아이디")
     name: str = Field(..., description="이름")
     type: UserTypeEnum = Field(..., description="권한 유형")
-    manager_flag: bool = Field(..., description="매니저 여부(모든 권한 소유)")
+    manager_flag: bool = Field(False, description="매니저 여부(모든 권한 소유)")
     authorities: list[AuthorityEnum] = Field([], description="권한 목록")
 
 
