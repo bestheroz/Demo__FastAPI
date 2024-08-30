@@ -29,11 +29,11 @@ cryptography = "^43.0.0"
 [tool.poetry.group.dev.dependencies]
 pyright = "^1.1.378"
 mypy = "^1.11.2"
-ruff = "^0.6.2"
+ruff = "^0.6.3"
 
 [tool.poetry.group.types.dependencies]
 types-python-jose = "^3.3.4.20240106"
-types-aiobotocore = "^2.13.2"
+types-aiobotocore = "^2.14.0"
 types-openpyxl = "^3.1.5.20240822"
 pandas-stubs = "^2.2.2.240807"
 
