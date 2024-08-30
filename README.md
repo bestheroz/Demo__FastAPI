@@ -1,7 +1,7 @@
 # Demo FastAPI
-> 즉시 개발을 시작할 수 있도록 프레임워크 코드를 작성하였습니다.
-> 
-> 그리고 최신 트렌드를 테스트하고 학습하기 위한 개인 프로젝트입니다.
+> 최신 트렌드를 학습/추적/테스트하기 위한 개인 프로젝트입니다.
+>
+> 또한 이 프레임워크 코드를 통해 개발을 즉시 시작할 수 있도록 작성하였습니다.
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Poetry](https://img.shields.io/badge/Poetry-%233B82F6.svg?style=for-the-badge&logo=poetry&logoColor=0B3D8D)
