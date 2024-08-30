@@ -18,7 +18,7 @@ settings = get_settings()
 log = get_logger()
 
 
-async def get_admin_id(request: Request) -> int | None:
+async def get_admin_id(request: Request) -> int:
     authorization = request.headers.get("Authorization")
     scheme, credentials = get_authorization_scheme_param(authorization)
     if not credentials:
