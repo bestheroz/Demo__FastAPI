@@ -26,7 +26,7 @@ admin_router = APIRouter(tags=["관리자"])
 
 
 @admin_router.get(
-    "/v1/admin/",
+    "/v1/admin",
     name="리스트 조회",
     dependencies=[
         Depends(AuthorityChecker([AuthorityEnum.ADMIN_VIEW])),

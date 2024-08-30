@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
 from app.apdapter.orm import Base, TZDateTime
 from app.application.notice.event import NoticeRemoved
-from app.application.notice.schema import NoticeResponse
+from app.application.notice.schema import NoticeCreate, NoticeResponse
 from app.common.exception import SystemException500
 from app.common.model import IdCreatedUpdated
 from app.common.type import UserTypeEnum
@@ -53,6 +53,29 @@ class Notice(IdCreatedUpdated, Base):
             return self.updated_by_admin
         raise SystemException500()
 
+    @staticmethod
+    def new(data: NoticeCreate, operator_id: int):
+        now = utcnow()
+        return Notice(
+            title=data.title,
+            content=data.content,
+            created_at=now,
+            created_by_id=operator_id,
+            created_object_type=UserTypeEnum.admin,
+            updated_at=now,
+            updated_by_id=operator_id,
+            updated_object_type=UserTypeEnum.admin,
+            removed_flag=False,
+        )
+
+    def update(self, data: NoticeCreate, operator_id: int):
+        now = utcnow()
+        self.title = data.title
+        self.content = data.content
+        self.updated_at = now
+        self.updated_by_id = operator_id
+        self.updated_object_type = UserTypeEnum.admin
+
     def remove(self, operator_id: int):
         now = utcnow()
         self.removed_flag = True
@@ -60,6 +83,24 @@ class Notice(IdCreatedUpdated, Base):
         self.updated_at = now
         self.updated_by_id = operator_id
         self.updated_object_type = UserTypeEnum.admin
+
+    def on_created(self) -> NoticeResponse:
+        session = object_session(self)
+        if not session:
+            raise SystemException500()
+        session.flush()
+
+        event_data = NoticeResponse.model_validate(self)
+        return event_data
+
+    def on_updated(self) -> NoticeResponse:
+        session = object_session(self)
+        if not session:
+            raise SystemException500()
+        session.flush()
+
+        event_data = NoticeResponse.model_validate(self)
+        return event_data
 
     def on_removed(self) -> NoticeResponse:
         session = object_session(self)

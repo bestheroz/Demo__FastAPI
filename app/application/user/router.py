@@ -21,7 +21,7 @@ user_router = APIRouter(tags=["유저"])
 
 
 @user_router.get(
-    "/v1/users/",
+    "/v1/users",
     name="리스트 조회",
     dependencies=[
         Depends(AuthorityChecker([AuthorityEnum.USER_VIEW])),

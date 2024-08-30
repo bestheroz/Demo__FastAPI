@@ -1,4 +1,3 @@
-from pydantic import AwareDatetime
 from sqlalchemy import select
 from sqlalchemy.sql.functions import count
 
@@ -18,8 +17,6 @@ async def get_notices(
     ordering: str | None = None,
     search: str | None = None,
     created_ids: set[int] | None = None,
-    created_start_at: AwareDatetime | None = None,
-    created_end_at: AwareDatetime | None = None,
 ) -> ListApiResult[NoticeResponse]:
     initial_query = select(Notice)
     count_query = select(count(Notice.id))
@@ -35,14 +32,6 @@ async def get_notices(
         count_query = count_query.filter_by(created_object_type=UserTypeEnum.user).filter(
             Notice.created_by_id.in_(created_ids)
         )
-
-    if created_start_at:
-        initial_query = initial_query.filter(Notice.created_at >= created_start_at)
-        count_query = count_query.filter(Notice.created_at >= created_start_at)
-
-    if created_end_at:
-        initial_query = initial_query.filter(Notice.created_at <= created_end_at)
-        count_query = count_query.filter(Notice.created_at <= created_end_at)
 
     return await get_pagination_list(
         initial_query=initial_query,
