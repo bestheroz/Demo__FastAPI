@@ -3,12 +3,15 @@ from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
 from app.apdapter.orm import Base, TZDateTime
-from app.application.user.event import UserPasswordReset, UserRemoved, UserUpdated
-from app.application.user.schema import UserResponse
-from app.common.exception import SystemException500
+from app.application.user.event import UserPasswordUpdated, UserRemoved, UserUpdated
+from app.application.user.schema import UserCreate, UserResponse, UserUpdate, UserUpdatePassword
+from app.common.code import Code
+from app.common.exception import RequestException400, SystemException500
 from app.common.model import IdCreatedUpdated
+from app.common.schema import Operator
 from app.common.type import UserTypeEnum
 from app.utils.datetime_utils import utcnow
+from app.utils.password import get_password_hash, verify_password
 
 
 class User(IdCreatedUpdated, Base):
@@ -19,7 +22,7 @@ class User(IdCreatedUpdated, Base):
     login_id: Mapped[str]
 
     token: Mapped[str | None]
-    password: Mapped[bytes | None]
+    password: Mapped[str | None]
     change_password_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=True)
     latest_active_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=False)
 
@@ -68,38 +71,66 @@ class User(IdCreatedUpdated, Base):
             return self.updated_by_admin
         raise SystemException500()
 
-    def reset_password(self, operator_id: int):
+    @staticmethod
+    def new(data: UserCreate, operator: Operator):
         now = utcnow()
-        self.password = None
-        self.updated_at = now
-        self.updated_by_id = operator_id
-        self.updated_object_type = UserTypeEnum.admin
+        return User(
+            name=data.name,
+            use_flag=data.use_flag,
+            login_id=data.login_id,
+            token=None,
+            password=get_password_hash(data.password),
+            change_password_at=now,
+            latest_active_at=now,
+            joined_at=now,
+            removed_flag=False,
+            created_at=now,
+            created_by_id=operator.id,
+            created_object_type=operator.type,
+            updated_at=now,
+            updated_by_id=operator.id,
+            updated_object_type=operator.type,
+        )
 
-    def remove(self, operator_id: int):
+    def update(self, data: UserUpdate, operator: Operator):
+        now = utcnow()
+        self.name = data.name
+        self.use_flag = data.use_flag
+        self.login_id = data.login_id
+        self.updated_at = now
+        self.updated_by_id = operator.id
+        self.updated_object_type = operator.type
+        if data.password:
+            self.password = get_password_hash(data.password)
+            self.change_password_at = now
+
+    def update_password(self, data: UserUpdatePassword, operator: Operator):
+        if verify_password(data.old_password, self.password):
+            raise RequestException400(Code.INVALID_PASSWORD)
+
+        now = utcnow()
+        self.password = get_password_hash(data.new_password)
+        self.change_password_at = now
+        self.updated_at = now
+        self.updated_by_id = operator.id
+        self.updated_object_type = operator.type
+
+    def remove(self, operator: Operator):
         now = utcnow()
         self.removed_flag = True
         self.removed_at = now
         self.updated_at = now
-        self.updated_by_id = operator_id
-        self.updated_object_type = UserTypeEnum.admin
+        self.updated_by_id = operator.id
+        self.updated_object_type = operator.type
 
-    def on_password_reset(self) -> UserResponse:
-        session = object_session(self)
-        if not session:
-            raise SystemException500()
-        session.flush()
-
-        self.events.append(UserPasswordReset(data=UserResponse.model_validate(self)))
-        return UserResponse.model_validate(self)
-
-    def on_removed(self) -> UserResponse:
+    def on_created(self) -> UserResponse:
         session = object_session(self)
         if not session:
             raise SystemException500()
         session.flush()
 
         event_data = UserResponse.model_validate(self)
-        self.events.append(UserRemoved(data=event_data))
+        self.events.append(UserPasswordUpdated(data=event_data))
         return event_data
 
     def on_updated(self) -> UserResponse:
@@ -110,4 +141,24 @@ class User(IdCreatedUpdated, Base):
 
         event_data = UserResponse.model_validate(self)
         self.events.append(UserUpdated(data=event_data))
+        return event_data
+
+    def on_password_updated(self) -> UserResponse:
+        session = object_session(self)
+        if not session:
+            raise SystemException500()
+        session.flush()
+
+        event_data = UserResponse.model_validate(self)
+        self.events.append(UserPasswordUpdated(data=event_data))
+        return event_data
+
+    def on_removed(self) -> UserResponse:
+        session = object_session(self)
+        if not session:
+            raise SystemException500()
+        session.flush()
+
+        event_data = UserResponse.model_validate(self)
+        self.events.append(UserRemoved(data=event_data))
         return event_data

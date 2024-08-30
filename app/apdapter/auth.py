@@ -8,8 +8,8 @@ from app.common.exception import (
     AuthenticationException401,
     AuthorityException403,
 )
-from app.common.schema import AccessTokenClaims
-from app.common.type import AuthorityEnum
+from app.common.schema import AccessTokenClaims, Operator
+from app.common.type import AuthorityEnum, UserTypeEnum
 from app.config.config import get_settings
 from app.utils.jwt import get_access_token_claims, is_validated_jwt
 
@@ -23,18 +23,17 @@ async def get_admin_id(request: Request) -> int | None:
     scheme, credentials = get_authorization_scheme_param(authorization)
     if not credentials:
         raise AuthenticationException401()
-    operator_id = get_access_token_claims(credentials).id
-    return operator_id
+    operator = get_access_token_claims(credentials)
+    if operator.type != UserTypeEnum.admin:
+        raise AuthorityException403()
+    return operator.id
 
 
-async def get_operator_id(request: Request) -> int | None:
+async def get_operator(request: Request) -> Operator:
     authorization = request.headers.get("Authorization")
     scheme, credentials = get_authorization_scheme_param(authorization)
     claims = get_access_token_claims(credentials)
-    admin_id = claims.id
-    if admin_id is None:
-        raise AuthenticationException401()
-    return int(admin_id)
+    return Operator.model_validate(claims.model_dump())
 
 
 class JWTToken(HTTPBearer):

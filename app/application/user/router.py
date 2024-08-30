@@ -2,19 +2,24 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
 
-from app.apdapter.auth import AuthorityChecker, get_operator_id
+from app.apdapter.auth import AuthorityChecker, get_operator
 from app.application.user.command import (
+    create_user,
     remove_user,
-    reset_password,
+    update_password,
+    update_user,
 )
 from app.application.user.query import (
     get_user,
     get_users,
 )
 from app.application.user.schema import (
+    UserCreate,
     UserResponse,
+    UserUpdate,
+    UserUpdatePassword,
 )
-from app.common.schema import ListApiResult
+from app.common.schema import ListApiResult, Operator
 from app.common.type import AuthorityEnum
 
 user_router = APIRouter(tags=["유저"])
@@ -53,19 +58,49 @@ async def _get_user(user_id: int) -> UserResponse:
     return await get_user(user_id)
 
 
-@user_router.delete(
-    "/v1/users/{user_id}/reset-password",
-    name="비밀번호 초기화",
+@user_router.post(
+    "/v1/users",
+    name="유저 생성",
+    dependencies=[
+        Depends(AuthorityChecker([AuthorityEnum.USER_EDIT])),
+    ],
+)
+async def _create_user(
+    data: UserCreate,
+    x_operator: Annotated[Operator, Depends(get_operator)],
+) -> UserResponse:
+    return await create_user(data, x_operator)
+
+
+@user_router.put(
+    "/v1/users/{user_id}",
+    name="유저 수정",
+    dependencies=[
+        Depends(AuthorityChecker([AuthorityEnum.USER_EDIT])),
+    ],
+)
+async def _update_user(
+    user_id: int,
+    data: UserUpdate,
+    x_operator: Annotated[Operator, Depends(get_operator)],
+) -> UserResponse:
+    return await update_user(user_id, data, x_operator)
+
+
+@user_router.patch(
+    "/v1/users/{user_id}/password",
+    name="비밀번호 변경",
     dependencies=[
         Depends(AuthorityChecker([AuthorityEnum.USER_EDIT])),
     ],
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def _reset_password(
+async def _update_password(
     user_id: int,
-    x_operator_id: Annotated[int, Depends(get_operator_id)],
+    data: UserUpdatePassword,
+    x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> None:
-    await reset_password(user_id, x_operator_id)
+    await update_password(user_id, data, x_operator)
 
 
 @user_router.delete(
@@ -78,6 +113,6 @@ async def _reset_password(
 )
 async def _remove_user(
     user_id: int,
-    x_operator_id: Annotated[int, Depends(get_operator_id)],
+    x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> None:
-    await remove_user(user_id, x_operator_id)
+    await remove_user(user_id, x_operator)

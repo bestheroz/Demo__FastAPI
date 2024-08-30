@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, Query, status
 
-from app.apdapter.auth import AuthorityChecker, get_admin_id, get_operator_id
+from app.apdapter.auth import AuthorityChecker, get_admin_id
 from app.application.admin.command import (
     change_password,
     login_admin,
@@ -97,7 +97,7 @@ async def _get_admin(admin_id: int) -> AdminResponse:
 async def _update_admin(
     admin_id: int,
     payload: AdminCreate,
-    x_operator_id: Annotated[int, Depends(get_operator_id)],
+    x_operator_id: Annotated[int, Depends(get_admin_id)],
 ) -> AdminResponse:
     return await update_admin(admin_id, payload, x_operator_id)
 
@@ -113,7 +113,7 @@ async def _update_admin(
 )
 async def _remove_admin(
     admin_id: int,
-    x_operator_id: Annotated[int, Depends(get_operator_id)],
+    x_operator_id: Annotated[int, Depends(get_admin_id)],
 ) -> None:
     await remove_admin(admin_id, x_operator_id)
 

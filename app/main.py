@@ -30,6 +30,7 @@ from app.common.exception import (
     SystemException500,
 )
 from app.common.schema import AccessTokenClaims
+from app.common.type import UserTypeEnum
 from app.config.config import get_settings
 from app.utils.jwt import create_access_token
 from app.utils.string import camelize
@@ -67,6 +68,7 @@ if settings.deployment_environment in ("local", "sandbox", "qa"):
                     id=1,
                     login_id="developer",
                     name="개발자",
+                    type=UserTypeEnum.admin,
                     manager_flag=True,
                     authorities=[],
                 )

@@ -5,11 +5,7 @@ from app.application.user.schema import UserResponse
 from app.common.event import Event
 
 
-class UserRemoved(Event[UserResponse]):
-    pass
-
-
-class UserPasswordReset(Event[UserResponse]):
+class UserCreated(Event[UserResponse]):
     pass
 
 
@@ -17,10 +13,19 @@ class UserUpdated(Event[UserResponse]):
     pass
 
 
+class UserPasswordUpdated(Event[UserResponse]):
+    pass
+
+
+class UserRemoved(Event[UserResponse]):
+    pass
+
+
 class UserEventHandler(EventHandler):
     def get_handlers(self) -> dict[type[Event], list[Callable]]:
         return {
-            UserPasswordReset: [],
-            UserRemoved: [],
+            UserCreated: [],
             UserUpdated: [],
+            UserPasswordUpdated: [],
+            UserRemoved: [],
         }

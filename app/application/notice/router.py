@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
 
-from app.apdapter.auth import AuthorityChecker, get_operator_id
+from app.apdapter.auth import AuthorityChecker, get_admin_id
 from app.application.notice.command import create_notice, remove_notice, update_notice
 from app.application.notice.query import get_notice, get_notices
 from app.application.notice.schema import NoticeCreate, NoticeResponse
@@ -51,7 +51,7 @@ async def _get_notice(
 )
 async def _create_notice(
     data: NoticeCreate,
-    x_operator_id: Annotated[int, Depends(get_operator_id)],
+    x_operator_id: Annotated[int, Depends(get_admin_id)],
 ) -> NoticeResponse:
     return await create_notice(data, x_operator_id)
 
@@ -67,7 +67,7 @@ async def _create_notice(
 async def _update_notice(
     notice_id: int,
     data: NoticeCreate,
-    x_operator_id: Annotated[int, Depends(get_operator_id)],
+    x_operator_id: Annotated[int, Depends(get_admin_id)],
 ) -> NoticeResponse:
     return await update_notice(notice_id, data, x_operator_id)
 
@@ -82,6 +82,6 @@ async def _update_notice(
 )
 async def _delete_notice(
     notice_id: int,
-    x_operator_id: Annotated[int, Depends(get_operator_id)],
+    x_operator_id: Annotated[int, Depends(get_admin_id)],
 ) -> None:
     await remove_notice(notice_id, x_operator_id)
