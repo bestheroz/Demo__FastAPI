@@ -85,16 +85,18 @@ class Admin(IdCreatedUpdated, Base):
         )
 
     def update(self, data: AdminCreate, operator_id: int):
+        now = utcnow()
         self.login_id = data.login_id
-        if data.password:
-            self.password = get_password_hash(data.password.get_secret_value())
         self.name = data.name
         self.use_flag = data.use_flag
         self._authorities = data.authorities  # type: ignore
         self.manager_flag = data.manager_flag
-        self.updated_at = utcnow()
+        self.updated_at = now
         self.updated_by_id = operator_id
         self.updated_object_type = UserTypeEnum.admin
+        if data.password and data.password.get_secret_value():
+            self.password = get_password_hash(data.password.get_secret_value())
+            self.change_password_at = now
 
     def change_password(self, password: str):
         now = utcnow()

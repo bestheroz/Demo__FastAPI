@@ -83,9 +83,8 @@ class User(IdCreatedUpdated, Base):
             login_id=data.login_id,
             authorities=data.authorities,
             token=None,
-            password=get_password_hash(data.password),
+            password=get_password_hash(data.password.get_secret_value()),
             change_password_at=now,
-            latest_active_at=now,
             joined_at=now,
             removed_flag=False,
             created_at=now,
@@ -105,8 +104,8 @@ class User(IdCreatedUpdated, Base):
         self.updated_at = now
         self.updated_by_id = operator.id
         self.updated_object_type = operator.type
-        if data.password:
-            self.password = get_password_hash(data.password)
+        if data.password and data.password.get_secret_value():
+            self.password = get_password_hash(data.password.get_secret_value())
             self.change_password_at = now
 
     def change_password(self, data: UserChangePassword, operator: Operator):

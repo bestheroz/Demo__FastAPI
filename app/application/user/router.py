@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Header, Query, status
 from app.apdapter.auth import AuthorityChecker, get_operator, get_user_id
 from app.application.user.command import (
     change_password,
+    check_login_id,
     create_user,
     login_user,
     logout,
@@ -52,6 +53,28 @@ async def _get_users(
 
 
 @user_router.get(
+    "/v1/users/check-login-id",
+    name="로그인 아이디 중복 확인",
+)
+async def _check_login_id(
+    login_id: Annotated[str, Query()],
+) -> bool:
+    return await check_login_id(login_id)
+
+
+@user_router.get(
+    "/v1/users/renew-token",
+    name="유저 토큰 갱신",
+    description="*어세스 토큰* 만료 시 *리플래시 토큰* 으로 *어세스 토큰* 을 갱신합니다. "
+    "(동시에 여러 사용자가 접속하고 있다면 *리플래시 토큰* 값이 달라서 갱신이 안될 수 있습니다.)",
+)
+async def _renew_token(
+    refresh_token: str = Header(alias="AuthorizationR"),
+) -> Token:
+    return await renew_token(refresh_token)
+
+
+@user_router.get(
     "/v1/users/{user_id}",
     name="상세 조회",
     dependencies=[
@@ -74,6 +97,16 @@ async def _create_user(
     x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> UserResponse:
     return await create_user(data, x_operator)
+
+
+@user_router.post(
+    "/v1/users/login",
+    name="유저 로그인",
+)
+async def _login_user(
+    payload: UserLogin,
+) -> Token:
+    return await login_user(payload)
 
 
 @user_router.put(
@@ -120,28 +153,6 @@ async def _remove_user(
     x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> None:
     await remove_user(user_id, x_operator)
-
-
-@user_router.get(
-    "/v1/users/renew-token",
-    name="유저 토큰 갱신",
-    description="*어세스 토큰* 만료 시 *리플래시 토큰* 으로 *어세스 토큰* 을 갱신합니다. "
-    "(동시에 여러 사용자가 접속하고 있다면 *리플래시 토큰* 값이 달라서 갱신이 안될 수 있습니다.)",
-)
-async def _renew_token(
-    refresh_token: str = Header(alias="AuthorizationR"),
-) -> Token:
-    return await renew_token(refresh_token)
-
-
-@user_router.post(
-    "/v1/users/login",
-    name="유저 로그인",
-)
-async def _login_user(
-    payload: UserLogin,
-) -> Token:
-    return await login_user(payload)
 
 
 @user_router.delete(

@@ -117,3 +117,11 @@ async def logout(account_id: int):
         if user is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
         user.sign_out()
+
+
+async def check_login_id(login_id: str) -> bool:
+    with get_uow() as uow:
+        return (
+            uow.repository.session.scalar(select(User).filter_by(login_id=login_id).filter_by(removed_flag=False))
+            is None
+        )

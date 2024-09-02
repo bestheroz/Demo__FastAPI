@@ -13,7 +13,7 @@ create table user
 
     authorities JSON  not null,
     joined_at timestamp,
-    additional_info JSON    not null,
+    additional_info JSON    null,
 
     removed_flag tinyint not null,
     removed_at timestamp,
