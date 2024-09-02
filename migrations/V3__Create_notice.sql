@@ -5,6 +5,7 @@ create table notice
     title     text  not null,
     content     text  not null,
 
+    use_flag tinyint    not null,
     removed_flag     tinyint  not null,
     removed_at     timestamp,
 

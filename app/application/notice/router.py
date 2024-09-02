@@ -20,14 +20,12 @@ async def _get_notices(
     page: Annotated[int, Query(example=1)],
     page_size: Annotated[int, Query(example=10)],
     search: Annotated[str | None, Query()] = None,
-    created_ids: Annotated[set[int] | None, Query()] = None,
 ) -> ListApiResult[NoticeResponse]:
     return await get_notices(
         page,
         page_size,
         "-id",
         search,
-        created_ids,
     )
 
 

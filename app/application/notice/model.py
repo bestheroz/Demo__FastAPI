@@ -16,6 +16,8 @@ class Notice(IdCreatedUpdated, Base):
     title: Mapped[str]
     content: Mapped[str]
 
+    use_flag: Mapped[bool]
+
     removed_flag: Mapped[bool]
     removed_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=True)
 
@@ -57,8 +59,7 @@ class Notice(IdCreatedUpdated, Base):
     def new(data: NoticeCreate, operator_id: int):
         now = utcnow()
         return Notice(
-            title=data.title,
-            content=data.content,
+            **data.model_dump(),
             created_at=now,
             created_by_id=operator_id,
             created_object_type=UserTypeEnum.admin,
@@ -72,6 +73,7 @@ class Notice(IdCreatedUpdated, Base):
         now = utcnow()
         self.title = data.title
         self.content = data.content
+        self.use_flag = data.use_flag
         self.updated_at = now
         self.updated_by_id = operator_id
         self.updated_object_type = UserTypeEnum.admin
