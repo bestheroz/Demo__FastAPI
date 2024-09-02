@@ -71,8 +71,11 @@ class Admin(IdCreatedUpdated, Base):
     ) -> "Admin":
         now = utcnow()
         return Admin(
-            **data.model_dump(),
+            **data.model_dump(exclude={"authorities", "password"}),
+            _authorities=data.authorities,
+            password=get_password_hash(data.password.get_secret_value()),
             removed_flag=False,
+            joined_at=now,
             created_at=now,
             created_by_id=operator_id,
             created_object_type=UserTypeEnum.admin,
@@ -83,6 +86,8 @@ class Admin(IdCreatedUpdated, Base):
 
     def update(self, data: AdminCreate, operator_id: int):
         self.login_id = data.login_id
+        if data.password:
+            self.password = get_password_hash(data.password.get_secret_value())
         self.name = data.name
         self.use_flag = data.use_flag
         self._authorities = data.authorities  # type: ignore

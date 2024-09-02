@@ -81,6 +81,7 @@ class User(IdCreatedUpdated, Base):
             name=data.name,
             use_flag=data.use_flag,
             login_id=data.login_id,
+            authorities=data.authorities,
             token=None,
             password=get_password_hash(data.password),
             change_password_at=now,

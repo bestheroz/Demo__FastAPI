@@ -75,7 +75,7 @@ async def remove_admin(
         if admin.id == operator_id:
             raise RequestException400(Code.CANNOT_REMOVE_YOURSELF)
         admin.remove(operator_id)
-        await admin.on_removed()
+        admin.on_removed()
 
 
 async def change_password(
@@ -156,3 +156,11 @@ async def logout(account_id: int):
         if admin is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
         admin.sign_out()
+
+
+async def check_login_id(login_id: str) -> bool:
+    with get_uow() as uow:
+        return (
+            uow.repository.session.scalar(select(Admin).filter_by(login_id=login_id).filter_by(removed_flag=False))
+            is None
+        )

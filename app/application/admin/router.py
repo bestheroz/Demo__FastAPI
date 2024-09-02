@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Header, Query, status
 from app.apdapter.auth import AuthorityChecker, SuperManagerOnly, get_admin_id
 from app.application.admin.command import (
     change_password,
+    check_login_id,
     create_admin,
     login_admin,
     logout,
@@ -26,7 +27,54 @@ admin_router = APIRouter(tags=["관리자"])
 
 
 @admin_router.get(
-    "/v1/admin",
+    "/v1/admins/renew-token",
+    name="관리자 토큰 갱신",
+    description="*어세스 토큰* 만료 시 *리플래시 토큰* 으로 *어세스 토큰* 을 갱신합니다. "
+    "(동시에 여러 사용자가 접속하고 있다면 *리플래시 토큰* 값이 달라서 갱신이 안될 수 있습니다.)",
+)
+async def _renew_token(
+    refresh_token: str = Header(alias="AuthorizationR"),
+) -> Token:
+    return await renew_token(refresh_token)
+
+
+@admin_router.post(
+    "/v1/admins/login",
+    name="관리자 로그인",
+)
+async def _login_admin(
+    payload: AdminLogin,
+) -> Token:
+    return await login_admin(payload)
+
+
+@admin_router.delete(
+    "/v1/admins/logout",
+    name="관리자 로그아웃",
+    description="*리플래시 토큰*을 삭제합니다.",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(AuthorityChecker()),
+    ],
+)
+async def _logout(
+    x_admin_id: Annotated[int, Depends(get_admin_id)],
+) -> None:
+    await logout(x_admin_id)
+
+
+@admin_router.get(
+    "/v1/admins/check-login-id",
+    name="로그인 아이디 중복 확인",
+)
+async def _check_login_id(
+    login_id: Annotated[str, Query()],
+) -> bool:
+    return await check_login_id(login_id)
+
+
+@admin_router.get(
+    "/v1/admins",
     name="리스트 조회",
     dependencies=[
         Depends(AuthorityChecker([AuthorityEnum.ADMIN_VIEW])),
@@ -40,7 +88,7 @@ async def _get_admins(
 
 
 @admin_router.get(
-    "/v1/admin/{admin_id}",
+    "/v1/admins/{admin_id}",
     name="상세 조회",
     dependencies=[
         Depends(AuthorityChecker([AuthorityEnum.ADMIN_VIEW])),
@@ -51,7 +99,7 @@ async def _get_admin(admin_id: int) -> AdminResponse:
 
 
 @admin_router.post(
-    "/v1/admin",
+    "/v1/admins",
     name="관리자 생성",
     dependencies=[
         Depends(SuperManagerOnly()),
@@ -65,7 +113,7 @@ async def _create_admin(
 
 
 @admin_router.put(
-    "/v1/admin/{admin_id}",
+    "/v1/admins/{admin_id}",
     name="관리자 수정",
     dependencies=[
         Depends(AuthorityChecker([AuthorityEnum.ADMIN_EDIT])),
@@ -80,7 +128,7 @@ async def _update_admin(
 
 
 @admin_router.patch(
-    "/v1/admin/{admin_id}/password",
+    "/v1/admins/{admin_id}/password",
     name="관리자 비밀번호 변경",
     dependencies=[
         Depends(AuthorityChecker()),
@@ -94,7 +142,7 @@ async def _change_password(
 
 
 @admin_router.delete(
-    "/v1/admin/{admin_id}",
+    "/v1/admins/{admin_id}",
     name="관리자 삭제",
     description="(Soft delete)",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -107,40 +155,3 @@ async def _remove_admin(
     x_operator_id: Annotated[int, Depends(get_admin_id)],
 ) -> None:
     await remove_admin(admin_id, x_operator_id)
-
-
-@admin_router.get(
-    "/v1/admin/renew-token",
-    name="관리자 토큰 갱신",
-    description="*어세스 토큰* 만료 시 *리플래시 토큰* 으로 *어세스 토큰* 을 갱신합니다. "
-    "(동시에 여러 사용자가 접속하고 있다면 *리플래시 토큰* 값이 달라서 갱신이 안될 수 있습니다.)",
-)
-async def _renew_token(
-    refresh_token: str = Header(alias="AuthorizationR"),
-) -> Token:
-    return await renew_token(refresh_token)
-
-
-@admin_router.post(
-    "/v1/admin/login",
-    name="관리자 로그인",
-)
-async def _login_admin(
-    payload: AdminLogin,
-) -> Token:
-    return await login_admin(payload)
-
-
-@admin_router.delete(
-    "/v1/admin/logout",
-    name="관리자 로그아웃",
-    description="*리플래시 토큰*을 삭제합니다.",
-    status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[
-        Depends(AuthorityChecker()),
-    ],
-)
-async def _logout(
-    x_admin_id: Annotated[int, Depends(get_admin_id)],
-) -> None:
-    await logout(x_admin_id)

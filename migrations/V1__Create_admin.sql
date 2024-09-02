@@ -34,6 +34,6 @@ login_id, password,
 authorities, joined_at, removed_flag,
 created_at, created_by_id, created_object_type, updated_at, updated_by_id, updated_object_type)
 VALUES (1, '개발자', 1, 1,
-'developer', '$2b$12$oquiOuftjG94Nepvwm1s3OJe5mt40rNI2VuDRaIlL11NDbaYzKIN2',
+'developer', '$2b$12$HbX5j99YnnKs8zWC/LokB.kyujREbh.kQ9sTNacD/hbEfm8eIP7lm',
 '[]', now(), 0,
  now(), 1, 'admin', now(), 1, 'admin');

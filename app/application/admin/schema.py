@@ -13,22 +13,27 @@ class AdminBase(Schema):
 
 
 class AdminCreate(AdminBase):
-    pass
+    password: SecretStr = Field(..., description="비밀번호")
 
 
 class AdminUpdate(AdminBase):
-    pass
+    password: SecretStr | None = Field(None, description="비밀번호")
 
 
 class AdminResponse(IdCreatedUpdatedDto, AdminBase):
-    id: int = Field(..., description="관리자 ID")
     joined_at: AwareDatetime | None = Field(None, description="가입 일시")
     latest_active_at: AwareDatetime | None = Field(None, description="최근 활동 일시")
 
 
 class AdminLogin(Schema):
     login_id: str = Field(..., description="로그인 아이디", examples=["developer"])
-    password: SecretStr = Field(..., description="비밀번호", examples=["1"])
+    password: SecretStr = Field(
+        ...,
+        description="비밀번호",
+        examples=[
+            "4dff4ea340f0a823f15d3f4f01ab62eae0e5da579ccb851f8db9dfe84c58b2b37b89903a740e1ee172da793a6e79d560e5f7f9bd058a12a280433ed6fa46510a"
+        ],
+    )
 
 
 class AdminChangePassword(Schema):
