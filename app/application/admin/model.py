@@ -13,6 +13,7 @@ from app.application.admin.event import (
 from app.application.admin.schema import (
     AdminCreate,
     AdminResponse,
+    AdminUpdate,
 )
 from app.common.exception import SystemException500
 from app.common.model import IdCreatedUpdated
@@ -84,7 +85,7 @@ class Admin(IdCreatedUpdated, Base):
             updated_object_type=UserTypeEnum.admin,
         )
 
-    def update(self, data: AdminCreate, operator_id: int):
+    def update(self, data: AdminUpdate, operator_id: int):
         now = utcnow()
         self.login_id = data.login_id
         self.name = data.name

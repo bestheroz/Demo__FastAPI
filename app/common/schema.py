@@ -86,3 +86,4 @@ class AccessTokenClaims(Schema):
 class Operator(Schema):
     id: int = Field(..., description="ID(KEY)")
     type: UserTypeEnum = Field(..., description="권한 유형")
+    manager_flag: bool = Field(False, description="매니저 여부(모든 권한 소유)")

@@ -11,10 +11,11 @@ from app.application.admin.schema import (
     AdminCreate,
     AdminLogin,
     AdminResponse,
+    AdminUpdate,
 )
 from app.common.code import Code
 from app.common.exception import AuthenticationException401, RequestException400
-from app.common.schema import Token
+from app.common.schema import Operator, Token
 from app.utils.jwt import (
     create_access_token,
     get_refresh_token_claims,
@@ -48,19 +49,19 @@ async def create_admin(
 
 async def update_admin(
     admin_id: int,
-    data: AdminCreate,
-    operator_id: int,
+    data: AdminUpdate,
+    operator: Operator,
 ) -> AdminResponse:
     with get_uow() as uow, uow.transaction():
         admin = uow.repository.get(admin_id)
         if admin is None or admin.removed_flag is True:
             raise RequestException400(Code.UNKNOWN_USER)
-        if admin.manager_flag is False and admin.id == operator_id:
+        if admin.manager_flag is False and admin.id == operator.id:
             raise RequestException400(Code.CANNOT_UPDATE_YOURSELF)
-        if admin.manager_flag != data.manager_flag and admin.manager_flag is False:
+        if admin.manager_flag != data.manager_flag and operator.manager_flag is False:
             raise RequestException400(Code.UNKNOWN_AUTHORITY)
 
-        admin.update(data, operator_id)
+        admin.update(data, operator.id)
         return admin.on_updated()
 
 

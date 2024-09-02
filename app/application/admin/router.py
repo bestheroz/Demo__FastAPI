@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, Query, status
 
-from app.apdapter.auth import AuthorityChecker, SuperManagerOnly, get_admin_id
+from app.apdapter.auth import AuthorityChecker, SuperManagerOnly, get_admin_id, get_operator
 from app.application.admin.command import (
     change_password,
     check_login_id,
@@ -19,8 +19,9 @@ from app.application.admin.schema import (
     AdminCreate,
     AdminLogin,
     AdminResponse,
+    AdminUpdate,
 )
-from app.common.schema import ListApiResult, Token
+from app.common.schema import ListApiResult, Operator, Token
 from app.common.type import AuthorityEnum
 
 admin_router = APIRouter(tags=["관리자"])
@@ -110,10 +111,10 @@ async def _login_admin(
 )
 async def _update_admin(
     admin_id: int,
-    payload: AdminCreate,
-    x_operator_id: Annotated[int, Depends(get_admin_id)],
+    payload: AdminUpdate,
+    x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> AdminResponse:
-    return await update_admin(admin_id, payload, x_operator_id)
+    return await update_admin(admin_id, payload, x_operator)
 
 
 @admin_router.patch(

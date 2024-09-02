@@ -81,7 +81,7 @@ class AuthorityChecker:
         request: Request,
         credentials: HTTPAuthorizationCredentials = Depends(verify_jwt),
     ) -> HTTPAuthorizationCredentials | None:
-        if self.require_authorities is None or self.is_authorized(credentials):
+        if not self.require_authorities or self.is_authorized(credentials):
             return credentials
         log.warning(
             f"Need: {self.require_authorities}, Yours: {get_access_token_claims(credentials.credentials).authorities}"
