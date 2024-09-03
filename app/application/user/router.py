@@ -127,14 +127,13 @@ async def _update_user(
 @user_router.patch(
     "/v1/users/{user_id}/password",
     name="비밀번호 변경",
-    status_code=status.HTTP_204_NO_CONTENT,
 )
 async def _change_password(
     user_id: int,
     data: UserChangePassword,
     x_operator: Annotated[Operator, Depends(get_operator)],
-) -> None:
-    await change_password(user_id, data, x_operator)
+) -> UserResponse:
+    return await change_password(user_id, data, x_operator)
 
 
 @user_router.delete(

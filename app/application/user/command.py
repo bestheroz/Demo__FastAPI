@@ -55,7 +55,7 @@ async def update_user(user_id: int, data: UserUpdate, operator: Operator) -> Use
         return user.on_updated()
 
 
-async def change_password(user_id: int, data: UserChangePassword, operator: Operator) -> None:
+async def change_password(user_id: int, data: UserChangePassword, operator: Operator) -> UserResponse:
     with get_uow() as uow, uow.transaction():
         user = uow.repository.get(user_id)
         if user is None or user.removed_flag is True:
@@ -67,7 +67,7 @@ async def change_password(user_id: int, data: UserChangePassword, operator: Oper
             raise RequestException400(Code.CHANGE_TO_SAME_PASSWORD)
 
         user.change_password(data, operator)
-        user.on_password_updated()
+        return user.on_password_updated()
 
 
 async def remove_user(user_id: int, operator: Operator) -> None:

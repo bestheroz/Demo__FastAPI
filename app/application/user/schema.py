@@ -27,6 +27,7 @@ class UserChangePassword(Schema):
 class UserResponse(IdCreatedUpdatedDto, UserBase):
     joined_at: AwareDatetime | None = Field(None, description="가입 일시")
     latest_active_at: AwareDatetime | None = Field(None, description="최근 활동 일시")
+    change_password_at: AwareDatetime | None = Field(None, description="비밀번호 변경 일시")
 
 
 class UserSimple(Schema):
