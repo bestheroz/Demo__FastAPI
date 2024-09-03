@@ -1,3 +1,6 @@
+import time
+from urllib.parse import urlparse
+
 from fastapi import Depends, FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
@@ -154,6 +157,25 @@ def handle_invalid_authentication_exception(_request: Request, exc: SystemExcept
         status_code=HTTP_500_INTERNAL_SERVER_ERROR,
         content=jsonable_encoder(exc),
     )
+
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    # URL에서 경로와 쿼리 파라미터만 추출
+    parsed_url = urlparse(str(request.url))
+    path_and_query = parsed_url.path
+    if parsed_url.query:
+        path_and_query += f"?{parsed_url.query}"
+
+    # 요청 파라미터 로깅
+    log.info(f"Request[{request.method} {path_and_query}] body: {dict(request.query_params)}")
+
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    process_time = time.perf_counter() - start_time
+    log.info(f"Response[{request.method} {path_and_query}] status={response.status_code}, time: {process_time:.2f}ms")
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
 
 
 @app.get("/health/liveness", include_in_schema=False)
