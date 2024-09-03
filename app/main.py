@@ -1,6 +1,8 @@
 import time
 from urllib.parse import urlparse
+from uuid import uuid4
 
+import structlog
 from fastapi import Depends, FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
@@ -19,7 +21,6 @@ from starlette.status import (
     HTTP_422_UNPROCESSABLE_ENTITY,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
-from structlog import get_logger
 
 from app.apdapter.orm import get_session
 from app.application.admin.router import admin_router
@@ -35,10 +36,12 @@ from app.common.exception import (
 from app.common.schema import AccessTokenClaims
 from app.common.type import UserTypeEnum
 from app.config.config import get_settings
+from app.config.logger import setup_logger
 from app.utils.jwt import create_access_token
 from app.utils.string import camelize
 
-log = get_logger()
+setup_logger()
+log = structlog.get_logger()
 
 settings = get_settings()
 if settings.sentry_dsn and settings.deployment_environment not in ("local", "test"):
@@ -166,6 +169,11 @@ async def add_process_time_header(request: Request, call_next):
     path_and_query = parsed_url.path
     if parsed_url.query:
         path_and_query += f"?{parsed_url.query}"
+
+    trace_id = str(uuid4())
+    request.state.trace_id = trace_id
+    structlog.contextvars.clear_contextvars()
+    structlog.contextvars.bind_contextvars(trace_id=trace_id)
 
     # 요청 파라미터 로깅
     log.info(f"Request[{request.method} {path_and_query}] body: {dict(request.query_params)}")
