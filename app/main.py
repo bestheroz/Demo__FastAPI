@@ -100,6 +100,31 @@ app.add_middleware(
     expose_headers=["Content-Disposition"],
 )
 
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    # URL에서 경로와 쿼리 파라미터만 추출
+    parsed_url = urlparse(str(request.url))
+    path_and_query = parsed_url.path
+    if parsed_url.query:
+        path_and_query += f"?{parsed_url.query}"
+
+    trace_id = str(uuid4())
+    request.state.trace_id = trace_id
+    structlog.contextvars.clear_contextvars()
+    structlog.contextvars.bind_contextvars(trace_id=trace_id)
+
+    # 요청 파라미터 로깅
+    log.info(f"Request[{request.method} {path_and_query}] body: {dict(request.query_params)}")
+
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    process_time = time.perf_counter() - start_time
+    log.info(f"Response[{request.method} {path_and_query}] status={response.status_code}, time: {process_time:.2f}ms")
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
+
+
 app.include_router(notice_router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
 app.include_router(user_router, prefix="/api")
@@ -160,30 +185,6 @@ def handle_invalid_authentication_exception(_request: Request, exc: SystemExcept
         status_code=HTTP_500_INTERNAL_SERVER_ERROR,
         content=jsonable_encoder(exc),
     )
-
-
-@app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
-    # URL에서 경로와 쿼리 파라미터만 추출
-    parsed_url = urlparse(str(request.url))
-    path_and_query = parsed_url.path
-    if parsed_url.query:
-        path_and_query += f"?{parsed_url.query}"
-
-    trace_id = str(uuid4())
-    request.state.trace_id = trace_id
-    structlog.contextvars.clear_contextvars()
-    structlog.contextvars.bind_contextvars(trace_id=trace_id)
-
-    # 요청 파라미터 로깅
-    log.info(f"Request[{request.method} {path_and_query}] body: {dict(request.query_params)}")
-
-    start_time = time.perf_counter()
-    response = await call_next(request)
-    process_time = time.perf_counter() - start_time
-    log.info(f"Response[{request.method} {path_and_query}] status={response.status_code}, time: {process_time:.2f}ms")
-    response.headers["X-Process-Time"] = str(process_time)
-    return response
 
 
 @app.get("/health/liveness", include_in_schema=False)
