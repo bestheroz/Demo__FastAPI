@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, Query, status
 
 from app.apdapter.auth import AuthorityChecker, SuperManagerOnly, get_admin_id, get_operator
 from app.application.admin.command import (
@@ -127,8 +127,9 @@ async def _update_admin(
 async def _change_password(
     admin_id: int,
     payload: AdminChangePassword,
+    x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> AdminResponse:
-    return await change_password(admin_id, payload)
+    return await change_password(admin_id, payload, x_operator)
 
 
 @admin_router.delete(
@@ -142,8 +143,9 @@ async def _change_password(
 )
 async def _logout(
     x_admin_id: Annotated[int, Depends(get_admin_id)],
+    background_tasks: BackgroundTasks,
 ) -> None:
-    await logout(x_admin_id)
+    background_tasks.add_task(logout, x_admin_id)
 
 
 @admin_router.delete(

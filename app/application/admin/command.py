@@ -36,10 +36,10 @@ async def create_admin(
     operator_id: int,
 ) -> AdminResponse:
     with get_uow() as uow, uow.transaction():
-        admin = uow.repository.session.scalar(
-            select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False)
-        )
-        if admin:
+        if (
+            uow.repository.session.scalar(select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False))
+            is not None
+        ):
             raise RequestException400(Code.ALREADY_JOINED_ACCOUNT)
 
         admin = Admin.new(data, operator_id)
@@ -60,6 +60,11 @@ async def update_admin(
             raise RequestException400(Code.CANNOT_UPDATE_YOURSELF)
         if admin.manager_flag != data.manager_flag and operator.manager_flag is False:
             raise RequestException400(Code.UNKNOWN_AUTHORITY)
+        if (
+            uow.repository.session.scalar(select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False))
+            is not None
+        ):
+            raise RequestException400(Code.ALREADY_JOINED_ACCOUNT)
 
         admin.update(data, operator.id)
         return admin.on_updated()
@@ -82,6 +87,7 @@ async def remove_admin(
 async def change_password(
     admin_id: int,
     data: AdminChangePassword,
+    operator: Operator,
 ) -> AdminResponse:
     with get_uow() as uow, uow.transaction():
         admin = uow.repository.get(admin_id)
@@ -95,7 +101,7 @@ async def change_password(
         if data.old_password.get_secret_value() == data.new_password.get_secret_value():
             raise RequestException400(Code.CHANGE_TO_SAME_PASSWORD)
 
-        admin.change_password(data.new_password.get_secret_value())
+        admin.change_password(data.new_password.get_secret_value(), operator)
         return admin.on_password_changed()
 
 

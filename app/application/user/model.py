@@ -109,7 +109,7 @@ class User(IdCreatedUpdated, Base):
             self.change_password_at = now
 
     def change_password(self, data: UserChangePassword, operator: Operator):
-        if verify_password(data.old_password.get_secret_value(), self.password):
+        if verify_password(data.old_password.get_secret_value(), self.password) is False:
             raise RequestException400(Code.INVALID_PASSWORD)
 
         now = utcnow()

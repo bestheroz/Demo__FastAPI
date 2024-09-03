@@ -17,7 +17,7 @@ from app.application.admin.schema import (
 )
 from app.common.exception import SystemException500
 from app.common.model import IdCreatedUpdated
-from app.common.schema import Token
+from app.common.schema import Operator, Token
 from app.common.type import AuthorityEnum, UserTypeEnum
 from app.utils.datetime_utils import utcnow
 from app.utils.jwt import create_access_token, create_refresh_token
@@ -99,11 +99,13 @@ class Admin(IdCreatedUpdated, Base):
             self.password = get_password_hash(data.password.get_secret_value())
             self.change_password_at = now
 
-    def change_password(self, password: str):
+    def change_password(self, password: str, operator: Operator):
         now = utcnow()
         self.password = get_password_hash(password)
         self.change_password_at = now
         self.updated_at = now
+        self.updated_by_id = operator.id
+        self.updated_object_type = operator.type
 
     def remove(self, operator_id: int):
         now = utcnow()

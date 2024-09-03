@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, Query, status
 
 from app.apdapter.auth import AuthorityChecker, get_operator, get_user_id
 from app.application.user.command import (
@@ -127,9 +127,6 @@ async def _update_user(
 @user_router.patch(
     "/v1/users/{user_id}/password",
     name="비밀번호 변경",
-    dependencies=[
-        Depends(AuthorityChecker([AuthorityEnum.USER_EDIT])),
-    ],
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def _change_password(
@@ -138,6 +135,19 @@ async def _change_password(
     x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> None:
     await change_password(user_id, data, x_operator)
+
+
+@user_router.delete(
+    "/v1/users/logout",
+    name="유저 로그아웃",
+    description="*리플래시 토큰*을 삭제합니다.",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(AuthorityChecker()),
+    ],
+)
+async def _logout(x_user_id: Annotated[int, Depends(get_user_id)], background_tasks: BackgroundTasks) -> None:
+    background_tasks.add_task(logout, x_user_id)
 
 
 @user_router.delete(
@@ -153,18 +163,3 @@ async def _remove_user(
     x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> None:
     await remove_user(user_id, x_operator)
-
-
-@user_router.delete(
-    "/v1/users/logout",
-    name="유저 로그아웃",
-    description="*리플래시 토큰*을 삭제합니다.",
-    status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[
-        Depends(AuthorityChecker()),
-    ],
-)
-async def _logout(
-    x_user_id: Annotated[int, Depends(get_user_id)],
-) -> None:
-    await logout(x_user_id)

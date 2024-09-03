@@ -16,3 +16,4 @@ class Code(StrEnum):
     UNJOINED_ACCOUNT = "가입되지 않은 계정"
     CHANGE_TO_SAME_PASSWORD = "이전과 동일한 비밀번호로 변경 불가능"
     EXPIRED_TOKEN = "만료된 토큰 정보"
+    CANNOT_CHANGE_OTHERS_PASSWORD = "다른 사용자의 비밀번호 변경 불가능"
