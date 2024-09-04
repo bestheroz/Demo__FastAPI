@@ -2,7 +2,7 @@ create table notice
 (
     id       bigint auto_increment
         primary key,
-    title     text  not null,
+    title     varchar(200)  not null,
     content     text  not null,
 
     use_flag tinyint    not null,
