@@ -145,9 +145,10 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
         status_code=HTTP_422_UNPROCESSABLE_ENTITY,
         content=jsonable_encoder(
             {
+                "code": Code.INVALID_PARAMETER,
                 "message": "\n".join(
                     [f"{x['loc'][1] if len(x['loc']) > 1 else x['loc'][0]}: {x['msg']}" for x in details]
-                )
+                ),
             }
         ),
     )
