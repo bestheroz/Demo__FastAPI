@@ -28,5 +28,5 @@ WORKDIR /opt/code
 COPY ./dotenvs dotenvs/
 COPY ./app app/
 
-ENV PORT=8000
+ENV PORT=8080
 CMD exec uvicorn --port=$PORT --host 0.0.0.0 app.main:app
