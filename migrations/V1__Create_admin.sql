@@ -20,10 +20,10 @@ create table admin
     removed_at timestamp,
 
     created_at timestamp not null,
-    created_by_id bigint not null,
+    created_object_id bigint not null,
     created_object_type varchar(10) not null,
     updated_at timestamp not null,
-    updated_by_id bigint not null,
+    updated_object_id bigint not null,
     updated_object_type varchar(10) not null
 ) default charset = utf8mb4
     collate = utf8mb4_general_ci;
@@ -32,7 +32,7 @@ create table admin
 INSERT INTO admin (id, name, use_flag, manager_flag,
 login_id, password,
 authorities, joined_at, removed_flag,
-created_at, created_by_id, created_object_type, updated_at, updated_by_id, updated_object_type)
+created_at, created_object_id, created_object_type, updated_at, updated_object_id, updated_object_type)
 VALUES (1, '개발자', 1, 1,
 'developer', '$2b$12$HbX5j99YnnKs8zWC/LokB.kyujREbh.kQ9sTNacD/hbEfm8eIP7lm',
 '[]', now(), 0,

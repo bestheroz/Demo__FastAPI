@@ -23,20 +23,20 @@ class Notice(IdCreatedUpdated, Base):
 
     created_by_admin: Mapped["Admin"] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
-        primaryjoin="foreign(Notice.created_by_id) == remote(Admin.id)",
+        primaryjoin="foreign(Notice.created_object_id) == remote(Admin.id)",
     )
     updated_by_admin: Mapped["Admin"] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
-        primaryjoin="foreign(Notice.updated_by_id) == remote(Admin.id)",
+        primaryjoin="foreign(Notice.updated_object_id) == remote(Admin.id)",
     )
 
     created_by_user: Mapped["User"] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
-        primaryjoin="foreign(Notice.created_by_id) == remote(User.id)",
+        primaryjoin="foreign(Notice.created_object_id) == remote(User.id)",
     )
     updated_by_user: Mapped["User"] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
-        primaryjoin="foreign(Notice.updated_by_id) == remote(User.id)",
+        primaryjoin="foreign(Notice.updated_object_id) == remote(User.id)",
     )
 
     @property
@@ -61,10 +61,10 @@ class Notice(IdCreatedUpdated, Base):
         return Notice(
             **data.model_dump(),
             created_at=now,
-            created_by_id=operator_id,
+            created_object_id=operator_id,
             created_object_type=UserTypeEnum.admin,
             updated_at=now,
-            updated_by_id=operator_id,
+            updated_object_id=operator_id,
             updated_object_type=UserTypeEnum.admin,
             removed_flag=False,
         )
@@ -75,7 +75,7 @@ class Notice(IdCreatedUpdated, Base):
         self.content = data.content
         self.use_flag = data.use_flag
         self.updated_at = now
-        self.updated_by_id = operator_id
+        self.updated_object_id = operator_id
         self.updated_object_type = UserTypeEnum.admin
 
     def remove(self, operator_id: int):
@@ -83,7 +83,7 @@ class Notice(IdCreatedUpdated, Base):
         self.removed_flag = True
         self.removed_at = now
         self.updated_at = now
-        self.updated_by_id = operator_id
+        self.updated_object_id = operator_id
         self.updated_object_type = UserTypeEnum.admin
 
     def on_created(self) -> NoticeResponse:

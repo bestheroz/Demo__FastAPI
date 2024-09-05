@@ -30,12 +30,6 @@ class UserResponse(IdCreatedUpdatedDto, UserBase):
     change_password_at: AwareDatetime | None = Field(None, description="비밀번호 변경 일시")
 
 
-class UserSimple(Schema):
-    id: int = Field(..., description="ID(KEY)")
-    login_id: str = Field(..., description="로그인 아이디")
-    name: str = Field(..., description="유저 이름(닉네임)")
-
-
 class UserLogin(Schema):
     login_id: str = Field(..., description="로그인 아이디", examples=["developer"])
     password: SecretStr = Field(

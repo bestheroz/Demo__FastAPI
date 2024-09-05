@@ -62,11 +62,11 @@ class IdUpdatedDto(UpdatedDto):
     id: int = Field(..., description="ID(KEY)")
 
 
-class CreatedUpdateDto(CreatedDto, UpdatedDto):
+class CreatedUpdatedDto(CreatedDto, UpdatedDto):
     pass
 
 
-class IdCreatedUpdatedDto(CreatedUpdateDto):
+class IdCreatedUpdatedDto(CreatedUpdatedDto):
     id: int = Field(..., description="ID(KEY)")
 
 

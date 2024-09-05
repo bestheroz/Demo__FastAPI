@@ -61,7 +61,7 @@ if settings.deployment_environment in ("local", "sandbox", "qa"):
     app = FastAPI(
         default_response_class=ORJSONResponse,
         title="Demo API",
-        docs_url="/docs",
+        docs_url="/api-docs",
         description="### 로그인 후 사용자 인증을 위해 헤더에 `Authorization`, `AuthorizationR` 값이 필요함\n\n"
         "토큰값을 헤더에서 전달할때는 scheme 정보인 `Bearer ` 를 반드시 붙여줘야 한다. "
         "(예: 토큰이 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9 라면 "

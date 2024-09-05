@@ -7,7 +7,7 @@ from urllib.parse import quote
 
 from orjson import dumps, loads
 from pydantic import AwareDatetime
-from sqlalchemy import DateTime, ForeignKey, TypeDecorator, create_engine
+from sqlalchemy import DateTime, TypeDecorator, create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Session, mapped_column, sessionmaker
 from structlog import get_logger
@@ -132,12 +132,4 @@ mapped_updated_at = Annotated[
         "updated_at",
         TZDateTime,
     ),
-]
-mapped_created_by_id = Annotated[
-    int,
-    mapped_column(ForeignKey("admin.id")),
-]
-mapped_updated_by_id = Annotated[
-    int,
-    mapped_column(ForeignKey("admin.id")),
 ]

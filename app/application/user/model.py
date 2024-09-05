@@ -38,20 +38,20 @@ class User(IdCreatedUpdated, Base):
 
     created_by_admin: Mapped["Admin"] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
-        primaryjoin="foreign(User.created_by_id) == remote(Admin.id)",
+        primaryjoin="foreign(User.created_object_id) == remote(Admin.id)",
     )
     updated_by_admin: Mapped["Admin"] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
-        primaryjoin="foreign(User.updated_by_id) == remote(Admin.id)",
+        primaryjoin="foreign(User.updated_object_id) == remote(Admin.id)",
     )
 
     created_by_user: Mapped["User"] = relationship(
         viewonly=True,
-        primaryjoin="foreign(User.created_by_id) == remote(User.id)",
+        primaryjoin="foreign(User.created_object_id) == remote(User.id)",
     )
     updated_by_user: Mapped["User"] = relationship(
         viewonly=True,
-        primaryjoin="foreign(User.updated_by_id) == remote(User.id)",
+        primaryjoin="foreign(User.updated_object_id) == remote(User.id)",
     )
 
     @property
@@ -88,10 +88,10 @@ class User(IdCreatedUpdated, Base):
             joined_at=now,
             removed_flag=False,
             created_at=now,
-            created_by_id=operator.id,
+            created_object_id=operator.id,
             created_object_type=operator.type,
             updated_at=now,
-            updated_by_id=operator.id,
+            updated_object_id=operator.id,
             updated_object_type=operator.type,
         )
 
@@ -102,7 +102,7 @@ class User(IdCreatedUpdated, Base):
         self.authorities = data.authorities  # type: ignore
         self.login_id = data.login_id
         self.updated_at = now
-        self.updated_by_id = operator.id
+        self.updated_object_id = operator.id
         self.updated_object_type = operator.type
         if data.password and data.password.get_secret_value():
             self.password = get_password_hash(data.password.get_secret_value())
@@ -116,7 +116,7 @@ class User(IdCreatedUpdated, Base):
         self.password = get_password_hash(data.new_password.get_secret_value())
         self.change_password_at = now
         self.updated_at = now
-        self.updated_by_id = operator.id
+        self.updated_object_id = operator.id
         self.updated_object_type = operator.type
 
     def remove(self, operator: Operator):
@@ -124,7 +124,7 @@ class User(IdCreatedUpdated, Base):
         self.removed_flag = True
         self.removed_at = now
         self.updated_at = now
-        self.updated_by_id = operator.id
+        self.updated_object_id = operator.id
         self.updated_object_type = operator.type
 
     def renew_token(self):

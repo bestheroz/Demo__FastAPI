@@ -48,13 +48,13 @@ class Admin(IdCreatedUpdated, Base):
         lazy="joined",
         innerjoin=True,
         viewonly=True,
-        primaryjoin="foreign(Admin.created_by_id) == remote(Admin.id)",
+        primaryjoin="foreign(Admin.created_object_id) == remote(Admin.id)",
     )
     updated_by: Mapped["Admin"] = relationship(
         lazy="joined",
         innerjoin=True,
         viewonly=True,
-        primaryjoin="foreign(Admin.updated_by_id) == remote(Admin.id)",
+        primaryjoin="foreign(Admin.updated_object_id) == remote(Admin.id)",
     )
 
     @property
@@ -78,10 +78,10 @@ class Admin(IdCreatedUpdated, Base):
             removed_flag=False,
             joined_at=now,
             created_at=now,
-            created_by_id=operator_id,
+            created_object_id=operator_id,
             created_object_type=UserTypeEnum.admin,
             updated_at=now,
-            updated_by_id=operator_id,
+            updated_object_id=operator_id,
             updated_object_type=UserTypeEnum.admin,
         )
 
@@ -93,7 +93,7 @@ class Admin(IdCreatedUpdated, Base):
         self._authorities = data.authorities  # type: ignore
         self.manager_flag = data.manager_flag
         self.updated_at = now
-        self.updated_by_id = operator_id
+        self.updated_object_id = operator_id
         self.updated_object_type = UserTypeEnum.admin
         if data.password and data.password.get_secret_value():
             self.password = get_password_hash(data.password.get_secret_value())
@@ -104,7 +104,7 @@ class Admin(IdCreatedUpdated, Base):
         self.password = get_password_hash(password)
         self.change_password_at = now
         self.updated_at = now
-        self.updated_by_id = operator.id
+        self.updated_object_id = operator.id
         self.updated_object_type = operator.type
 
     def remove(self, operator_id: int):
@@ -112,7 +112,7 @@ class Admin(IdCreatedUpdated, Base):
         self.removed_flag = True
         self.removed_at = now
         self.updated_at = now
-        self.updated_by_id = operator_id
+        self.updated_object_id = operator_id
         self.updated_object_type = UserTypeEnum.admin
 
     def renew_token(self):
