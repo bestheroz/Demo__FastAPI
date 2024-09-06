@@ -2,7 +2,7 @@ from pydantic.alias_generators import to_snake
 from sqlalchemy import Select, desc
 
 from app.apdapter.orm import session_scope
-from app.common.schema import ListApiResult
+from app.common.schema import ListResult
 
 
 async def get_pagination_list(
@@ -12,7 +12,7 @@ async def get_pagination_list(
     initial_query: Select,
     count_query: Select,
     ordering: str | None = None,
-) -> ListApiResult:
+) -> ListResult:
     async def _get_pagination_list():
         query = initial_query
 
@@ -33,4 +33,4 @@ async def get_pagination_list(
         obj_data_list = await _get_pagination_list()
         total_obj = session.scalar(count_query)
 
-        return ListApiResult[schema_cls](items=obj_data_list, total=total_obj or 0, page=page, page_size=page_size)
+        return ListResult[schema_cls](items=obj_data_list, total=total_obj or 0, page=page, page_size=page_size)

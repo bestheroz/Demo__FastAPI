@@ -24,7 +24,7 @@ from app.application.user.schema import (
     UserResponse,
     UserUpdate,
 )
-from app.common.schema import ListApiResult, Operator, Token
+from app.common.schema import ListResult, Operator, Token
 from app.common.type import AuthorityEnum
 
 user_router = APIRouter(tags=["유저"])
@@ -42,7 +42,7 @@ async def _get_users(
     page_size: Annotated[int, Query(example=10)],
     search: Annotated[str | None, Query()] = None,
     ids: Annotated[set[int] | None, Query()] = None,
-) -> ListApiResult[UserResponse]:
+) -> ListResult[UserResponse]:
     return await get_users(
         page,
         page_size,

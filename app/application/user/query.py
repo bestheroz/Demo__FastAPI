@@ -8,7 +8,7 @@ from app.application.user.schema import (
 )
 from app.common.code import Code
 from app.common.exception import RequestException400
-from app.common.schema import ListApiResult
+from app.common.schema import ListResult
 from app.utils.pagination import get_pagination_list
 
 
@@ -18,7 +18,7 @@ async def get_users(
     ordering: str | None = None,
     search: str | None = None,
     ids: set[int] | None = None,
-) -> ListApiResult[UserResponse]:
+) -> ListResult[UserResponse]:
     initial_query = select(User).filter_by(removed_flag=False)
     count_query = select(count(User.id)).filter_by(removed_flag=False)
 

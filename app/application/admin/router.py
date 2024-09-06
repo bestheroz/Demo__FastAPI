@@ -21,7 +21,7 @@ from app.application.admin.schema import (
     AdminResponse,
     AdminUpdate,
 )
-from app.common.schema import ListApiResult, Operator, Token
+from app.common.schema import ListResult, Operator, Token
 from app.common.type import AuthorityEnum
 
 admin_router = APIRouter(tags=["관리자"])
@@ -37,7 +37,7 @@ admin_router = APIRouter(tags=["관리자"])
 async def _get_admins(
     page: Annotated[int, Query(example=1)],
     page_size: Annotated[int, Query(example=10)],
-) -> ListApiResult[AdminResponse]:
+) -> ListResult[AdminResponse]:
     return await get_admins(
         page,
         page_size,

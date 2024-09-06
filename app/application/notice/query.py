@@ -6,7 +6,7 @@ from app.application.notice.model import Notice
 from app.application.notice.schema import NoticeResponse
 from app.common.code import Code
 from app.common.exception import RequestException400
-from app.common.schema import ListApiResult
+from app.common.schema import ListResult
 from app.utils.pagination import get_pagination_list
 
 
@@ -16,7 +16,7 @@ async def get_notices(
     ordering: str | None = None,
     search: str | None = None,
     use_flag: bool | None = None,
-) -> ListApiResult[NoticeResponse]:
+) -> ListResult[NoticeResponse]:
     initial_query = select(Notice).filter_by(removed_flag=False)
     count_query = select(count(Notice.id)).filter_by(removed_flag=False)
 

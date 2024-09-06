@@ -6,7 +6,7 @@ from app.apdapter.auth import AuthorityChecker, get_admin_id
 from app.application.notice.command import create_notice, remove_notice, update_notice
 from app.application.notice.query import get_notice, get_notices
 from app.application.notice.schema import NoticeCreate, NoticeResponse
-from app.common.schema import ListApiResult
+from app.common.schema import ListResult
 from app.common.type import AuthorityEnum
 
 notice_router = APIRouter(tags=["공지사항"])
@@ -20,7 +20,7 @@ async def _get_notices(
     page: Annotated[int, Query(example=1)],
     page_size: Annotated[int, Query(example=10)],
     search: Annotated[str | None, Query()] = None,
-) -> ListApiResult[NoticeResponse]:
+) -> ListResult[NoticeResponse]:
     return await get_notices(
         page,
         page_size,

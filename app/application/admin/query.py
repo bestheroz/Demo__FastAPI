@@ -6,11 +6,11 @@ from app.application.admin.model import Admin
 from app.application.admin.schema import AdminResponse
 from app.common.code import Code
 from app.common.exception import RequestException400
-from app.common.schema import ListApiResult
+from app.common.schema import ListResult
 from app.utils.pagination import get_pagination_list
 
 
-async def get_admins(page: int, page_size: int, ordering: str | None = None) -> ListApiResult[AdminResponse]:
+async def get_admins(page: int, page_size: int, ordering: str | None = None) -> ListResult[AdminResponse]:
     initial_query = select(Admin).filter_by(removed_flag=False)
     count_query = select(count(Admin.id)).filter_by(removed_flag=False)
 

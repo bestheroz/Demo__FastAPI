@@ -16,7 +16,7 @@ class Schema(BaseModel):
     )
 
 
-class ListApiResult(Schema, Generic[T]):
+class ListResult(Schema, Generic[T]):
     page: int
     page_size: int
     total: int
