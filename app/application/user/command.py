@@ -46,7 +46,12 @@ async def update_user(user_id: int, data: UserUpdate, operator: Operator) -> Use
             raise RequestException400(Code.UNKNOWN_USER)
 
         if (
-            uow.repository.session.scalar(select(User).filter_by(login_id=data.login_id).filter_by(removed_flag=False))
+            uow.repository.session.scalar(
+                select(User)
+                .filter_by(login_id=data.login_id)
+                .filter_by(removed_flag=False)
+                .filter(User.id.is_not(user_id))
+            )
             is not None
         ):
             raise RequestException400(Code.ALREADY_JOINED_ACCOUNT)

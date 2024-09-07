@@ -61,7 +61,12 @@ async def update_admin(
         if admin.manager_flag != data.manager_flag and operator.manager_flag is False:
             raise RequestException400(Code.UNKNOWN_AUTHORITY)
         if (
-            uow.repository.session.scalar(select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False))
+            uow.repository.session.scalar(
+                select(Admin)
+                .filter_by(login_id=data.login_id)
+                .filter_by(removed_flag=False)
+                .filter(Admin.id.is_not(admin_id))
+            )
             is not None
         ):
             raise RequestException400(Code.ALREADY_JOINED_ACCOUNT)
