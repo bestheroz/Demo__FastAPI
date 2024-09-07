@@ -101,8 +101,6 @@ async def login_user(
             log.warning("password not match")
             raise RequestException400(Code.UNKNOWN_USER)
 
-        uow.repository.add_seen(user)
-
         user.renew_token()
 
         return user.on_logged_in()

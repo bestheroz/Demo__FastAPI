@@ -96,7 +96,7 @@ async def change_password(
 ) -> AdminResponse:
     with get_uow() as uow, uow.transaction():
         admin = uow.repository.get(admin_id)
-        if admin is None:
+        if admin is None or admin.removed_flag is True:
             raise RequestException400(Code.UNKNOWN_ADMIN)
 
         if admin.password and not verify_password(data.old_password.get_secret_value(), admin.password):
@@ -126,8 +126,6 @@ async def login_admin(
         if verify_password(data.password.get_secret_value(), admin.password) is False:
             log.warning("password not match")
             raise RequestException400(Code.UNKNOWN_ADMIN)
-
-        uow.repository.add_seen(admin)
 
         admin.renew_token()
 
