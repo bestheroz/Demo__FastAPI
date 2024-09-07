@@ -27,6 +27,9 @@ create table user
 ) default charset = utf8mb4
     collate = utf8mb4_general_ci;
 
+ALTER TABLE user
+ADD INDEX idx_login_id_on_user (login_id);
+
 insert into user (id, name, use_flag, login_id, password,
 authorities, removed_flag, additional_info,
 created_at, created_object_id, created_object_type, updated_at, updated_object_id, updated_object_type)

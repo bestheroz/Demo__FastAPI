@@ -28,6 +28,9 @@ create table admin
 ) default charset = utf8mb4
     collate = utf8mb4_general_ci;
 
+ALTER TABLE admin
+ADD INDEX idx_login_id_on_admin (login_id);
+
 -- 초기 세팅를 위해 INSERT
 INSERT INTO admin (id, name, use_flag, manager_flag,
 login_id, password,
