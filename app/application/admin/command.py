@@ -65,7 +65,7 @@ async def update_admin(
                 select(Admin)
                 .filter_by(login_id=data.login_id)
                 .filter_by(removed_flag=False)
-                .filter(Admin.id.is_not(admin_id))
+                .filter(Admin.id != admin_id)
             )
             is not None
         ):
@@ -168,9 +168,9 @@ async def logout(account_id: int):
         admin.logout()
 
 
-async def check_login_id(login_id: str) -> bool:
+async def check_login_id(login_id: str, admin_id: int | None) -> bool:
     with get_uow() as uow:
-        return (
-            uow.repository.session.scalar(select(Admin).filter_by(login_id=login_id).filter_by(removed_flag=False))
-            is None
-        )
+        query = select(Admin).filter_by(login_id=login_id).filter_by(removed_flag=False)
+        if admin_id:
+            query = query.filter(Admin.id != admin_id)
+        return uow.repository.session.scalar(query) is None

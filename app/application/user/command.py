@@ -47,10 +47,7 @@ async def update_user(user_id: int, data: UserUpdate, operator: Operator) -> Use
 
         if (
             uow.repository.session.scalar(
-                select(User)
-                .filter_by(login_id=data.login_id)
-                .filter_by(removed_flag=False)
-                .filter(User.id.is_not(user_id))
+                select(User).filter_by(login_id=data.login_id).filter_by(removed_flag=False).filter(User.id != user_id)
             )
             is not None
         ):
@@ -142,9 +139,9 @@ async def logout(account_id: int):
         user.logout()
 
 
-async def check_login_id(login_id: str) -> bool:
+async def check_login_id(login_id: str, user_id: int | None) -> bool:
     with get_uow() as uow:
-        return (
-            uow.repository.session.scalar(select(User).filter_by(login_id=login_id).filter_by(removed_flag=False))
-            is None
-        )
+        query = select(User).filter_by(login_id=login_id).filter_by(removed_flag=False)
+        if user_id:
+            query = query.filter(User.id != user_id)
+        return uow.repository.session.scalar(query) is None
