@@ -162,7 +162,7 @@ async def logout(account_id: int):
         admin = uow.repository.get(account_id)
         if admin is None:
             raise RequestException400(Code.UNKNOWN_ADMIN)
-        admin.sign_out()
+        admin.logout()
 
 
 async def check_login_id(login_id: str) -> bool:

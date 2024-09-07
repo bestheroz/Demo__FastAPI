@@ -131,7 +131,7 @@ class User(IdCreatedUpdated, Base):
         self.token = create_refresh_token(self)
         self.latest_active_at = utcnow()
 
-    def sign_out(self):
+    def logout(self):
         self.token = None
 
     def on_created(self) -> UserResponse:

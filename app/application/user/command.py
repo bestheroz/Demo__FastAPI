@@ -136,7 +136,7 @@ async def logout(account_id: int):
         user = uow.repository.get(account_id)
         if user is None:
             raise RequestException400(Code.UNKNOWN_USER)
-        user.sign_out()
+        user.logout()
 
 
 async def check_login_id(login_id: str) -> bool:
