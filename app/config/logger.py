@@ -32,10 +32,6 @@ class StructLogHandler(logging.Handler):
         log.debug(record.getMessage(), level=record.levelname)
 
 
-# 핸들러 추가
-sql_logger.addHandler(StructLogHandler())
-
-
 logging.basicConfig(
     format="%(message)s",
     level=logging.INFO,
