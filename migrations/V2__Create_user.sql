@@ -15,7 +15,7 @@ create table user
     joined_at timestamp,
     additional_info JSON    null,
 
-    removed_flag tinyint not null,
+    removed_flag     tinyint  default 0 not null,
     removed_at timestamp,
 
     created_at timestamp not null,
@@ -28,7 +28,7 @@ create table user
     collate = utf8mb4_general_ci;
 
 ALTER TABLE user
-ADD INDEX idx_login_id_on_user (login_id);
+    ADD INDEX idx_login_id_on_user (login_id);
 
 insert into user (id, name, use_flag, login_id, password,
 authorities, removed_flag, additional_info,

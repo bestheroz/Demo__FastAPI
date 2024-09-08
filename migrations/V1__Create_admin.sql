@@ -16,7 +16,7 @@ create table admin
     authorities JSON  not null,
     joined_at timestamp,
 
-    removed_flag tinyint    not null,
+    removed_flag     tinyint  default 0 not null,
     removed_at timestamp,
 
     created_at timestamp not null,
