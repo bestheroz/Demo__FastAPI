@@ -49,8 +49,8 @@ async def _get_admins(
     "/v1/admins/check-login-id",
     name="로그인 아이디 중복 확인",
 )
-async def _check_login_id(login_id: Annotated[str, Query()], user_id: Annotated[int | None, Query()] = None) -> bool:
-    return await check_login_id(login_id, user_id)
+async def _check_login_id(login_id: Annotated[str, Query()], admin_id: Annotated[int | None, Query()] = None) -> bool:
+    return await check_login_id(login_id, admin_id)
 
 
 @admin_router.get(
