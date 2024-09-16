@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = "^0.114.0"
+fastapi = "^0.114.2"
 pydantic = {version = "*", extras = ["email"]}
 orjson = "^3.10.7"
 uvicorn = "^0.30.6"
@@ -29,7 +29,7 @@ cryptography = "^43.0.1"
 [tool.poetry.group.dev.dependencies]
 pyright = "^1.1.379"
 mypy = "^1.11.2"
-ruff = "^0.6.4"
+ruff = "^0.6.5"
 
 [tool.poetry.group.types.dependencies]
 types-python-jose = "^3.3.4.20240106"
