@@ -246,13 +246,13 @@ typecheck = ["mypy"]
 
 [[package]]
 name = "botocore-stubs"
-version = "1.35.21"
+version = "1.35.22"
 description = "Type annotations and code completion for botocore"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore_stubs-1.35.21-py3-none-any.whl", hash = "sha256:ae3a0810110e831bf29f73772fbd137f37444e12b0945583cd18e0a12d809e6f"},
-    {file = "botocore_stubs-1.35.21.tar.gz", hash = "sha256:4859206b5766907ecfeff42c25d6596ffaa0b0528b0b41d7eaa081f59dc591fc"},
+    {file = "botocore_stubs-1.35.22-py3-none-any.whl", hash = "sha256:dae8cc433df3044ece464f4985e67a154bab51fd042757d0c59e4a9ea26d0376"},
+    {file = "botocore_stubs-1.35.22.tar.gz", hash = "sha256:14dec6b00d974dce4747d6917a791bcea0d8efd1c8959821d8ce6ca69ce40d70"},
 ]
 
 [package.dependencies]
@@ -1220,13 +1220,13 @@ rsa = ["cryptography"]
 
 [[package]]
 name = "pyright"
-version = "1.1.380"
+version = "1.1.381"
 description = "Command line wrapper for pyright"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.380-py3-none-any.whl", hash = "sha256:a6404392053d8848bacc7aebcbd9d318bb46baf1a1a000359305481920f43879"},
-    {file = "pyright-1.1.380.tar.gz", hash = "sha256:e6ceb1a5f7e9f03106e0aa1d6fbb4d97735a5e7ffb59f3de6b2db590baf935b2"},
+    {file = "pyright-1.1.381-py3-none-any.whl", hash = "sha256:5dc0aa80a265675d36abab59c674ae01dbe476714f91845b61b841d34aa99081"},
+    {file = "pyright-1.1.381.tar.gz", hash = "sha256:314cf0c1351c189524fb10c7ac20688ecd470e8cc505c394d642c9c80bf7c3a5"},
 ]
 
 [package.dependencies]
