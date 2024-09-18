@@ -7,11 +7,11 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = "^0.114.2"
+fastapi = "^0.115.0"
 pydantic = {version = "*", extras = ["email"]}
 orjson = "^3.10.7"
 uvicorn = "^0.30.6"
-sqlalchemy = "^2.0.34"
+sqlalchemy = "^2.0.35"
 greenlet = "^3.0.3"
 python-dotenv = "^1.0.1"
 uvloop = "^0.20.0"
@@ -34,7 +34,7 @@ ruff = "^0.6.5"
 [tool.poetry.group.types.dependencies]
 types-python-jose = "^3.3.4.20240106"
 types-aiobotocore = "^2.14.0"
-types-openpyxl = "^3.1.5.20240822"
+types-openpyxl = "^3.1.5.20240918"
 pandas-stubs = "^2.2.2.240807"
 
 
