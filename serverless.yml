@@ -18,7 +18,6 @@ custom:
 provider:
   name: aws
   profile: default
-  runtime: python3.12
   region: ${self:custom.env.AWS_PROFILE_REGION}
   stage: ${opt:stage, 'sandbox'}
   apiGateway:

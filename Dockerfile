@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/python:3.12-bookworm as builder
+FROM public.ecr.aws/docker/library/python:3.13-bookworm as builder
 LABEL maintainer="joony.kim <bestheroz@gmail.com>"
 
 ENV POETRY_VERSION=1.8.3
@@ -13,7 +13,7 @@ COPY poetry.lock pyproject.toml ./
 RUN poetry export -f requirements.txt -o requirements.txt --without-hashes \
     && pip install --disable-pip-version-check -r requirements.txt
 
-FROM public.ecr.aws/docker/library/python:3.12-slim-bookworm as runner
+FROM public.ecr.aws/docker/library/python:3.13-slim-bookworm as runner
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.4 /lambda-adapter /opt/extensions/lambda-adapter
 LABEL maintainer="joony.kim <bestheroz@gmail.com>"
 

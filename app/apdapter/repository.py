@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Generic
+from typing import Generic, TypeVar
 
 from sqlalchemy.orm import Session
-from typing_extensions import TypeVar
 
 from app.apdapter.orm import Base
 
