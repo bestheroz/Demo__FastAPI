@@ -97,9 +97,13 @@ class TZDateTime(TypeDecorator, ABC):
         return value
 
     def process_result_value(self, value, dialect):
-        if value is not None:
-            value = value.replace(tzinfo=UTC)
-        return value
+        if not value or value == "0000-00-00 00:00:00":
+            return None
+
+        try:
+            return value.astimezone(UTC)
+        except (ValueError, AttributeError):
+            return value.replace(tzinfo=UTC)
 
 
 def events_getter(self) -> deque[Event]:
