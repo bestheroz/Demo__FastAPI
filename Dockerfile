@@ -29,4 +29,9 @@ COPY ./dotenvs dotenvs/
 COPY ./app app/
 
 ENV PORT=8080
-CMD exec uvicorn --port=$PORT --host 0.0.0.0 app.main:app
+CMD exec uvicorn --port=$PORT --host 0.0.0.0 app.main:app --workers 5
+
+# 권장되는 worker 수 계산
+# allocated_cpu = 2  # k8s에서 할당된 CPU
+# workers = allocated_cpu * 2 + 1  # 일반적인 공식
+# 이 경우 workers = 5가 됨
