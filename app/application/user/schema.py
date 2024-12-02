@@ -8,7 +8,7 @@ class UserBase(Schema):
     login_id: str = Field(..., description="로그인 아이디")
     use_flag: bool = Field(True, description="사용 여부")
     name: str = Field(..., description="유저 이름(닉네임)")
-    authorities: set[AuthorityEnum] = Field([], description="권한 목록")
+    authorities: set[AuthorityEnum] = Field(default_factory=set, description="권한 목록")
 
 
 class UserCreate(UserBase):

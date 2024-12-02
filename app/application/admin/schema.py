@@ -9,7 +9,7 @@ class AdminBase(Schema):
     name: str = Field(..., description="관리자 이름")
     use_flag: bool = Field(True, description="사용 여부")
     manager_flag: bool = Field(..., description="매니저 여부(모든 권한 소유)")
-    authorities: set[AuthorityEnum] = Field([], description="권한 목록")
+    authorities: set[AuthorityEnum] = Field(default_factory=set, description="권한 목록")
 
 
 class AdminCreate(AdminBase):
