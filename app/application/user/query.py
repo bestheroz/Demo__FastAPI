@@ -7,7 +7,7 @@ from app.application.user.schema import (
     UserResponse,
 )
 from app.common.code import Code
-from app.common.exception import RequestException400
+from app.common.exception import BadRequestException400
 from app.common.schema import ListResult
 from app.utils.pagination import get_pagination_list
 
@@ -44,5 +44,5 @@ async def get_user(user_id: int) -> UserResponse:
     with session_scope() as session:
         result = session.scalar(select(User).filter_by(id=user_id).filter_by(removed_flag=False))
         if result is None:
-            raise RequestException400(Code.UNKNOWN_USER)
+            raise BadRequestException400(Code.UNKNOWN_USER)
         return UserResponse.model_validate(result)

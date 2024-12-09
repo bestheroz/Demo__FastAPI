@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 from app.apdapter.orm import Base, TZDateTime
 from app.application.notice.event import NoticeRemoved
 from app.application.notice.schema import NoticeCreate, NoticeResponse
-from app.common.exception import SystemException500
+from app.common.exception import UnknownSystemException500
 from app.common.model import IdCreatedUpdated
 from app.common.type import UserTypeEnum
 from app.utils.datetime_utils import utcnow
@@ -45,7 +45,7 @@ class Notice(IdCreatedUpdated, Base):
             return self.created_by_user
         elif self.created_object_type == UserTypeEnum.admin:
             return self.created_by_admin
-        raise SystemException500()
+        raise UnknownSystemException500()
 
     @property
     def updated_by(self):
@@ -53,7 +53,7 @@ class Notice(IdCreatedUpdated, Base):
             return self.updated_by_user
         elif self.updated_object_type == UserTypeEnum.admin:
             return self.updated_by_admin
-        raise SystemException500()
+        raise UnknownSystemException500()
 
     @staticmethod
     def new(data: NoticeCreate, operator_id: int):
@@ -89,7 +89,7 @@ class Notice(IdCreatedUpdated, Base):
     def on_created(self) -> NoticeResponse:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         event_data = NoticeResponse.model_validate(self)
@@ -98,7 +98,7 @@ class Notice(IdCreatedUpdated, Base):
     def on_updated(self) -> NoticeResponse:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         event_data = NoticeResponse.model_validate(self)
@@ -107,7 +107,7 @@ class Notice(IdCreatedUpdated, Base):
     def on_removed(self) -> NoticeResponse:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         event_data = NoticeResponse.model_validate(self)

@@ -5,7 +5,7 @@ from app.apdapter.orm import session_scope
 from app.application.notice.model import Notice
 from app.application.notice.schema import NoticeResponse
 from app.common.code import Code
-from app.common.exception import RequestException400
+from app.common.exception import BadRequestException400
 from app.common.schema import ListResult
 from app.utils.pagination import get_pagination_list
 
@@ -42,5 +42,5 @@ async def get_notice(notice_id: int) -> NoticeResponse:
     with session_scope() as session:
         result = session.scalar(select(Notice).filter_by(id=notice_id))
         if result is None:
-            raise RequestException400(Code.UNKNOWN_NOTICE)
+            raise BadRequestException400(Code.UNKNOWN_NOTICE)
         return NoticeResponse.model_validate(result)

@@ -15,7 +15,7 @@ from app.application.admin.schema import (
     AdminResponse,
     AdminUpdate,
 )
-from app.common.exception import SystemException500
+from app.common.exception import UnknownSystemException500
 from app.common.model import IdCreatedUpdated
 from app.common.schema import Operator, Token
 from app.common.type import AuthorityEnum, UserTypeEnum
@@ -125,7 +125,7 @@ class Admin(IdCreatedUpdated, Base):
     def on_created(self) -> AdminResponse:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         event_data = AdminResponse.model_validate(self)
@@ -135,7 +135,7 @@ class Admin(IdCreatedUpdated, Base):
     def on_updated(self) -> AdminResponse:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         event_data = AdminResponse.model_validate(self)
@@ -145,7 +145,7 @@ class Admin(IdCreatedUpdated, Base):
     def on_removed(self) -> AdminResponse:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         event_data = AdminResponse.model_validate(self)
@@ -155,12 +155,12 @@ class Admin(IdCreatedUpdated, Base):
     def on_logged_in(self) -> Token:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         self.events.append(AdminLoggedIn(data=(AdminResponse.model_validate(self))))
         if self.token is None:
-            raise SystemException500()
+            raise UnknownSystemException500()
         return Token(
             access_token=create_access_token(self),
             refresh_token=self.token,
@@ -169,7 +169,7 @@ class Admin(IdCreatedUpdated, Base):
     def on_password_changed(self) -> AdminResponse:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         event_data = AdminResponse.model_validate(self)

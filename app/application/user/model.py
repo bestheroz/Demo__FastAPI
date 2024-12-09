@@ -6,7 +6,7 @@ from app.apdapter.orm import Base, TZDateTime
 from app.application.user.event import UserLoggedIn, UserPasswordUpdated, UserRemoved, UserUpdated
 from app.application.user.schema import UserChangePassword, UserCreate, UserResponse, UserUpdate
 from app.common.code import Code
-from app.common.exception import RequestException400, SystemException500
+from app.common.exception import BadRequestException400, UnknownSystemException500
 from app.common.model import IdCreatedUpdated
 from app.common.schema import Operator, Token
 from app.common.type import AuthorityEnum, UserTypeEnum
@@ -64,7 +64,7 @@ class User(IdCreatedUpdated, Base):
             return self.created_by_user
         elif self.created_object_type == UserTypeEnum.admin:
             return self.created_by_admin
-        raise SystemException500()
+        raise UnknownSystemException500()
 
     @property
     def updated_by(self):
@@ -72,7 +72,7 @@ class User(IdCreatedUpdated, Base):
             return self.updated_by_user
         elif self.updated_object_type == UserTypeEnum.admin:
             return self.updated_by_admin
-        raise SystemException500()
+        raise UnknownSystemException500()
 
     @staticmethod
     def new(data: UserCreate, operator: Operator):
@@ -110,7 +110,7 @@ class User(IdCreatedUpdated, Base):
 
     def change_password(self, data: UserChangePassword, operator: Operator):
         if verify_password(data.old_password.get_secret_value(), self.password) is False:
-            raise RequestException400(Code.INVALID_PASSWORD)
+            raise BadRequestException400(Code.INVALID_PASSWORD)
 
         now = utcnow()
         self.password = get_password_hash(data.new_password.get_secret_value())
@@ -137,7 +137,7 @@ class User(IdCreatedUpdated, Base):
     def on_created(self) -> UserResponse:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         event_data = UserResponse.model_validate(self)
@@ -147,7 +147,7 @@ class User(IdCreatedUpdated, Base):
     def on_updated(self) -> UserResponse:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         event_data = UserResponse.model_validate(self)
@@ -157,7 +157,7 @@ class User(IdCreatedUpdated, Base):
     def on_password_updated(self) -> UserResponse:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         event_data = UserResponse.model_validate(self)
@@ -167,7 +167,7 @@ class User(IdCreatedUpdated, Base):
     def on_removed(self) -> UserResponse:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         event_data = UserResponse.model_validate(self)
@@ -177,12 +177,12 @@ class User(IdCreatedUpdated, Base):
     def on_logged_in(self) -> Token:
         session = object_session(self)
         if not session:
-            raise SystemException500()
+            raise UnknownSystemException500()
         session.flush()
 
         self.events.append(UserLoggedIn(data=(UserResponse.model_validate(self))))
         if self.token is None:
-            raise SystemException500()
+            raise UnknownSystemException500()
         return Token(
             access_token=create_access_token(self),
             refresh_token=self.token,

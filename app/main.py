@@ -32,6 +32,9 @@ from app.common.exception import (
     AuthorityException403,
     RequestException400,
     SystemException500,
+    BadRequestException400,
+    ForbiddenException403,
+    UnauthorizedException401,
 )
 from app.common.schema import AccessTokenClaims
 from app.common.type import UserTypeEnum
@@ -154,16 +157,16 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
     )
 
 
-@app.exception_handler(RequestException400)
-def handle_exception_400(_request: Request, exc: RequestException400):
+@app.exception_handler(BadRequestException400)
+def handle_exception_400(_request: Request, exc: BadRequestException400):
     return ORJSONResponse(
         status_code=HTTP_400_BAD_REQUEST,
         content=jsonable_encoder(exc),
     )
 
 
-@app.exception_handler(AuthenticationException401)
-def handle_expired_token_exception(_request: Request, exc: AuthenticationException401):
+@app.exception_handler(UnauthorizedException401)
+def handle_expired_token_exception(_request: Request, exc: UnauthorizedException401):
     return ORJSONResponse(
         status_code=HTTP_401_UNAUTHORIZED,
         content=jsonable_encoder(exc),
@@ -171,16 +174,16 @@ def handle_expired_token_exception(_request: Request, exc: AuthenticationExcepti
     )
 
 
-@app.exception_handler(AuthorityException403)
-def handle_invalid_authority_exception(_request: Request, exc: AuthorityException403):
+@app.exception_handler(ForbiddenException403)
+def handle_invalid_authority_exception(_request: Request, exc: ForbiddenException403):
     return ORJSONResponse(
         status_code=HTTP_403_FORBIDDEN,
         content=jsonable_encoder(exc),
     )
 
 
-@app.exception_handler(SystemException500)
-def handle_invalid_authentication_exception(_request: Request, exc: SystemException500):
+@app.exception_handler(UnknownSystemException500)
+def handle_invalid_authentication_exception(_request: Request, exc: UnknownSystemException500):
     capture_exception(exc)
     return ORJSONResponse(
         status_code=HTTP_500_INTERNAL_SERVER_ERROR,

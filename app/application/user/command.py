@@ -8,7 +8,7 @@ from app.application.user.event import UserEventHandler
 from app.application.user.model import User
 from app.application.user.schema import UserChangePassword, UserCreate, UserLogin, UserResponse, UserUpdate
 from app.common.code import Code
-from app.common.exception import AuthenticationException401, RequestException400
+from app.common.exception import BadRequestException400, UnauthorizedException401
 from app.common.schema import Operator, Token
 from app.common.type import UserTypeEnum
 from app.utils.jwt import (
@@ -32,7 +32,7 @@ async def create_user(data: UserCreate, operator: Operator) -> UserResponse:
             uow.repository.session.scalar(select(User).filter_by(login_id=data.login_id).filter_by(removed_flag=False))
             is not None
         ):
-            raise RequestException400(Code.ALREADY_JOINED_ACCOUNT)
+            raise BadRequestException400(Code.ALREADY_JOINED_ACCOUNT)
 
         user = User.new(data, operator)
         uow.repository.add(user)
@@ -43,7 +43,7 @@ async def update_user(user_id: int, data: UserUpdate, operator: Operator) -> Use
     with get_uow() as uow, uow.transaction():
         user = uow.repository.get(user_id)
         if user is None or user.removed_flag is True:
-            raise RequestException400(Code.UNKNOWN_USER)
+            raise BadRequestException400(Code.UNKNOWN_USER)
 
         if (
             uow.repository.session.scalar(
@@ -51,7 +51,7 @@ async def update_user(user_id: int, data: UserUpdate, operator: Operator) -> Use
             )
             is not None
         ):
-            raise RequestException400(Code.ALREADY_JOINED_ACCOUNT)
+            raise BadRequestException400(Code.ALREADY_JOINED_ACCOUNT)
 
         user.update(data, operator)
         return user.on_updated()
@@ -61,12 +61,12 @@ async def change_password(user_id: int, data: UserChangePassword, operator: Oper
     with get_uow() as uow, uow.transaction():
         user = uow.repository.get(user_id)
         if user is None or user.removed_flag is True:
-            raise RequestException400(Code.UNKNOWN_USER)
+            raise BadRequestException400(Code.UNKNOWN_USER)
         if operator.type == UserTypeEnum.user and user.id != operator.id:
-            raise RequestException400(Code.CANNOT_CHANGE_OTHERS_PASSWORD)
+            raise BadRequestException400(Code.CANNOT_CHANGE_OTHERS_PASSWORD)
 
         if data.old_password.get_secret_value() == data.new_password.get_secret_value():
-            raise RequestException400(Code.CHANGE_TO_SAME_PASSWORD)
+            raise BadRequestException400(Code.CHANGE_TO_SAME_PASSWORD)
 
         user.change_password(data, operator)
         return user.on_password_updated()
@@ -76,7 +76,7 @@ async def remove_user(user_id: int, operator: Operator) -> None:
     with get_uow() as uow, uow.transaction():
         user = uow.repository.get(user_id)
         if user is None or user.removed_flag is True:
-            raise RequestException400(Code.UNKNOWN_USER)
+            raise BadRequestException400(Code.UNKNOWN_USER)
         user.remove(operator)
         user.on_removed()
 
@@ -89,14 +89,14 @@ async def login_user(
             select(User).filter_by(login_id=data.login_id).filter_by(removed_flag=False)
         )
         if user is None:
-            raise RequestException400(Code.UNJOINED_ACCOUNT)
+            raise BadRequestException400(Code.UNJOINED_ACCOUNT)
 
         if user.use_flag is False:
-            raise RequestException400(Code.UNKNOWN_USER)
+            raise BadRequestException400(Code.UNKNOWN_USER)
 
         if verify_password(data.password.get_secret_value(), user.password) is False:
             log.warning("password not match")
-            raise RequestException400(Code.UNKNOWN_USER)
+            raise BadRequestException400(Code.UNKNOWN_USER)
 
         user.renew_token()
 
@@ -111,7 +111,7 @@ async def renew_token(refresh_token: str) -> Token:
             user = uow.repository.get(user_id)
 
             if user is None or user.removed_flag is True or user.token is None or not is_validated_jwt(user.token):
-                raise AuthenticationException401()
+                raise UnauthorizedException401()
 
             if user.token and issued_refresh_token_in_10_seconds(user.token):
                 return Token(
@@ -125,17 +125,17 @@ async def renew_token(refresh_token: str) -> Token:
                     refresh_token=user.token,
                 )
             else:
-                raise AuthenticationException401()
+                raise UnauthorizedException401()
         except (jwt.DecodeError, jwt.InvalidTokenError) as e:
             log.exception(e)
-            raise AuthenticationException401() from None
+            raise UnauthorizedException401() from None
 
 
 async def logout(account_id: int):
     with get_uow() as uow, uow.transaction():
         user = uow.repository.get(account_id)
         if user is None:
-            raise RequestException400(Code.UNKNOWN_USER)
+            raise BadRequestException400(Code.UNKNOWN_USER)
         user.logout()
 
 

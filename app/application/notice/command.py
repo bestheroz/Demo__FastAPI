@@ -3,7 +3,7 @@ from app.application.notice.event import NoticeEventHandler
 from app.application.notice.model import Notice
 from app.application.notice.schema import NoticeCreate, NoticeResponse
 from app.common.code import Code
-from app.common.exception import RequestException400
+from app.common.exception import BadRequestException400
 
 
 def get_uow():
@@ -28,7 +28,7 @@ async def update_notice(
     with get_uow() as uow, uow.transaction():
         notice = uow.repository.get(notice_id)
         if notice is None:
-            raise RequestException400(Code.UNKNOWN_NOTICE)
+            raise BadRequestException400(Code.UNKNOWN_NOTICE)
         notice.update(data, operator_id)
         return notice.on_updated()
 
@@ -40,6 +40,6 @@ async def remove_notice(
     with get_uow() as uow, uow.transaction():
         notice = uow.repository.get(notice_id)
         if notice is None:
-            raise RequestException400(Code.UNKNOWN_NOTICE)
+            raise BadRequestException400(Code.UNKNOWN_NOTICE)
         notice.remove(operator_id)
         notice.on_removed()

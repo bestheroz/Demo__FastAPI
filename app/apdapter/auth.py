@@ -5,8 +5,8 @@ from structlog import get_logger
 
 from app.common.code import Code
 from app.common.exception import (
-    AuthenticationException401,
-    AuthorityException403,
+    ForbiddenException403,
+    UnauthorizedException401,
 )
 from app.common.schema import AccessTokenClaims, Operator
 from app.common.type import AuthorityEnum, UserTypeEnum
@@ -29,7 +29,7 @@ def get_admin_id(request: Request) -> int:
     operator = get_operator(request)
     if operator.type != UserTypeEnum.admin:
         log.warning(f"You are not admin: {operator}")
-        raise AuthorityException403()
+        raise ForbiddenException403()
     return operator.id
 
 
@@ -37,7 +37,7 @@ def get_user_id(request: Request) -> int:
     operator = get_operator(request)
     if operator.type != UserTypeEnum.user:
         log.warning(f"You are not user: {operator}")
-        raise AuthorityException403()
+        raise ForbiddenException403()
     return operator.id
 
 
@@ -50,19 +50,19 @@ class JWTToken(HTTPBearer):
         if self.is_authorized(credentials):
             return credentials
 
-        raise AuthorityException403()
+        raise ForbiddenException403()
 
     async def authenticate(self, request: Request) -> HTTPAuthorizationCredentials:
         credentials = await super().__call__(request)
         if not credentials:
-            raise AuthenticationException401()
+            raise UnauthorizedException401()
         return credentials
 
     @staticmethod
     def is_authorized(credentials: HTTPAuthorizationCredentials) -> bool:
         access_token = credentials.credentials
         if not is_validated_jwt(access_token):
-            raise AuthenticationException401(Code.EXPIRED_TOKEN)
+            raise UnauthorizedException401(Code.EXPIRED_TOKEN)
         return True
 
 
@@ -86,7 +86,7 @@ class AuthorityChecker:
         log.warning(
             f"Need: {self.require_authorities}, Yours: {get_access_token_claims(credentials.credentials).authorities}"
         )
-        raise AuthorityException403()
+        raise ForbiddenException403()
 
     def is_authorized(
         self,
@@ -94,7 +94,7 @@ class AuthorityChecker:
     ) -> bool:
         access_token = credentials.credentials
         if not is_validated_jwt(access_token):
-            raise AuthenticationException401(Code.EXPIRED_TOKEN)
+            raise UnauthorizedException401(Code.EXPIRED_TOKEN)
 
         claims = get_access_token_claims(access_token)
         if claims.manager_flag:
@@ -120,13 +120,13 @@ class SuperManagerOnly:
     ) -> HTTPAuthorizationCredentials | None:
         if self.is_authorized(credentials):
             return credentials
-        raise AuthorityException403()
+        raise ForbiddenException403()
 
     @staticmethod
     def is_authorized(credentials: HTTPAuthorizationCredentials) -> bool:
         access_token = credentials.credentials
         if not is_validated_jwt(access_token):
-            raise AuthenticationException401(Code.EXPIRED_TOKEN)
+            raise UnauthorizedException401(Code.EXPIRED_TOKEN)
 
         claims = get_access_token_claims(access_token)
         result = bool(claims.manager_flag)

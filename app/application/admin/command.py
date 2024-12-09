@@ -14,7 +14,7 @@ from app.application.admin.schema import (
     AdminUpdate,
 )
 from app.common.code import Code
-from app.common.exception import AuthenticationException401, RequestException400
+from app.common.exception import BadRequestException400, UnauthorizedException401
 from app.common.schema import Operator, Token
 from app.utils.jwt import (
     create_access_token,
@@ -40,7 +40,7 @@ async def create_admin(
             uow.repository.session.scalar(select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False))
             is not None
         ):
-            raise RequestException400(Code.ALREADY_JOINED_ACCOUNT)
+            raise BadRequestException400(Code.ALREADY_JOINED_ACCOUNT)
 
         admin = Admin.new(data, operator_id)
         uow.repository.add(admin)
@@ -55,11 +55,11 @@ async def update_admin(
     with get_uow() as uow, uow.transaction():
         admin = uow.repository.get(admin_id)
         if admin is None or admin.removed_flag is True:
-            raise RequestException400(Code.UNKNOWN_USER)
+            raise BadRequestException400(Code.UNKNOWN_USER)
         if admin.manager_flag is False and admin.id == operator.id:
-            raise RequestException400(Code.CANNOT_UPDATE_YOURSELF)
+            raise BadRequestException400(Code.CANNOT_UPDATE_YOURSELF)
         if admin.manager_flag != data.manager_flag and operator.manager_flag is False:
-            raise RequestException400(Code.UNKNOWN_AUTHORITY)
+            raise BadRequestException400(Code.UNKNOWN_AUTHORITY)
         if (
             uow.repository.session.scalar(
                 select(Admin)
@@ -69,7 +69,7 @@ async def update_admin(
             )
             is not None
         ):
-            raise RequestException400(Code.ALREADY_JOINED_ACCOUNT)
+            raise BadRequestException400(Code.ALREADY_JOINED_ACCOUNT)
 
         admin.update(data, operator.id)
         return admin.on_updated()
@@ -82,9 +82,9 @@ async def remove_admin(
     with get_uow() as uow, uow.transaction():
         admin = uow.repository.get(admin_id)
         if admin is None:
-            raise RequestException400(Code.UNKNOWN_USER)
+            raise BadRequestException400(Code.UNKNOWN_USER)
         if admin.id == operator_id:
-            raise RequestException400(Code.CANNOT_REMOVE_YOURSELF)
+            raise BadRequestException400(Code.CANNOT_REMOVE_YOURSELF)
         admin.remove(operator_id)
         admin.on_removed()
 
@@ -97,14 +97,14 @@ async def change_password(
     with get_uow() as uow, uow.transaction():
         admin = uow.repository.get(admin_id)
         if admin is None or admin.removed_flag is True:
-            raise RequestException400(Code.UNKNOWN_ADMIN)
+            raise BadRequestException400(Code.UNKNOWN_ADMIN)
 
         if admin.password and not verify_password(data.old_password.get_secret_value(), admin.password):
             log.warning("password not match")
-            raise RequestException400(Code.UNKNOWN_ADMIN)
+            raise BadRequestException400(Code.UNKNOWN_ADMIN)
 
         if data.old_password.get_secret_value() == data.new_password.get_secret_value():
-            raise RequestException400(Code.CHANGE_TO_SAME_PASSWORD)
+            raise BadRequestException400(Code.CHANGE_TO_SAME_PASSWORD)
 
         admin.change_password(data.new_password.get_secret_value(), operator)
         return admin.on_password_changed()
@@ -118,14 +118,14 @@ async def login_admin(
             select(Admin).filter_by(login_id=data.login_id).filter_by(removed_flag=False)
         )
         if admin is None:
-            raise RequestException400(Code.UNJOINED_ACCOUNT)
+            raise BadRequestException400(Code.UNJOINED_ACCOUNT)
 
         if admin.use_flag is False:
-            raise RequestException400(Code.UNKNOWN_ADMIN)
+            raise BadRequestException400(Code.UNKNOWN_ADMIN)
 
         if verify_password(data.password.get_secret_value(), admin.password) is False:
             log.warning("password not match")
-            raise RequestException400(Code.UNKNOWN_ADMIN)
+            raise BadRequestException400(Code.UNKNOWN_ADMIN)
 
         admin.renew_token()
 
@@ -140,7 +140,7 @@ async def renew_token(refresh_token: str) -> Token:
             admin = uow.repository.get(admin_id)
 
             if admin is None or admin.removed_flag is True or admin.token is None or not is_validated_jwt(admin.token):
-                raise AuthenticationException401()
+                raise UnauthorizedException401()
 
             if admin.token and issued_refresh_token_in_10_seconds(admin.token):
                 return Token(
@@ -154,17 +154,17 @@ async def renew_token(refresh_token: str) -> Token:
                     refresh_token=admin.token,
                 )
             else:
-                raise AuthenticationException401()
+                raise UnauthorizedException401()
         except (jwt.DecodeError, jwt.InvalidTokenError) as e:
             log.exception(e)
-            raise AuthenticationException401() from None
+            raise UnauthorizedException401() from None
 
 
 async def logout(account_id: int):
     with get_uow() as uow, uow.transaction():
         admin = uow.repository.get(account_id)
         if admin is None:
-            raise RequestException400(Code.UNKNOWN_ADMIN)
+            raise BadRequestException400(Code.UNKNOWN_ADMIN)
         admin.logout()
 
 
