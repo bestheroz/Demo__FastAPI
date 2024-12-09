@@ -32,7 +32,6 @@ DEFAULT_SESSION_FACTORY = sessionmaker(
     autoflush=False,
     bind=create_engine(
         f"mysql+pymysql://{settings.db_username}:{quote(settings.db_password)}@{settings.db_host}:{settings.db_port}/{settings.db_name}",
-        isolation_level="REPEATABLE READ",
         json_serializer=custom_json_serializer,
         json_deserializer=loads,
         pool_size=10,
