@@ -28,13 +28,10 @@ from app.application.notice.router import notice_router
 from app.application.user.router import user_router
 from app.common.code import Code
 from app.common.exception import (
-    AuthenticationException401,
-    AuthorityException403,
-    RequestException400,
-    SystemException500,
     BadRequestException400,
     ForbiddenException403,
     UnauthorizedException401,
+    UnknownSystemException500,
 )
 from app.common.schema import AccessTokenClaims
 from app.common.type import UserTypeEnum
