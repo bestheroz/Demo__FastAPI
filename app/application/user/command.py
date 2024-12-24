@@ -62,7 +62,7 @@ async def change_password(user_id: int, data: UserChangePassword, operator: Oper
         user = uow.repository.get(user_id)
         if user is None or user.removed_flag is True:
             raise BadRequestException400(Code.UNKNOWN_USER)
-        if operator.type == UserTypeEnum.user and user.id != operator.id:
+        if operator.type == UserTypeEnum.USER and user.id != operator.id:
             raise BadRequestException400(Code.CANNOT_CHANGE_OTHERS_PASSWORD)
 
         if data.old_password.get_secret_value() == data.new_password.get_secret_value():

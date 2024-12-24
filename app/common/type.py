@@ -8,8 +8,8 @@ class EventType(StrEnum):
 
 
 class UserTypeEnum(StrEnum):
-    admin = "admin"
-    user = "user"
+    ADMIN = "ADMIN"
+    USER = "USER"
 
 
 class AuthorityEnum(StrEnum):

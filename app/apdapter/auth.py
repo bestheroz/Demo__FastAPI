@@ -27,7 +27,7 @@ def get_operator(request: Request) -> Operator:
 
 def get_admin_id(request: Request) -> int:
     operator = get_operator(request)
-    if operator.type != UserTypeEnum.admin:
+    if operator.type != UserTypeEnum.ADMIN:
         log.warning(f"You are not admin: {operator}")
         raise ForbiddenException403()
     return operator.id
@@ -35,7 +35,7 @@ def get_admin_id(request: Request) -> int:
 
 def get_user_id(request: Request) -> int:
     operator = get_operator(request)
-    if operator.type != UserTypeEnum.user:
+    if operator.type != UserTypeEnum.USER:
         log.warning(f"You are not user: {operator}")
         raise ForbiddenException403()
     return operator.id

@@ -25,7 +25,7 @@ from app.utils.password import get_password_hash
 
 
 class Admin(IdCreatedUpdated, Base):
-    __tablename__ = "admin"
+    __tablename__ = "admins"
 
     login_id: Mapped[str]
     password: Mapped[str | None]
@@ -59,7 +59,7 @@ class Admin(IdCreatedUpdated, Base):
 
     @property
     def type(self):
-        return UserTypeEnum.admin
+        return UserTypeEnum.ADMIN
 
     @property
     def authorities(self):
@@ -79,10 +79,10 @@ class Admin(IdCreatedUpdated, Base):
             joined_at=now,
             created_at=now,
             created_object_id=operator_id,
-            created_object_type=UserTypeEnum.admin,
+            created_object_type=UserTypeEnum.ADMIN,
             updated_at=now,
             updated_object_id=operator_id,
-            updated_object_type=UserTypeEnum.admin,
+            updated_object_type=UserTypeEnum.ADMIN,
         )
 
     def update(self, data: AdminUpdate, operator_id: int):
@@ -94,7 +94,7 @@ class Admin(IdCreatedUpdated, Base):
         self.manager_flag = data.manager_flag
         self.updated_at = now
         self.updated_object_id = operator_id
-        self.updated_object_type = UserTypeEnum.admin
+        self.updated_object_type = UserTypeEnum.ADMIN
         if data.password and data.password.get_secret_value():
             self.password = get_password_hash(data.password.get_secret_value())
             self.change_password_at = now
@@ -113,7 +113,7 @@ class Admin(IdCreatedUpdated, Base):
         self.removed_at = now
         self.updated_at = now
         self.updated_object_id = operator_id
-        self.updated_object_type = UserTypeEnum.admin
+        self.updated_object_type = UserTypeEnum.ADMIN
 
     def renew_token(self):
         self.token = create_refresh_token(self)

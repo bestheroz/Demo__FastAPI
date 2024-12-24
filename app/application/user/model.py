@@ -16,7 +16,7 @@ from app.utils.password import get_password_hash, verify_password
 
 
 class User(IdCreatedUpdated, Base):
-    __tablename__ = "user"
+    __tablename__ = "users"
 
     name: Mapped[str]
     use_flag: Mapped[bool]
@@ -56,21 +56,21 @@ class User(IdCreatedUpdated, Base):
 
     @property
     def type(self):
-        return UserTypeEnum.user
+        return UserTypeEnum.USER
 
     @property
     def created_by(self):
-        if self.created_object_type == UserTypeEnum.user:
+        if self.created_object_type == UserTypeEnum.USER:
             return self.created_by_user
-        elif self.created_object_type == UserTypeEnum.admin:
+        elif self.created_object_type == UserTypeEnum.ADMIN:
             return self.created_by_admin
         raise UnknownSystemException500()
 
     @property
     def updated_by(self):
-        if self.updated_object_type == UserTypeEnum.user:
+        if self.updated_object_type == UserTypeEnum.USER:
             return self.updated_by_user
-        elif self.updated_object_type == UserTypeEnum.admin:
+        elif self.updated_object_type == UserTypeEnum.ADMIN:
             return self.updated_by_admin
         raise UnknownSystemException500()
 

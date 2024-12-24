@@ -74,7 +74,7 @@ if settings.deployment_environment in ("local", "sandbox", "qa"):
                     id=1,
                     login_id="developer",
                     name="개발자",
-                    type=UserTypeEnum.admin,
+                    type=UserTypeEnum.ADMIN,
                     manager_flag=True,
                     authorities=[],
                 )

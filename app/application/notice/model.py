@@ -11,7 +11,7 @@ from app.utils.datetime_utils import utcnow
 
 
 class Notice(IdCreatedUpdated, Base):
-    __tablename__ = "notice"
+    __tablename__ = "notices"
 
     title: Mapped[str]
     content: Mapped[str]
@@ -41,17 +41,17 @@ class Notice(IdCreatedUpdated, Base):
 
     @property
     def created_by(self):
-        if self.created_object_type == UserTypeEnum.user.lower():
+        if self.created_object_type == UserTypeEnum.USER:
             return self.created_by_user
-        elif self.created_object_type == UserTypeEnum.admin:
+        elif self.created_object_type == UserTypeEnum.ADMIN:
             return self.created_by_admin
         raise UnknownSystemException500()
 
     @property
     def updated_by(self):
-        if self.updated_object_type == UserTypeEnum.user.lower():
+        if self.updated_object_type == UserTypeEnum.USER:
             return self.updated_by_user
-        elif self.updated_object_type == UserTypeEnum.admin:
+        elif self.updated_object_type == UserTypeEnum.ADMIN:
             return self.updated_by_admin
         raise UnknownSystemException500()
 
@@ -62,10 +62,10 @@ class Notice(IdCreatedUpdated, Base):
             **data.model_dump(),
             created_at=now,
             created_object_id=operator_id,
-            created_object_type=UserTypeEnum.admin,
+            created_object_type=UserTypeEnum.ADMIN,
             updated_at=now,
             updated_object_id=operator_id,
-            updated_object_type=UserTypeEnum.admin,
+            updated_object_type=UserTypeEnum.ADMIN,
             removed_flag=False,
         )
 
@@ -76,7 +76,7 @@ class Notice(IdCreatedUpdated, Base):
         self.use_flag = data.use_flag
         self.updated_at = now
         self.updated_object_id = operator_id
-        self.updated_object_type = UserTypeEnum.admin
+        self.updated_object_type = UserTypeEnum.ADMIN
 
     def remove(self, operator_id: int):
         now = utcnow()
@@ -84,7 +84,7 @@ class Notice(IdCreatedUpdated, Base):
         self.removed_at = now
         self.updated_at = now
         self.updated_object_id = operator_id
-        self.updated_object_type = UserTypeEnum.admin
+        self.updated_object_type = UserTypeEnum.ADMIN
 
     def on_created(self) -> NoticeResponse:
         session = object_session(self)
