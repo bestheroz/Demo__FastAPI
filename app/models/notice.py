@@ -1,12 +1,12 @@
+from fastapi_events.dispatcher import dispatch
 from pydantic import AwareDatetime
 from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
-from app.apdapter.orm import Base, TZDateTime
-from app.application.notice.event import NoticeRemoved
-from app.application.notice.schema import NoticeCreate, NoticeResponse
 from app.common.exception import UnknownSystemException500
 from app.common.model import IdCreatedUpdated
 from app.common.type import UserTypeEnum
+from app.config.orm import Base, TZDateTime
+from app.schemas.notice import NoticeCreate, NoticeResponse
 from app.utils.datetime_utils import utcnow
 
 
@@ -111,5 +111,5 @@ class Notice(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = NoticeResponse.model_validate(self)
-        self.events.append(NoticeRemoved(data=event_data))
+        dispatch("NoticeRemovedEvent", event_data)
         return event_data

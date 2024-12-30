@@ -2,12 +2,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
 
-from app.apdapter.auth import AuthorityChecker, get_admin_id
-from app.application.notice.command import create_notice, remove_notice, update_notice
-from app.application.notice.query import get_notice, get_notices
-from app.application.notice.schema import NoticeCreate, NoticeResponse
 from app.common.schema import ListResult
 from app.common.type import AuthorityEnum
+from app.dependencies.auth import AuthorityChecker, get_admin_id
+from app.schemas.notice import NoticeCreate, NoticeResponse
+from app.services.notice import create_notice, get_notice, get_notices, remove_notice, update_notice
 
 notice_router = APIRouter(tags=["공지사항"])
 

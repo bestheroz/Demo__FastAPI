@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Mapped
 
-from app.apdapter.orm import (
+from app.common.type import UserTypeEnum
+from app.config.orm import (
     mapped_created_at,
     mapped_intpk,
     mapped_updated_at,
 )
-from app.common.type import UserTypeEnum
 
 
 class IdCreated:

@@ -9,6 +9,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
 from fastapi.routing import APIRoute
+from fastapi_events.handlers.local import local_handler
+from fastapi_events.middleware import EventHandlerASGIMiddleware
 from sentry_sdk import capture_exception, init
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
@@ -22,10 +24,9 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-from app.apdapter.orm import get_session
-from app.application.admin.router import admin_router
-from app.application.notice.router import notice_router
-from app.application.user.router import user_router
+from app.api.v1.admin import admin_router
+from app.api.v1.notice import notice_router
+from app.api.v1.user import user_router
 from app.common.code import Code
 from app.common.exception import (
     BadRequestException400,
@@ -37,6 +38,7 @@ from app.common.schema import AccessTokenClaims
 from app.common.type import UserTypeEnum
 from app.config.config import get_settings
 from app.config.logger import setup_logger
+from app.dependencies.db import get_session
 from app.utils.jwt import create_access_token
 from app.utils.string import camelize
 
@@ -98,6 +100,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["Content-Disposition"],
+)
+
+app.add_middleware(
+    EventHandlerASGIMiddleware,  # type: ignore
+    handlers=[local_handler],
 )
 
 

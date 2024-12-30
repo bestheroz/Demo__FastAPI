@@ -1,7 +1,7 @@
 from pydantic import Field
 
-from app.application.user.schema import IdCreatedUpdatedDto
 from app.common.schema import Schema
+from app.schemas.user import IdCreatedUpdatedDto
 
 
 class NoticeBase(Schema):

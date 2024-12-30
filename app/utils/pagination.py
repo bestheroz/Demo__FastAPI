@@ -1,12 +1,13 @@
 from pydantic.alias_generators import to_snake
 from sqlalchemy import Select, desc
+from sqlalchemy.orm import Session
 
-from app.apdapter.orm import session_scope
 from app.common.schema import ListResult
 
 
 async def get_pagination_list(
     schema_cls,
+    session: Session,
     page: int,
     page_size: int,
     initial_query: Select,
@@ -29,8 +30,7 @@ async def get_pagination_list(
         _obj_data_list = [schema_cls.model_validate(model_obj) for model_obj in results]
         return _obj_data_list
 
-    with session_scope() as session:
-        obj_data_list = await _get_pagination_list()
-        total_obj = session.scalar(count_query)
+    obj_data_list = await _get_pagination_list()
+    total_obj = session.scalar(count_query)
 
-        return ListResult[schema_cls](items=obj_data_list, total=total_obj or 0, page=page, page_size=page_size)
+    return ListResult[schema_cls](items=obj_data_list, total=total_obj or 0, page=page, page_size=page_size)

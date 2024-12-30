@@ -1,15 +1,15 @@
+from fastapi_events.dispatcher import dispatch
 from pydantic import AwareDatetime
 from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
-from app.apdapter.orm import Base, TZDateTime
-from app.application.user.event import UserLoggedIn, UserPasswordUpdated, UserRemoved, UserUpdated
-from app.application.user.schema import UserChangePassword, UserCreate, UserResponse, UserUpdate
 from app.common.code import Code
 from app.common.exception import BadRequestException400, UnknownSystemException500
 from app.common.model import IdCreatedUpdated
 from app.common.schema import Operator, Token
 from app.common.type import AuthorityEnum, UserTypeEnum
+from app.config.orm import Base, TZDateTime
+from app.schemas.user import UserChangePassword, UserCreate, UserResponse, UserUpdate
 from app.utils.datetime_utils import utcnow
 from app.utils.jwt import create_access_token, create_refresh_token
 from app.utils.password import get_password_hash, verify_password
@@ -141,7 +141,7 @@ class User(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = UserResponse.model_validate(self)
-        self.events.append(UserPasswordUpdated(data=event_data))
+        dispatch("UserPasswordUpdated", event_data)
         return event_data
 
     def on_updated(self) -> UserResponse:
@@ -151,7 +151,7 @@ class User(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = UserResponse.model_validate(self)
-        self.events.append(UserUpdated(data=event_data))
+        dispatch("UserUpdated", event_data)
         return event_data
 
     def on_password_updated(self) -> UserResponse:
@@ -161,7 +161,7 @@ class User(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = UserResponse.model_validate(self)
-        self.events.append(UserPasswordUpdated(data=event_data))
+        dispatch("UserPasswordUpdated", event_data)
         return event_data
 
     def on_removed(self) -> UserResponse:
@@ -171,7 +171,7 @@ class User(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = UserResponse.model_validate(self)
-        self.events.append(UserRemoved(data=event_data))
+        dispatch("UserRemoved", event_data)
         return event_data
 
     def on_logged_in(self) -> Token:
@@ -180,7 +180,7 @@ class User(IdCreatedUpdated, Base):
             raise UnknownSystemException500()
         session.flush()
 
-        self.events.append(UserLoggedIn(data=(UserResponse.model_validate(self))))
+        dispatch("UserLoggedIn", UserResponse.model_validate(self))
         if self.token is None:
             raise UnknownSystemException500()
         return Token(

@@ -2,27 +2,28 @@ from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, Query, status
 
-from app.apdapter.auth import AuthorityChecker, SuperManagerOnly, get_admin_id, get_operator
-from app.application.admin.command import (
-    change_password,
-    check_login_id,
-    create_admin,
-    login_admin,
-    logout,
-    remove_admin,
-    renew_token,
-    update_admin,
-)
-from app.application.admin.query import get_admin, get_admins
-from app.application.admin.schema import (
+from app.common.schema import ListResult, Operator, Token
+from app.common.type import AuthorityEnum
+from app.dependencies.auth import AuthorityChecker, SuperManagerOnly, get_admin_id, get_operator
+from app.schemas.admin import (
     AdminChangePassword,
     AdminCreate,
     AdminLogin,
     AdminResponse,
     AdminUpdate,
 )
-from app.common.schema import ListResult, Operator, Token
-from app.common.type import AuthorityEnum
+from app.services.admin import (
+    change_password,
+    check_login_id,
+    create_admin,
+    get_admin,
+    get_admins,
+    login_admin,
+    logout,
+    remove_admin,
+    renew_token,
+    update_admin,
+)
 
 admin_router = APIRouter(tags=["관리자"])
 

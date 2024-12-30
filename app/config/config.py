@@ -24,6 +24,9 @@ class Settings(CustomBaseSettings):
     db_username: str
     db_password: str
     db_port: str
+    db_pool_size: int
+    db_max_overflow: int
+    db_pool_recycle: int
 
     class Config(CustomBaseSettings.Config):
         env_files = get_dotenv_paths()

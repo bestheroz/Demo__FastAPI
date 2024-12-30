@@ -1,24 +1,18 @@
+from fastapi_events.dispatcher import dispatch
 from pydantic import AwareDatetime
 from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
-from app.apdapter.orm import Base, TZDateTime
-from app.application.admin.event import (
-    AdminCreated,
-    AdminLoggedIn,
-    AdminPasswordChanged,
-    AdminRemoved,
-    AdminUpdated,
-)
-from app.application.admin.schema import (
-    AdminCreate,
-    AdminResponse,
-    AdminUpdate,
-)
 from app.common.exception import UnknownSystemException500
 from app.common.model import IdCreatedUpdated
 from app.common.schema import Operator, Token
 from app.common.type import AuthorityEnum, UserTypeEnum
+from app.config.orm import Base, TZDateTime
+from app.schemas.admin import (
+    AdminCreate,
+    AdminResponse,
+    AdminUpdate,
+)
 from app.utils.datetime_utils import utcnow
 from app.utils.jwt import create_access_token, create_refresh_token
 from app.utils.password import get_password_hash
@@ -129,7 +123,7 @@ class Admin(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = AdminResponse.model_validate(self)
-        self.events.append(AdminCreated(data=event_data))
+        dispatch("AdminCreatedEvent", event_data)
         return AdminResponse.model_validate(self)
 
     def on_updated(self) -> AdminResponse:
@@ -139,7 +133,7 @@ class Admin(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = AdminResponse.model_validate(self)
-        self.events.append(AdminUpdated(data=event_data))
+        dispatch("AdminUpdatedEvent", event_data)
         return event_data
 
     def on_removed(self) -> AdminResponse:
@@ -149,7 +143,7 @@ class Admin(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = AdminResponse.model_validate(self)
-        self.events.append(AdminRemoved(data=event_data))
+        dispatch("AdminRemovedEvent", event_data)
         return event_data
 
     def on_logged_in(self) -> Token:
@@ -158,7 +152,7 @@ class Admin(IdCreatedUpdated, Base):
             raise UnknownSystemException500()
         session.flush()
 
-        self.events.append(AdminLoggedIn(data=(AdminResponse.model_validate(self))))
+        dispatch("AdminLoggedInEvent", AdminResponse.model_validate(self))
         if self.token is None:
             raise UnknownSystemException500()
         return Token(
@@ -173,5 +167,5 @@ class Admin(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = AdminResponse.model_validate(self)
-        self.events.append(AdminPasswordChanged(data=event_data))
+        dispatch("AdminPasswordChangedEvent", event_data)
         return event_data
