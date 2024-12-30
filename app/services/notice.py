@@ -3,7 +3,7 @@ from sqlalchemy.sql.functions import count
 
 from app.core.code import Code
 from app.core.exception import BadRequestException400
-from app.dependencies.database import PropagationType, transactional
+from app.dependencies.database import transactional
 from app.models.notice import Notice
 from app.schemas.base import ListResult
 from app.schemas.notice import NoticeCreate, NoticeResponse
@@ -17,7 +17,7 @@ async def get_notices(
     search: str | None = None,
     use_flag: bool | None = None,
 ) -> ListResult[NoticeResponse]:
-    with transactional(PropagationType.NOT_SUPPORTED) as session:
+    with transactional(readonly=True) as session:
         initial_query = select(Notice).filter_by(removed_flag=False)
         count_query = select(count(Notice.id)).filter_by(removed_flag=False)
 
@@ -41,7 +41,7 @@ async def get_notices(
 
 
 async def get_notice(notice_id: int) -> NoticeResponse:
-    with transactional(PropagationType.NOT_SUPPORTED) as session:
+    with transactional(readonly=True) as session:
         result = session.scalar(select(Notice).filter_by(id=notice_id))
         if result is None:
             raise BadRequestException400(Code.UNKNOWN_NOTICE)

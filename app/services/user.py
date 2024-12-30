@@ -6,7 +6,7 @@ from structlog import get_logger
 
 from app.core.code import Code
 from app.core.exception import BadRequestException400, UnauthorizedException401
-from app.dependencies.database import PropagationType, transactional
+from app.dependencies.database import transactional
 from app.models.user import User
 from app.schemas.base import ListResult, Operator, Token
 from app.schemas.user import UserChangePassword, UserCreate, UserLogin, UserResponse, UserUpdate
@@ -30,7 +30,7 @@ async def get_users(
     search: str | None = None,
     ids: set[int] | None = None,
 ) -> ListResult[UserResponse]:
-    with transactional(PropagationType.NOT_SUPPORTED) as session:
+    with transactional(readonly=True) as session:
         initial_query = select(User).filter_by(removed_flag=False)
         count_query = select(count(User.id)).filter_by(removed_flag=False)
 
@@ -56,7 +56,7 @@ async def get_users(
 
 
 async def get_user(user_id: int) -> UserResponse:
-    with transactional(PropagationType.NOT_SUPPORTED) as session:
+    with transactional(readonly=True) as session:
         result = session.scalar(select(User).filter_by(id=user_id).filter_by(removed_flag=False))
         if result is None:
             raise BadRequestException400(Code.UNKNOWN_USER)
@@ -172,7 +172,7 @@ async def logout(account_id: int):
 
 
 async def check_login_id(login_id: str, user_id: int | None) -> bool:
-    with transactional(PropagationType.NOT_SUPPORTED) as session:
+    with transactional(readonly=True) as session:
         query = select(User).filter_by(login_id=login_id).filter_by(removed_flag=False)
         if user_id:
             query = query.filter(User.id != user_id)

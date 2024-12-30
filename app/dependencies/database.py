@@ -1,6 +1,5 @@
 from collections.abc import Generator
 from contextlib import contextmanager
-from enum import Enum
 from urllib.parse import quote
 
 from orjson import dumps, loads
@@ -30,10 +29,27 @@ DEFAULT_SESSION_FACTORY = sessionmaker(
         f"mysql+pymysql://{settings.db_username}:{quote(settings.db_password)}@{settings.db_host}:{settings.db_port}/{settings.db_name}",
         json_serializer=custom_json_serializer,
         json_deserializer=loads,
-        pool_size=settings.db_pool_size,
-        max_overflow=settings.db_max_overflow,
+        pool_size=int(settings.db_pool_size / 3),
+        max_overflow=int(settings.db_max_overflow / 3),
         pool_recycle=settings.db_pool_recycle,
         pool_pre_ping=True,
+    ),
+    expire_on_commit=False,
+    class_=Session,
+)
+
+READONLY_SESSION_FACTORY = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=create_engine(
+        f"mysql+pymysql://{settings.db_username}:{quote(settings.db_password)}@{settings.db_host}:{settings.db_port}/{settings.db_name}",
+        json_serializer=custom_json_serializer,
+        json_deserializer=loads,
+        pool_size=int(settings.db_pool_size * 2 / 3),
+        max_overflow=int(settings.db_max_overflow * 2 / 3),
+        pool_recycle=settings.db_pool_recycle,
+        pool_pre_ping=True,
+        execution_options={"readonly": True},
     ),
     expire_on_commit=False,
     class_=Session,
@@ -62,30 +78,56 @@ def get_session() -> Generator[Session]:
         session.close()
 
 
-class PropagationType(Enum):
-    REQUIRED = "REQUIRED"  # 기존 트랜잭션 사용, 없으면 새로 생성
-    REQUIRES_NEW = "REQUIRES_NEW"  # 항상 새로운 트랜잭션 생성
-    NOT_SUPPORTED = "NOT_SUPPORTED"  # 트랜잭션 없이 실행
+def _create_readonly_session() -> Session:
+    return READONLY_SESSION_FACTORY()
+
+
+# FastAPI Dependency for read-only operations
+def get_readonly_session() -> Generator[Session]:
+    session = _create_readonly_session()
+    try:
+        yield session
+    except SQLAlchemyError as e:
+        log.error(f"Database error: {e}")
+        session.rollback()
+        raise
+    except Exception as e:
+        log.error(f"Read operation error: {e}")
+        raise
+    finally:
+        session.close()
 
 
 @contextmanager
-def transactional(propagation: PropagationType = PropagationType.REQUIRED):
-    if propagation == PropagationType.NOT_SUPPORTED:
-        db_session = _create_session()
+def transactional(readonly: bool = False):
+    if readonly:
+        session = next(get_readonly_session())
         try:
-            yield db_session
+            yield session
+        except SQLAlchemyError as e:
+            log.error(f"Database error: {e}")
+            # 굳이 rollback 할 변경사항이 없긴 하지만, 안정성을 위해 남겨둠
+            session.rollback()
+            raise
+        except Exception as e:
+            log.error(f"Transaction error: {e}")
+            # 굳이 rollback 할 변경사항이 없긴 하지만, 안정성을 위해 남겨둠
+            session.rollback()
+            raise
         finally:
-            db_session.close()
-        return
-
-    db_session = _create_session() if propagation == PropagationType.REQUIRES_NEW else next(get_session())
-
-    try:
-        yield db_session
-        db_session.commit()
-    except Exception as e:
-        log.error(f"Transaction error: {e}")
-        db_session.rollback()
-        raise
-    finally:
-        db_session.close()
+            session.close()
+    else:
+        session = next(get_session())
+        try:
+            yield session
+            session.commit()
+        except SQLAlchemyError as e:
+            log.error(f"Database error: {e}")
+            session.rollback()
+            raise
+        except Exception as e:
+            log.error(f"Transaction error: {e}")
+            session.rollback()
+            raise
+        finally:
+            session.close()

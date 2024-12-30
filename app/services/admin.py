@@ -6,7 +6,7 @@ from structlog import get_logger
 
 from app.core.code import Code
 from app.core.exception import BadRequestException400, UnauthorizedException401
-from app.dependencies.database import PropagationType, transactional
+from app.dependencies.database import transactional
 from app.models.admin import Admin
 from app.schemas.admin import (
     AdminChangePassword,
@@ -29,7 +29,7 @@ log = get_logger()
 
 
 async def get_admins(page: int, page_size: int, ordering: str | None = None) -> ListResult[AdminResponse]:
-    with transactional(PropagationType.NOT_SUPPORTED) as session:
+    with transactional(readonly=True) as session:
         initial_query = select(Admin).filter_by(removed_flag=False)
         count_query = select(count(Admin.id)).filter_by(removed_flag=False)
 
@@ -45,7 +45,7 @@ async def get_admins(page: int, page_size: int, ordering: str | None = None) -> 
 
 
 async def get_admin(admin_id: int) -> AdminResponse:
-    with transactional(PropagationType.NOT_SUPPORTED) as session:
+    with transactional(readonly=True) as session:
         result = session.scalar(select(Admin).filter_by(id=admin_id).filter_by(removed_flag=False))
         if result is None:
             raise BadRequestException400(Code.UNKNOWN_ADMIN)
@@ -185,7 +185,7 @@ async def logout(account_id: int):
 
 
 async def check_login_id(login_id: str, admin_id: int | None) -> bool:
-    with transactional(PropagationType.NOT_SUPPORTED) as session:
+    with transactional(readonly=True) as session:
         query = select(Admin).filter_by(login_id=login_id).filter_by(removed_flag=False)
         if admin_id:
             query = query.filter(Admin.id != admin_id)
