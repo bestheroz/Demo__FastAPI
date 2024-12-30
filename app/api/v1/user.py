@@ -2,9 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, Query, status
 
-from app.common.schema import ListResult, Operator, Token
-from app.common.type import AuthorityEnum
 from app.dependencies.auth import AuthorityChecker, get_operator, get_user_id
+from app.schemas.base import ListResult, Operator, Token
 from app.schemas.user import (
     UserChangePassword,
     UserCreate,
@@ -24,6 +23,7 @@ from app.services.user import (
     renew_token,
     update_user,
 )
+from app.types.base import AuthorityEnum
 
 user_router = APIRouter(tags=["유저"])
 

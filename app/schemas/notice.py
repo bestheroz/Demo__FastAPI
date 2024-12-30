@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from app.common.schema import Schema
+from app.schemas.base import Schema
 from app.schemas.user import IdCreatedUpdatedDto
 
 

@@ -3,14 +3,14 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.security.utils import get_authorization_scheme_param
 from structlog import get_logger
 
-from app.common.code import Code
-from app.common.exception import (
+from app.core.code import Code
+from app.core.config import get_settings
+from app.core.exception import (
     ForbiddenException403,
     UnauthorizedException401,
 )
-from app.common.schema import AccessTokenClaims, Operator
-from app.common.type import AuthorityEnum, UserTypeEnum
-from app.config.config import get_settings
+from app.schemas.base import AccessTokenClaims, Operator
+from app.types.base import AuthorityEnum, UserTypeEnum
 from app.utils.jwt import get_access_token_claims, is_validated_jwt
 
 settings = get_settings()

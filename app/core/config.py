@@ -2,7 +2,7 @@ from functools import lru_cache
 from os import getenv
 from pathlib import Path
 
-from app.config.settings import CustomBaseSettings
+from app.core.settings import CustomBaseSettings
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent.parent
 

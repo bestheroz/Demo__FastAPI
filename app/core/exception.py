@@ -1,4 +1,4 @@
-from app.common.code import Code
+from app.core.code import Code
 
 
 class BadRequestException400(Exception):

@@ -2,8 +2,8 @@ from datetime import UTC, datetime, timedelta
 
 from jwt import DecodeError, InvalidTokenError, decode, encode
 
-from app.common.schema import AccessTokenClaims, RefreshTokenClaims
-from app.config.config import get_settings
+from app.core.config import get_settings
+from app.schemas.base import AccessTokenClaims, RefreshTokenClaims
 
 settings = get_settings()
 

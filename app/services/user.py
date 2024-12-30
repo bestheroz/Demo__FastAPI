@@ -4,13 +4,13 @@ from sqlalchemy import or_, select
 from sqlalchemy.sql.functions import count
 from structlog import get_logger
 
-from app.common.code import Code
-from app.common.exception import BadRequestException400, UnauthorizedException401
-from app.common.schema import ListResult, Operator, Token
-from app.common.type import UserTypeEnum
+from app.core.code import Code
+from app.core.exception import BadRequestException400, UnauthorizedException401
 from app.dependencies.db import PropagationType, transactional
 from app.models.user import User
+from app.schemas.base import ListResult, Operator, Token
 from app.schemas.user import UserChangePassword, UserCreate, UserLogin, UserResponse, UserUpdate
+from app.types.base import UserTypeEnum
 from app.utils.jwt import (
     create_access_token,
     get_refresh_token_claims,

@@ -2,7 +2,7 @@ from pydantic.alias_generators import to_snake
 from sqlalchemy import Select, desc
 from sqlalchemy.orm import Session
 
-from app.common.schema import ListResult
+from app.schemas.base import ListResult
 
 
 async def get_pagination_list(

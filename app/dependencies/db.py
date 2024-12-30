@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 from structlog import get_logger
 
-from app.config.config import get_settings
+from app.core.config import get_settings
 
 settings = get_settings()
 

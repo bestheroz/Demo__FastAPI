@@ -2,11 +2,11 @@ from fastapi_events.dispatcher import dispatch
 from pydantic import AwareDatetime
 from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
-from app.common.exception import UnknownSystemException500
-from app.common.model import IdCreatedUpdated
-from app.common.type import UserTypeEnum
-from app.config.orm import Base, TZDateTime
+from app.core.exception import UnknownSystemException500
+from app.dependencies.orm import Base, TZDateTime
+from app.models.base import IdCreatedUpdated
 from app.schemas.notice import NoticeCreate, NoticeResponse
+from app.types.base import UserTypeEnum
 from app.utils.datetime_utils import utcnow
 
 

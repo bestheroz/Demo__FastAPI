@@ -3,7 +3,7 @@ from typing import Generic, TypeVar
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
-from app.common.type import AuthorityEnum, UserTypeEnum
+from app.types.base import AuthorityEnum, UserTypeEnum
 
 T = TypeVar("T")
 

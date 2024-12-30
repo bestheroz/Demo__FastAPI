@@ -3,16 +3,16 @@ from pydantic import AwareDatetime
 from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
-from app.common.exception import UnknownSystemException500
-from app.common.model import IdCreatedUpdated
-from app.common.schema import Operator, Token
-from app.common.type import AuthorityEnum, UserTypeEnum
-from app.config.orm import Base, TZDateTime
+from app.core.exception import UnknownSystemException500
+from app.dependencies.orm import Base, TZDateTime
+from app.models.base import IdCreatedUpdated
 from app.schemas.admin import (
     AdminCreate,
     AdminResponse,
     AdminUpdate,
 )
+from app.schemas.base import Operator, Token
+from app.types.base import AuthorityEnum, UserTypeEnum
 from app.utils.datetime_utils import utcnow
 from app.utils.jwt import create_access_token, create_refresh_token
 from app.utils.password import get_password_hash

@@ -1,7 +1,7 @@
 from pydantic import AwareDatetime, Field, SecretStr
 
-from app.common.schema import IdCreatedUpdatedDto, Schema
-from app.common.type import AuthorityEnum
+from app.schemas.base import IdCreatedUpdatedDto, Schema
+from app.types.base import AuthorityEnum
 
 
 class AdminBase(Schema):

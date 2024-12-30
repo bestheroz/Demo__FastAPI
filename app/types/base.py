@@ -1,12 +1,6 @@
 from enum import StrEnum
 
 
-class EventType(StrEnum):
-    CREATE = "CREATE"
-    UPDATE = "UPDATE"
-    DELETE = "DELETE"
-
-
 class UserTypeEnum(StrEnum):
     ADMIN = "ADMIN"
     USER = "USER"

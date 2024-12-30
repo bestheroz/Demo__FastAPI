@@ -27,18 +27,18 @@ from starlette.status import (
 from app.api.v1.admin import admin_router
 from app.api.v1.notice import notice_router
 from app.api.v1.user import user_router
-from app.common.code import Code
-from app.common.exception import (
+from app.core.code import Code
+from app.core.config import get_settings
+from app.core.exception import (
     BadRequestException400,
     ForbiddenException403,
     UnauthorizedException401,
     UnknownSystemException500,
 )
-from app.common.schema import AccessTokenClaims
-from app.common.type import UserTypeEnum
-from app.config.config import get_settings
-from app.config.logger import setup_logger
 from app.dependencies.db import get_session
+from app.dependencies.logger import setup_logger
+from app.schemas.base import AccessTokenClaims
+from app.types.base import UserTypeEnum
 from app.utils.jwt import create_access_token
 from app.utils.string import camelize
 
