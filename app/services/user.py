@@ -6,7 +6,7 @@ from structlog import get_logger
 
 from app.core.code import Code
 from app.core.exception import BadRequestException400, UnauthorizedException401
-from app.dependencies.db import PropagationType, transactional
+from app.dependencies.database import PropagationType, transactional
 from app.models.user import User
 from app.schemas.base import ListResult, Operator, Token
 from app.schemas.user import UserChangePassword, UserCreate, UserLogin, UserResponse, UserUpdate

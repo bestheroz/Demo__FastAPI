@@ -35,7 +35,7 @@ from app.core.exception import (
     UnauthorizedException401,
     UnknownSystemException500,
 )
-from app.dependencies.db import get_session
+from app.dependencies.database import get_session
 from app.dependencies.logger import setup_logger
 from app.schemas.base import AccessTokenClaims
 from app.types.base import UserTypeEnum

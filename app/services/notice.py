@@ -3,7 +3,7 @@ from sqlalchemy.sql.functions import count
 
 from app.core.code import Code
 from app.core.exception import BadRequestException400
-from app.dependencies.db import PropagationType, transactional
+from app.dependencies.database import PropagationType, transactional
 from app.models.notice import Notice
 from app.schemas.base import ListResult
 from app.schemas.notice import NoticeCreate, NoticeResponse
