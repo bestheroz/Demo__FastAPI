@@ -10,7 +10,7 @@ python = "^3.13"
 fastapi = "^0.115.6"
 pydantic = {version = "*", extras = ["email"]}
 orjson = "^3.10.12"
-uvicorn = "^0.32.1"
+uvicorn = "^0.34.0"
 sqlalchemy = "^2.0.36"
 greenlet = "^3.1.1"
 python-dotenv = "^1.0.1"
