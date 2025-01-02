@@ -1,4 +1,4 @@
-create table admin
+create table admins
 (
     id       bigint auto_increment
         primary key,
@@ -28,15 +28,16 @@ create table admin
 ) default charset = utf8mb4
     collate = utf8mb4_general_ci;
 
-ALTER TABLE admin
-ADD INDEX idx_login_id_on_admin (login_id);
+ALTER TABLE admins
+    ADD INDEX idx_admins_removed_flag_login_id (removed_flag, login_id),
+    ADD INDEX idx_admins_removed_flag_id (removed_flag, id);
 
 -- 초기 세팅를 위해 INSERT
-INSERT INTO admin (id, name, use_flag, manager_flag,
+INSERT INTO admins (id, name, use_flag, manager_flag,
 login_id, password,
 authorities, joined_at, removed_flag,
 created_at, created_object_id, created_object_type, updated_at, updated_object_id, updated_object_type)
 VALUES (1, '개발자', 1, 1,
 'developer', '$2b$12$HbX5j99YnnKs8zWC/LokB.kyujREbh.kQ9sTNacD/hbEfm8eIP7lm',
 '[]', now(), 0,
- now(), 1, 'admin', now(), 1, 'admin');
+ now(), 1, 'ADMIN', now(), 1, 'ADMIN');

@@ -1,4 +1,4 @@
-create table user
+create table users
 (
     id       bigint auto_increment
         primary key,
@@ -27,13 +27,15 @@ create table user
 ) default charset = utf8mb4
     collate = utf8mb4_general_ci;
 
-ALTER TABLE user
-    ADD INDEX idx_login_id_on_user (login_id);
+ALTER TABLE users
+    ADD INDEX idx_users_login_id_removed_flag (login_id, removed_flag),
+    ADD INDEX idx_users_removed_flag_id (removed_flag, id);
 
-insert into user (id, name, use_flag, login_id, password,
+
+insert into users (id, name, use_flag, login_id, password,
 authorities, removed_flag, additional_info,
 created_at, created_object_id, created_object_type, updated_at, updated_object_id, updated_object_type)
 values (1, '개발자(User)', 1, 'developer', '$2b$12$HbX5j99YnnKs8zWC/LokB.kyujREbh.kQ9sTNacD/hbEfm8eIP7lm',
 '["NOTICE_VIEW"]', 0, '{}',
- now(), 1, 'admin', now(), 1, 'admin');
+ now(), 1, 'ADMIN', now(), 1, 'ADMIN');
 

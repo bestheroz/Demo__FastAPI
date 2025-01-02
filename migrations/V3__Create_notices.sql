@@ -1,4 +1,4 @@
-create table notice
+create table notices
 (
     id       bigint auto_increment
         primary key,
