@@ -9,7 +9,7 @@ readme = "README.md"
 python = "^3.13"
 fastapi = "^0.115.6"
 pydantic = {version = "*", extras = ["email"]}
-orjson = "^3.10.12"
+orjson = "^3.10.13"
 uvicorn = "^0.34.0"
 sqlalchemy = "^2.0.36"
 greenlet = "^3.1.1"
@@ -18,7 +18,7 @@ uvloop = "^0.21.0"
 httptools = "^0.6.4"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 sentry-sdk = "^2.19.2"
-aiohttp = "^3.11.10"
+aiohttp = "^3.11.11"
 structlog = "^24.4.0"
 pyjwt = "^2.10.1"
 aiomysql = "^0.2.0"
@@ -27,14 +27,14 @@ fastapi-events = "^0.12.2"
 
 
 [tool.poetry.group.dev.dependencies]
-pyright = "^1.1.390"
-mypy = "^1.13.0"
-ruff = "^0.8.2"
+pyright = "^1.1.391"
+mypy = "^1.14.1"
+ruff = "^0.8.6"
 
 [tool.poetry.group.types.dependencies]
 types-python-jose = "^3.3.4.20240106"
 types-aiobotocore = "^2.15.2.post3"
-types-openpyxl = "^3.1.5.20241126"
+types-openpyxl = "^3.1.5.20241225"
 pandas-stubs = "^2.2.3.241126"
 
 
