@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi (>=0.115.6)",
-    "pydantic (>=2.10.4)",
+    "pydantic[email] (>=2.10.4)",
     "orjson (>=3.10.13)",
     "uvicorn (>=0.34.0)",
     "sqlalchemy (>=2.0.36)",
@@ -17,7 +17,7 @@ dependencies = [
     "python-dotenv (>=1.0.1)",
     "uvloop (>=0.21.0)",
     "httptools (>=0.6.4)",
-    "passlib (>=1.7.4)",
+    "passlib[bcrypt] (>=1.7.4)",
     "sentry-sdk (>=2.19.2)",
     "aiohttp (>=3.11.11)",
     "structlog (>=24.4.0)",
@@ -26,10 +26,6 @@ dependencies = [
     "cryptography (>=44.0.0)",
     "fastapi-events (>=0.12.2)",
 ]
-
-[tool.poetry]
-package-mode = false
-
 
 [tool.poetry.group.dev.dependencies]
 pyright = "^1.1.391"
