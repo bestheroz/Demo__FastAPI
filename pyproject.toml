@@ -1,7 +1,5 @@
 [project]
 name = "demo-fastapi"
-version = "0.1.0"
-description = ""
 authors = [
     { name="joony.kim", email="bestheroz@gmail.com" }
 ]
@@ -26,6 +24,10 @@ dependencies = [
     "cryptography (>=44.0.0)",
     "fastapi-events (>=0.12.2)",
 ]
+
+[tool.poetry]
+package-mode = false
+
 
 [tool.poetry.group.dev.dependencies]
 pyright = "^1.1.391"
