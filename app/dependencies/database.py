@@ -1,10 +1,11 @@
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager, suppress
-from typing import Any
+from typing import Any, cast
 from urllib.parse import quote
 
 from orjson import dumps, loads
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import CursorResult, Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from structlog import get_logger
 
@@ -15,9 +16,20 @@ log = get_logger()
 
 def custom_json_serializer(obj: Any) -> bytes:
     if isinstance(obj, set):
-        return dumps(sorted(list(obj)))  # set은 정렬해서 반환(테스트 코드 이슈)
-    # 다른 타입에 대한 처리가 필요하면 여기에 추가
+        return dumps(sorted(list(obj)))
     return dumps(obj)
+
+
+class ReadonlySession(Session):
+    """읽기 전용 세션을 위한 커스텀 세션 클래스"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def execute(self, *args, **kwargs) -> CursorResult[Any]:
+        """쿼리 실행을 자동으로 병렬 처리"""
+        future = db_manager._thread_pool.submit(super().execute, *args, **kwargs)
+        return cast(CursorResult[Any], future.result())
 
 
 class DatabaseSessionManager:
@@ -27,6 +39,7 @@ class DatabaseSessionManager:
         self._readonly_engine: Engine | None = None
         self._default_session_factory: sessionmaker | None = None
         self._readonly_session_factory: sessionmaker | None = None
+        self._thread_pool = ThreadPoolExecutor(max_workers=self.config.db_pool_size, thread_name_prefix="db_readonly_")
 
     def _create_engine(self, readonly: bool = False) -> Engine:
         pool_size = int(self.config.db_pool_size * (2 / 3 if readonly else 1 / 3))
@@ -51,13 +64,13 @@ class DatabaseSessionManager:
 
         return create_engine(connection_url, **engine_kwargs)
 
-    def _create_session_factory(self, engine: Engine) -> sessionmaker:
+    def _create_session_factory(self, engine: Engine, readonly: bool = False) -> sessionmaker:
         return sessionmaker(
             bind=engine,
             autocommit=False,
             autoflush=False,
             expire_on_commit=False,
-            class_=Session,
+            class_=ReadonlySession if readonly else Session,
             future=True,
         )
 
@@ -66,7 +79,7 @@ class DatabaseSessionManager:
             if not self._readonly_session_factory:
                 if not self._readonly_engine:
                     self._readonly_engine = self._create_engine(readonly=True)
-                self._readonly_session_factory = self._create_session_factory(self._readonly_engine)
+                self._readonly_session_factory = self._create_session_factory(self._readonly_engine, readonly=True)
             return self._readonly_session_factory
 
         if not self._default_session_factory:
@@ -79,7 +92,7 @@ class DatabaseSessionManager:
     def _handle_session_error(session: Session, error: Exception, readonly: bool) -> None:
         error_type = "Read operation" if readonly else "Database"
         log.error(f"{error_type} error", error=str(error), exc_info=True)
-        if not readonly:  # readonly 세션은 rollback이 불필요
+        if not readonly:
             session.rollback()
         raise
 
