@@ -60,7 +60,8 @@ class DatabaseSessionManager:
         }
 
         if readonly:
-            engine_kwargs["execution_options"] = {"readonly": True}
+            engine_kwargs["execution_options"] = {"readonly": True, "isolation_level": "READ COMMITTED"}
+            engine_kwargs["isolation_level"] = "READ COMMITTED"
 
         return create_engine(connection_url, **engine_kwargs)
 
@@ -97,7 +98,11 @@ class DatabaseSessionManager:
         raise
 
     def get_session(self, readonly: bool = False) -> Iterator[Session]:
-        session = self._get_session_factory(readonly=readonly)()
+        session_factory = self._get_session_factory(readonly=readonly)
+        if readonly:
+            session = session_factory(bind=self._readonly_engine.execution_options(isolation_level="READ COMMITTED"))
+        else:
+            session = session_factory()
         try:
             yield session
             if not readonly:
