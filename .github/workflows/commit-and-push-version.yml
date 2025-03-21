@@ -1,0 +1,40 @@
+name: push-version
+on:
+  push:
+    tags: ['^[0-9]+\.[0-9]+\.[0-9]+$']
+permissions:
+  contents: write  # 레포지토리 내용 수정 권한 추가
+env:
+  GITHUB_TOKEN: ${{ secrets.WRITABLE_GITHUB_TOKEN }}
+jobs:
+  commit-and-push-version:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: commit-and-push-version
+      cancel-in-progress: false
+    steps:
+      - name: Checkout 코드
+        uses: actions/checkout@main
+        with:
+          ref: main
+
+      - name: 태그 가져오기
+        id: tag
+        uses: dawidd6/action-get-tag@master
+        with:
+          strip_v: true
+
+      - name: pyproject.toml 버전 업데이트
+        run: |
+          # [project] 섹션의 버전 업데이트
+          sed -i 's/^version = ".*"$/version = "${{ steps.tag.outputs.tag }}"/g' pyproject.toml
+          
+          # 변경사항 확인
+          echo "업데이트된 버전 정보:"
+          grep "version = " pyproject.toml
+
+      - name: 변경사항 커밋 및 푸시
+        uses: stefanzweifel/git-auto-commit-action@master
+        with:
+          commit_message: "⬆️ 버전 업데이트 (pyproject.toml) v${{ steps.tag.outputs.tag }}"
+          branch: main

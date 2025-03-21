@@ -1,5 +1,6 @@
 [project]
 name = "demo-fastapi"
+version = "0.0.1"
 authors = [
     { name="joony.kim", email="bestheroz@gmail.com" }
 ]
