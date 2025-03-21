@@ -20,9 +20,7 @@ jobs:
 
       - name: 태그 가져오기
         id: tag
-        uses: dawidd6/action-get-tag@master
-        with:
-          strip_v: true
+        uses: olegtarasov/get-tag@master
 
       - name: pyproject.toml 버전 업데이트
         uses: jacobtomlinson/gha-find-replace@master
