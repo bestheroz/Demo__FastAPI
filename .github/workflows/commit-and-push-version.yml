@@ -25,13 +25,12 @@ jobs:
           strip_v: true
 
       - name: pyproject.toml 버전 업데이트
-        run: |
-          # [project] 섹션의 버전 업데이트
-          sed -i 's/^version = ".*"$/version = "${{ steps.tag.outputs.tag }}"/g' pyproject.toml
-          
-          # 변경사항 확인
-          echo "업데이트된 버전 정보:"
-          grep "version = " pyproject.toml
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          find: '^version = "(.+?)"'
+          replace: 'version = "${{ steps.tag.outputs.tag }}"'
+          include: "pyproject.toml"
+          regex: true
 
       - name: 변경사항 커밋 및 푸시
         uses: stefanzweifel/git-auto-commit-action@master
