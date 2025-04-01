@@ -9,16 +9,16 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi (==0.115.12)",
     "pydantic[email] (==2.10.6)",
-    "orjson (==3.10.15)",
+    "orjson (==3.10.16)",
     "uvicorn (==0.34.0)",
-    "sqlalchemy (==2.0.39)",
+    "sqlalchemy (==2.0.40)",
     "greenlet (==3.1.1)",
-    "python-dotenv (==1.0.1)",
+    "python-dotenv (==1.1.0)",
     "uvloop (==0.21.0)",
     "httptools (==0.6.4)",
     "passlib[bcrypt] (==1.7.4)",
-    "sentry-sdk (==2.24.0)",
-    "aiohttp (==3.11.14)",
+    "sentry-sdk (==2.25.0)",
+    "aiohttp (==3.11.15)",
     "structlog (==25.2.0)",
     "pyjwt (==2.10.1)",
     "aiomysql (==0.2.0)",
@@ -31,7 +31,7 @@ package-mode = false
 
 
 [tool.poetry.group.dev.dependencies]
-pyright = "1.1.397"
+pyright = "1.1.398"
 mypy = "1.15.0"
 ruff = "0.11.2"
 
