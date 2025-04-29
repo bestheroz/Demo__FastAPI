@@ -8,9 +8,6 @@ package:
     - .serverless/**
 
 custom:
-  prune:
-    automatic: true
-    number: 5
   env: ${file(./serverless-env/${opt:stage,'local'}.json)}
   pythonRequirements:
     dockerizePip: true
@@ -77,5 +74,4 @@ functions:
           private: ${self:custom.env.PROTECT_API}
 
 plugins:
-  - serverless-prune-plugin
   - serverless-python-requirements
