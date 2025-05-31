@@ -8,21 +8,21 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi (==0.115.12)",
-    "pydantic[email] (==2.10.6)",
-    "orjson (==3.10.16)",
-    "uvicorn (==0.34.0)",
-    "sqlalchemy (==2.0.40)",
-    "greenlet (==3.1.1)",
+    "pydantic[email] (==2.11.5)",
+    "orjson (==3.10.18)",
+    "uvicorn (==0.34.2)",
+    "sqlalchemy (==2.0.41)",
+    "greenlet (==3.2.2)",
     "python-dotenv (==1.1.0)",
     "uvloop (==0.21.0)",
     "httptools (==0.6.4)",
     "passlib[bcrypt] (==1.7.4)",
-    "sentry-sdk (==2.25.1)",
-    "aiohttp (==3.11.16)",
-    "structlog (==25.2.0)",
+    "sentry-sdk (==2.29.1)",
+    "aiohttp (==3.12.6)",
+    "structlog (==25.3.0)",
     "pyjwt (==2.10.1)",
     "aiomysql (==0.2.0)",
-    "cryptography (==44.0.2)",
+    "cryptography (==45.0.3)",
     "fastapi-events (==0.12.2)",
 ]
 
@@ -31,13 +31,13 @@ package-mode = false
 
 
 [tool.poetry.group.dev.dependencies]
-pyright = "1.1.399"
-mypy = "1.15.0"
-ruff = "0.11.4"
+pyright = "1.1.401"
+mypy = "1.16.0"
+ruff = "0.11.12"
 
 [tool.poetry.group.types.dependencies]
-types-python-jose = "3.4.0.20250224"
-types-aiobotocore = "2.21.1"
+types-python-jose = "3.5.0.20250531"
+types-aiobotocore = "2.22.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
