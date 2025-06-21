@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
@@ -16,7 +16,7 @@ class Schema(BaseModel):
     )
 
 
-class ListResult(Schema, Generic[T]):
+class ListResult[T](Schema):
     page: int
     page_size: int
     total: int
