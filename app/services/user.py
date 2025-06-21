@@ -1,6 +1,6 @@
 import jwt
 from fastapi.security.utils import get_authorization_scheme_param
-from sqlalchemy import or_, select
+from sqlalchemy import select
 from sqlalchemy.sql.functions import count
 from structlog import get_logger
 
@@ -9,7 +9,7 @@ from app.core.exception import BadRequestException400, UnauthorizedException401
 from app.dependencies.database import transactional
 from app.models.user import User
 from app.schemas.base import ListResult, Operator, Token
-from app.schemas.user import UserChangePassword, UserCreate, UserLogin, UserResponse, UserUpdate
+from app.schemas.user import UserChangePassword, UserCreate, UserListRequest, UserLogin, UserResponse, UserUpdate
 from app.types.base import UserTypeEnum
 from app.utils.jwt import (
     create_access_token,
@@ -24,34 +24,36 @@ log = get_logger()
 
 
 async def get_users(
-    page: int,
-    page_size: int,
-    ordering: str | None = None,
-    search: str | None = None,
-    ids: set[int] | None = None,
+    request: UserListRequest,
 ) -> ListResult[UserResponse]:
     with transactional(readonly=True) as session:
         initial_query = select(User).filter_by(removed_flag=False)
         count_query = select(count(User.id)).filter_by(removed_flag=False)
 
-        if search:
-            initial_query = initial_query.filter(
-                or_(User.name.ilike(f"%{search}%"), User.login_id.ilike(f"%{search}%"))
-            )
-            count_query = count_query.filter(or_(User.name.ilike(f"%{search}%"), User.login_id.ilike(f"%{search}%")))
+        if request.id is not None:
+            initial_query = initial_query.filter_by(id=request.id)
+            count_query = count_query.filter_by(id=request.id)
 
-        if ids:
-            initial_query = initial_query.filter(User.id.in_(ids))
-            count_query = count_query.filter(User.id.in_(ids))
+        if request.login_id is not None:
+            initial_query = initial_query.filter(User.login_id.ilike(f"%{request.login_id}%"))
+            count_query = count_query.filter(User.login_id.ilike(f"%{request.login_id}%"))
+
+        if request.name is not None:
+            initial_query = initial_query.filter(User.name.ilike(f"%{request.name}%"))
+            count_query = count_query.filter(User.name.ilike(f"%{request.name}%"))
+
+        if request.use_flag is not None:
+            initial_query = initial_query.filter_by(use_flag=request.use_flag)
+            count_query = count_query.filter_by(use_flag=request.use_flag)
 
         return await get_pagination_list(
             session=session,
             initial_query=initial_query,
             count_query=count_query,
             schema_cls=UserResponse,
-            page=page,
-            page_size=page_size,
-            ordering=ordering,
+            page=request.page,
+            page_size=request.page_size,
+            ordering="-id",
         )
 
 

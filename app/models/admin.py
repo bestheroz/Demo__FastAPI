@@ -19,7 +19,7 @@ from app.utils.password import get_password_hash
 
 
 class Admin(IdCreatedUpdated, Base):
-    __tablename__ = "admins"
+    __tablename__ = "admin"
 
     login_id: Mapped[str]
     password: Mapped[str | None]

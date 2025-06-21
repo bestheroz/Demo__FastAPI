@@ -1,6 +1,6 @@
 from pydantic import AwareDatetime, Field, SecretStr
 
-from app.schemas.base import IdCreatedUpdatedDto, Schema
+from app.schemas.base import IdCreatedUpdatedDto, Pagination, Schema
 from app.types.base import AuthorityEnum
 
 
@@ -40,3 +40,11 @@ class AdminLogin(Schema):
 class AdminChangePassword(Schema):
     old_password: SecretStr = Field(..., description="비밀번호")
     new_password: SecretStr = Field(..., description="새 비밀번호")
+
+
+class AdminListRequest(Pagination):
+    id: int | None = Field(None, description="ID(KEY)")
+    login_id: str | None = Field(None, description="로그인 아이디")
+    name: str | None = Field(None, description="관리자 이름")
+    use_flag: bool | None = Field(None, description="사용 여부")
+    manager_flag: bool | None = Field(None, description="매니저 여부")

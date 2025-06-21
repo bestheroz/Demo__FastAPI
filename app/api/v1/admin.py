@@ -6,6 +6,7 @@ from app.dependencies.auth import AuthorityChecker, SuperManagerOnly, get_admin_
 from app.schemas.admin import (
     AdminChangePassword,
     AdminCreate,
+    AdminListRequest,
     AdminLogin,
     AdminResponse,
     AdminUpdate,
@@ -36,14 +37,9 @@ admin_router = APIRouter(tags=["관리자"])
     ],
 )
 async def _get_admins(
-    page: Annotated[int, Query(example=1)],
-    page_size: Annotated[int, Query(example=10)],
+    request: Annotated[AdminListRequest, Depends()],
 ) -> ListResult[AdminResponse]:
-    return await get_admins(
-        page,
-        page_size,
-        "-id",
-    )
+    return await get_admins(request)
 
 
 @admin_router.get(

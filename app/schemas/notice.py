@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from app.schemas.base import Schema
+from app.schemas.base import Pagination, Schema
 from app.schemas.user import IdCreatedUpdatedDto
 
 
@@ -16,3 +16,9 @@ class NoticeCreate(NoticeBase):
 
 class NoticeResponse(IdCreatedUpdatedDto, NoticeBase):
     pass
+
+
+class NoticeListRequest(Pagination):
+    id: int | None = Field(None, description="ID(KEY)")
+    title: str | None = Field(None, description="제목")
+    use_flag: bool | None = Field(None, description="사용 여부")

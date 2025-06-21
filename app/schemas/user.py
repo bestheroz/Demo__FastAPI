@@ -1,6 +1,6 @@
 from pydantic import AwareDatetime, Field, SecretStr
 
-from app.schemas.base import IdCreatedUpdatedDto, Schema
+from app.schemas.base import IdCreatedUpdatedDto, Pagination, Schema
 from app.types.base import AuthorityEnum
 
 
@@ -39,3 +39,10 @@ class UserLogin(Schema):
             "4dff4ea340f0a823f15d3f4f01ab62eae0e5da579ccb851f8db9dfe84c58b2b37b89903a740e1ee172da793a6e79d560e5f7f9bd058a12a280433ed6fa46510a"
         ],
     )
+
+
+class UserListRequest(Pagination):
+    id: int | None = Field(None, description="ID(KEY)")
+    login_id: str | None = Field(None, description="로그인 아이디")
+    name: str | None = Field(None, description="이름")
+    use_flag: bool | None = Field(None, description="사용 여부")

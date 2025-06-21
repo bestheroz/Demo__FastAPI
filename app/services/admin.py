@@ -11,6 +11,7 @@ from app.models.admin import Admin
 from app.schemas.admin import (
     AdminChangePassword,
     AdminCreate,
+    AdminListRequest,
     AdminLogin,
     AdminResponse,
     AdminUpdate,
@@ -28,19 +29,41 @@ from app.utils.password import verify_password
 log = get_logger()
 
 
-async def get_admins(page: int, page_size: int, ordering: str | None = None) -> ListResult[AdminResponse]:
+async def get_admins(
+    request: AdminListRequest,
+) -> ListResult[AdminResponse]:
     with transactional(readonly=True) as session:
         initial_query = select(Admin).filter_by(removed_flag=False)
         count_query = select(count(Admin.id)).filter_by(removed_flag=False)
+
+        if request.id:
+            initial_query = initial_query.filter_by(id=request.id)
+            count_query = count_query.filter_by(id=request.id)
+
+        if request.login_id is not None:
+            initial_query = initial_query.filter(Admin.login_id.ilike(f"%{request.login_id}%"))
+            count_query = count_query.filter(Admin.login_id.ilike(f"%{request.login_id}%"))
+
+        if request.name is not None:
+            initial_query = initial_query.filter(Admin.name.ilike(f"%{request.name}%"))
+            count_query = count_query.filter(Admin.name.ilike(f"%{request.name}%"))
+
+        if request.use_flag is not None:
+            initial_query = initial_query.filter_by(use_flag=request.use_flag)
+            count_query = count_query.filter_by(use_flag=request.use_flag)
+
+        if request.manager_flag is not None:
+            initial_query = initial_query.filter_by(manager_flag=request.manager_flag)
+            count_query = count_query.filter_by(manager_flag=request.manager_flag)
 
         return await get_pagination_list(
             session=session,
             initial_query=initial_query,
             count_query=count_query,
             schema_cls=AdminResponse,
-            page=page,
-            page_size=page_size,
-            ordering=ordering,
+            page=request.page,
+            page_size=request.page_size,
+            ordering="-id",
         )
 
 

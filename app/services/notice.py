@@ -6,37 +6,37 @@ from app.core.exception import BadRequestException400
 from app.dependencies.database import transactional
 from app.models.notice import Notice
 from app.schemas.base import ListResult
-from app.schemas.notice import NoticeCreate, NoticeResponse
+from app.schemas.notice import NoticeCreate, NoticeListRequest, NoticeResponse
 from app.utils.pagination import get_pagination_list
 
 
 async def get_notices(
-    page: int,
-    page_size: int,
-    ordering: str | None = None,
-    search: str | None = None,
-    use_flag: bool | None = None,
+    request: NoticeListRequest,
 ) -> ListResult[NoticeResponse]:
     with transactional(readonly=True) as session:
         initial_query = select(Notice).filter_by(removed_flag=False)
         count_query = select(count(Notice.id)).filter_by(removed_flag=False)
 
-        if search:
-            # TODO joony: Implement search
-            pass
+        if request.id is not None:
+            initial_query = initial_query.filter_by(id=request.id)
+            count_query = count_query.filter_by(id=request.id)
 
-        if use_flag:
-            initial_query = initial_query.filter_by(use_flag=use_flag)
-            count_query = count_query.filter_by(use_flag=use_flag)
+        if request.title is not None:
+            initial_query = initial_query.filter(Notice.title.ilike(f"%{request.title}%"))
+            count_query = count_query.filter(Notice.title.ilike(f"%{request.title}%"))
+
+        if request.use_flag is not None:
+            initial_query = initial_query.filter_by(use_flag=request.use_flag)
+            count_query = count_query.filter_by(use_flag=request.use_flag)
 
         return await get_pagination_list(
             session=session,
             initial_query=initial_query,
             count_query=count_query,
             schema_cls=NoticeResponse,
-            page=page,
-            page_size=page_size,
-            ordering=ordering,
+            page=request.page,
+            page_size=request.page_size,
+            ordering="-id",
         )
 
 

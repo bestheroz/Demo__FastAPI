@@ -1,10 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, status
 
 from app.dependencies.auth import AuthorityChecker, get_admin_id
 from app.schemas.base import ListResult
-from app.schemas.notice import NoticeCreate, NoticeResponse
+from app.schemas.notice import NoticeCreate, NoticeListRequest, NoticeResponse
 from app.services.notice import create_notice, get_notice, get_notices, remove_notice, update_notice
 from app.types.base import AuthorityEnum
 
@@ -16,16 +16,9 @@ notice_router = APIRouter(tags=["공지사항"])
     name="공지사항 목록 조회",
 )
 async def _get_notices(
-    page: Annotated[int, Query(example=1)],
-    page_size: Annotated[int, Query(example=10)],
-    search: Annotated[str | None, Query()] = None,
+    request: Annotated[NoticeListRequest, Depends()],
 ) -> ListResult[NoticeResponse]:
-    return await get_notices(
-        page,
-        page_size,
-        "-id",
-        search,
-    )
+    return await get_notices(request)
 
 
 @notice_router.get(

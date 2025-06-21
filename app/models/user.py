@@ -16,7 +16,7 @@ from app.utils.password import get_password_hash, verify_password
 
 
 class User(IdCreatedUpdated, Base):
-    __tablename__ = "users"
+    __tablename__ = "user"
 
     name: Mapped[str]
     use_flag: Mapped[bool]

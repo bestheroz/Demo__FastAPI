@@ -11,7 +11,7 @@ from app.utils.datetime_utils import utcnow
 
 
 class Notice(IdCreatedUpdated, Base):
-    __tablename__ = "notices"
+    __tablename__ = "notice"
 
     title: Mapped[str]
     content: Mapped[str]

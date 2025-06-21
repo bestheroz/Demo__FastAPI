@@ -7,6 +7,7 @@ from app.schemas.base import ListResult, Operator, Token
 from app.schemas.user import (
     UserChangePassword,
     UserCreate,
+    UserListRequest,
     UserLogin,
     UserResponse,
     UserUpdate,
@@ -36,18 +37,9 @@ user_router = APIRouter(tags=["유저"])
     ],
 )
 async def _get_users(
-    page: Annotated[int, Query(example=1)],
-    page_size: Annotated[int, Query(example=10)],
-    search: Annotated[str | None, Query()] = None,
-    ids: Annotated[set[int] | None, Query()] = None,
+    request: Annotated[UserListRequest, Depends()],
 ) -> ListResult[UserResponse]:
-    return await get_users(
-        page,
-        page_size,
-        "-id",
-        search,
-        ids,
-    )
+    return await get_users(request)
 
 
 @user_router.get(
