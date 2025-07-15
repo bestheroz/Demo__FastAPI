@@ -14,7 +14,6 @@ custom:
 
 provider:
   name: aws
-  profile: default
   region: ${self:custom.env.AWS_PROFILE_REGION}
   stage: ${opt:stage, 'sandbox'}
   apiGateway:
