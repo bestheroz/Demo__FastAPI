@@ -16,10 +16,10 @@ jobs:
       - name: checkout
         uses: actions/checkout@main
 
-      - name: setup node.js lts
+      - name: setup node.js 22
         uses: actions/setup-node@main
         with:
-          node-version: lts
+          node-version: 22
           cache: 'npm'
 
       - name: install serverless

@@ -14,7 +14,6 @@ custom:
 
 provider:
   name: aws
-  profile: default
   region: ${self:custom.env.AWS_PROFILE_REGION}
   stage: ${opt:stage, 'sandbox'}
   apiGateway:
@@ -43,35 +42,15 @@ functions:
     maximumRetryAttempts: 0
     events:
       - http:
-          method: GET
-          path: /docs
-          private: false
-      - http:
-          method: GET
-          path: '/docs/{proxy+}'
-          private: false
-      - http:
           method: ANY
           path: /
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - Authorization
-              - AuthorizationR
-            allowCredentials: false
-          private: ${self:custom.env.PROTECT_API}
+          cors: true
+          private: false
       - http:
           method: ANY
-          path: '{proxy+}'
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - Authorization
-              - AuthorizationR
-            allowCredentials: false
-          private: ${self:custom.env.PROTECT_API}
+          path: "{proxy+}"
+          cors: true
+          private: false
 
 plugins:
   - serverless-python-requirements
