@@ -1,7 +1,7 @@
 FROM public.ecr.aws/docker/library/python:3.13-bookworm as builder
 LABEL maintainer="joony.kim <bestheroz@gmail.com>"
 
-ENV POETRY_VERSION=2.1.2
+ENV POETRY_VERSION=2.1.3
 #RUN apt-get update && apt-get upgrade -y && apt-get install gcc -y
 RUN pip install --disable-pip-version-check --no-cache-dir poetry==$POETRY_VERSION
 
