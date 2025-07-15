@@ -10,8 +10,8 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN python -m venv $VIRTUAL_ENV
 
 COPY poetry.lock pyproject.toml ./
-RUN poetry export -f requirements.txt -o requirements.txt --without-hashes \
-    && pip install --disable-pip-version-check -r requirements.txt
+RUN poetry config virtualenvs.create false \
+    && poetry install --only=main --no-root
 
 FROM public.ecr.aws/docker/library/python:3.13-slim-bookworm as runner
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.4 /lambda-adapter /opt/extensions/lambda-adapter
