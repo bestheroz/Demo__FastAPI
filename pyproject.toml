@@ -17,7 +17,7 @@ dependencies = [
     "uvloop (==0.21.0)",
     "httptools (==0.6.4)",
     "passlib[bcrypt] (==1.7.4)",
-    "sentry-sdk (==2.30.0)",
+    "sentry-sdk[fastapi] (==2.30.0)",
     "aiohttp (==3.12.13)",
     "structlog (==25.4.0)",
     "pyjwt (==2.10.1)",
