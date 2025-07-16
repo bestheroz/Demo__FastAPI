@@ -48,13 +48,14 @@ log = structlog.get_logger()
 settings = get_settings()
 if settings.sentry_dsn and settings.deployment_environment not in ("local", "test"):
     init(
-        settings.sentry_dsn,
+        dsn=settings.sentry_dsn,
         environment=settings.deployment_environment,
         integrations=[
             SqlalchemyIntegration(),
             StarletteIntegration(),
             FastApiIntegration(),
         ],
+        send_default_pii=True,
     )
 
 
