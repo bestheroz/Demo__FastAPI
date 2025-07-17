@@ -31,6 +31,8 @@ class Settings(CustomBaseSettings):
     db_max_overflow: int
     db_pool_recycle: int
 
+    cors_origins: str = "http://localhost:3000"
+
     class Config(CustomBaseSettings.Config):
         env_files = get_dotenv_paths()
         env_file_encoding = "utf-8"

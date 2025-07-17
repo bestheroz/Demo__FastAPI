@@ -1,5 +1,4 @@
 import time
-from os import getenv
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -93,15 +92,15 @@ else:
         title="DEMO API",
     )
 
-cors_origins = getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+cors_origins = settings.cors_origins.split(",")
 origins = [origin.strip() for origin in cors_origins]
 
 app.add_middleware(
     CORSMiddleware,  # type: ignore
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allow_headers=["Accept", "Accept-Language", "Content-Language", "Content-Type", "Authorization", "AuthorizationR"],
+    allow_methods=["*"],
+    allow_headers=["*"],
     expose_headers=["Content-Disposition"],
 )
 
