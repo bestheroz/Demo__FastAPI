@@ -109,6 +109,8 @@ class User(IdCreatedUpdated, Base):
             self.change_password_at = now
 
     def change_password(self, data: UserChangePassword, operator: Operator):
+        if not self.password:
+            raise BadRequestException400(Code.INVALID_PASSWORD)
         if verify_password(data.old_password.get_secret_value(), self.password) is False:
             raise BadRequestException400(Code.INVALID_PASSWORD)
 
@@ -141,7 +143,7 @@ class User(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = UserResponse.model_validate(self)
-        dispatch("UserPasswordUpdated", event_data)
+        dispatch("UserCreated", event_data)
         return event_data
 
     def on_updated(self) -> UserResponse:

@@ -41,6 +41,15 @@ class DatabaseSessionManager:
         self._readonly_session_factory: sessionmaker | None = None
         self._thread_pool = ThreadPoolExecutor(max_workers=self.config.db_pool_size, thread_name_prefix="db_readonly_")
 
+    def close(self) -> None:
+        """Clean up resources"""
+        if self._thread_pool:
+            self._thread_pool.shutdown(wait=True)
+        if self._default_engine:
+            self._default_engine.dispose()
+        if self._readonly_engine:
+            self._readonly_engine.dispose()
+
     def _create_engine(self, readonly: bool = False) -> Engine:
         pool_size = int(self.config.db_pool_size * (2 / 3 if readonly else 1 / 3))
         max_overflow = int(self.config.db_max_overflow * (2 / 3 if readonly else 1 / 3))

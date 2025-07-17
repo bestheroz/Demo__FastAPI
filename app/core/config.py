@@ -2,6 +2,8 @@ from functools import lru_cache
 from os import getenv
 from pathlib import Path
 
+from pydantic import ValidationError
+
 from app.core.settings import CustomBaseSettings
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -36,4 +38,10 @@ class Settings(CustomBaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()  # type: ignore
+    try:
+        return Settings()  # type: ignore
+    except ValidationError as e:
+        missing_fields = [str(error["loc"][0]) for error in e.errors() if error.get("type") == "missing"]
+        if missing_fields:
+            raise ValueError(f"Missing required environment variables: {', '.join(missing_fields)}") from e
+        raise ValueError(f"Configuration validation failed: {e}") from e

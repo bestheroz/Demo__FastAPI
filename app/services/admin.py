@@ -123,7 +123,7 @@ async def remove_admin(
     with transactional() as session:
         admin = session.scalar(select(Admin).filter_by(id=admin_id))
         if admin is None:
-            raise BadRequestException400(Code.UNKNOWN_USER)
+            raise BadRequestException400(Code.UNKNOWN_ADMIN)
         if admin.id == operator_id:
             raise BadRequestException400(Code.CANNOT_REMOVE_YOURSELF)
         admin.remove(operator_id)
@@ -140,7 +140,10 @@ async def change_password(
         if admin is None or admin.removed_flag is True:
             raise BadRequestException400(Code.UNKNOWN_ADMIN)
 
-        if admin.password and not verify_password(data.old_password.get_secret_value(), admin.password):
+        if not admin.password:
+            raise BadRequestException400(Code.UNKNOWN_ADMIN)
+
+        if not verify_password(data.old_password.get_secret_value(), admin.password):
             log.warning("password not match")
             raise BadRequestException400(Code.UNKNOWN_ADMIN)
 

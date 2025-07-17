@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Header, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, Path, Query, status
 
 from app.dependencies.auth import AuthorityChecker, get_operator, get_user_id
 from app.schemas.base import ListResult, Operator, Token
@@ -69,7 +69,7 @@ async def _renew_token(
         Depends(AuthorityChecker([AuthorityEnum.USER_VIEW])),
     ],
 )
-async def _get_user(user_id: int) -> UserResponse:
+async def _get_user(user_id: Annotated[int, Path(ge=1)]) -> UserResponse:
     return await get_user(user_id)
 
 
@@ -105,7 +105,7 @@ async def _login_user(
     ],
 )
 async def _update_user(
-    user_id: int,
+    user_id: Annotated[int, Path(ge=1)],
     data: UserUpdate,
     x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> UserResponse:
@@ -117,7 +117,7 @@ async def _update_user(
     name="비밀번호 변경",
 )
 async def _change_password(
-    user_id: int,
+    user_id: Annotated[int, Path(ge=1)],
     data: UserChangePassword,
     x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> UserResponse:
@@ -146,7 +146,7 @@ async def _logout(x_user_id: Annotated[int, Depends(get_user_id)], background_ta
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def _remove_user(
-    user_id: int,
+    user_id: Annotated[int, Path(ge=1)],
     x_operator: Annotated[Operator, Depends(get_operator)],
 ) -> None:
     await remove_user(user_id, x_operator)

@@ -1,4 +1,5 @@
 import time
+from os import getenv
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -92,9 +93,8 @@ else:
         title="DEMO API",
     )
 
-origins = [
-    "http://localhost:3000",
-]
+cors_origins = getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+origins = [origin.strip() for origin in cors_origins]
 
 app.add_middleware(
     CORSMiddleware,  # type: ignore
