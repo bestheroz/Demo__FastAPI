@@ -66,7 +66,6 @@ class Admin(IdCreatedUpdated, Base):
         operator_id: int,
     ) -> "Admin":
         now = utcnow()
-        dispatch(AdminEvent.ADMIN_CREATED, data)
         return Admin(
             **data.model_dump(exclude={"authorities", "password"}),
             _authorities=data.authorities,

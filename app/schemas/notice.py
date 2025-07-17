@@ -1,7 +1,6 @@
 from pydantic import Field
 
-from app.schemas.base import Pagination, Schema
-from app.schemas.user import IdCreatedUpdatedDto
+from app.schemas.base import IdCreatedUpdatedDto, Pagination, Schema
 
 
 class NoticeBase(Schema):
