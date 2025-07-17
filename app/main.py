@@ -71,18 +71,20 @@ if settings.deployment_environment in ("local", "sandbox", "qa"):
         "`Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9` 로 전달주어야 한다)\n\n"
         "### 테스트을 위한 JWT 토큰은 아래 값을 사용하세요."
         f"""
-        {(
-            create_access_token( 
-                AccessTokenClaims(
-                    id=1,
-                    login_id="developer",
-                    name="개발자",
-                    type=UserTypeEnum.ADMIN,
-                    manager_flag=True,
-                    authorities=[],
+        {
+            (
+                create_access_token(
+                    AccessTokenClaims(
+                        id=1,
+                        login_id="developer",
+                        name="개발자",
+                        type=UserTypeEnum.ADMIN,
+                        manager_flag=True,
+                        authorities=[],
+                    )
                 )
             )
-        )} """,
+        } """,
     )
 else:
     app = FastAPI(
@@ -98,8 +100,8 @@ app.add_middleware(
     CORSMiddleware,  # type: ignore
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allow_headers=["Accept", "Accept-Language", "Content-Language", "Content-Type", "Authorization", "AuthorizationR"],
     expose_headers=["Content-Disposition"],
 )
 
@@ -123,8 +125,7 @@ async def add_process_time_header(request: Request, call_next):
     structlog.contextvars.bind_contextvars(trace_id=trace_id)
 
     # 요청 파라미터 로깅 (민감한 정보 필터링)
-    safe_params = {k: "***" if k.lower() in ("password", "token") else v 
-                   for k, v in request.query_params.items()}
+    safe_params = {k: "***" if k.lower() in ("password", "token") else v for k, v in request.query_params.items()}
     log.info(f"Request[{request.method} {path_and_query}] params: {safe_params}")
 
     start_time = time.perf_counter()
