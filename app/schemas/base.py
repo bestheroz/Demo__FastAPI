@@ -90,5 +90,5 @@ class Operator(Schema):
 
 
 class Pagination(Schema):
-    page: int = Field(1, description="페이지")
-    page_size: int = Field(10, description="페이지 사이즈")
+    page: int = Field(1, description="페이지", ge=1, le=10_000)
+    page_size: int = Field(10, description="페이지 사이즈", ge=1, le=1_000)
