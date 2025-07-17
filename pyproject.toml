@@ -33,7 +33,7 @@ package-mode = false
 [tool.poetry.group.dev.dependencies]
 pyright = "1.1.403"
 mypy = "1.17.0"
-ruff = "0.12.3"
+ruff = "0.12.4"
 
 [tool.poetry.group.types.dependencies]
 types-python-jose = "3.5.0.20250531"
