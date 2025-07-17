@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
 from app.core.exception import UnknownSystemException500
 from app.dependencies.orm import Base, TZDateTime
+from app.events.admin import AdminEvent
 from app.models.base import IdCreatedUpdated
 from app.schemas.admin import (
     AdminCreate,
@@ -65,6 +66,7 @@ class Admin(IdCreatedUpdated, Base):
         operator_id: int,
     ) -> "Admin":
         now = utcnow()
+        dispatch(AdminEvent.ADMIN_CREATED, data)
         return Admin(
             **data.model_dump(exclude={"authorities", "password"}),
             _authorities=data.authorities,
@@ -123,7 +125,7 @@ class Admin(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = AdminResponse.model_validate(self)
-        dispatch("AdminCreatedEvent", event_data)
+        dispatch(AdminEvent.ADMIN_CREATED, event_data)
         return AdminResponse.model_validate(self)
 
     def on_updated(self) -> AdminResponse:
@@ -133,7 +135,7 @@ class Admin(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = AdminResponse.model_validate(self)
-        dispatch("AdminUpdatedEvent", event_data)
+        dispatch(AdminEvent.ADMIN_UPDATED, event_data)
         return event_data
 
     def on_removed(self) -> AdminResponse:
@@ -143,7 +145,7 @@ class Admin(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = AdminResponse.model_validate(self)
-        dispatch("AdminRemovedEvent", event_data)
+        dispatch(AdminEvent.ADMIN_REMOVED, event_data)
         return event_data
 
     def on_logged_in(self) -> Token:
@@ -152,7 +154,7 @@ class Admin(IdCreatedUpdated, Base):
             raise UnknownSystemException500()
         session.flush()
 
-        dispatch("AdminLoggedInEvent", AdminResponse.model_validate(self))
+        dispatch(AdminEvent.ADMIN_LOGGED_IN, AdminResponse.model_validate(self))
         if self.token is None:
             raise UnknownSystemException500()
         return Token(
@@ -167,5 +169,5 @@ class Admin(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = AdminResponse.model_validate(self)
-        dispatch("AdminPasswordChangedEvent", event_data)
+        dispatch(AdminEvent.ADMIN_PASSWORD_CHANGED, event_data)
         return event_data

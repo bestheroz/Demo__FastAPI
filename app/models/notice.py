@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
 from app.core.exception import UnknownSystemException500
 from app.dependencies.orm import Base, TZDateTime
+from app.events.notice import NoticeEvent
 from app.models.base import IdCreatedUpdated
 from app.schemas.notice import NoticeCreate, NoticeResponse
 from app.types.base import UserTypeEnum
@@ -93,6 +94,7 @@ class Notice(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = NoticeResponse.model_validate(self)
+        dispatch(NoticeEvent.NOTICE_CREATED, event_data)
         return event_data
 
     def on_updated(self) -> NoticeResponse:
@@ -102,6 +104,7 @@ class Notice(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = NoticeResponse.model_validate(self)
+        dispatch(NoticeEvent.NOTICE_UPDATED, event_data)
         return event_data
 
     def on_removed(self) -> NoticeResponse:
@@ -111,5 +114,5 @@ class Notice(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = NoticeResponse.model_validate(self)
-        dispatch("NoticeRemovedEvent", event_data)
+        dispatch(NoticeEvent.NOTICE_REMOVED, event_data)
         return event_data

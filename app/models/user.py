@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 from app.core.code import Code
 from app.core.exception import BadRequestException400, UnknownSystemException500
 from app.dependencies.orm import Base, TZDateTime
+from app.events.user import UserEvent
 from app.models.base import IdCreatedUpdated
 from app.schemas.base import Operator, Token
 from app.schemas.user import UserChangePassword, UserCreate, UserResponse, UserUpdate
@@ -143,7 +144,7 @@ class User(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = UserResponse.model_validate(self)
-        dispatch("UserCreated", event_data)
+        dispatch(UserEvent.USER_CREATED, event_data)
         return event_data
 
     def on_updated(self) -> UserResponse:
@@ -153,7 +154,7 @@ class User(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = UserResponse.model_validate(self)
-        dispatch("UserUpdated", event_data)
+        dispatch(UserEvent.USER_UPDATED, event_data)
         return event_data
 
     def on_password_updated(self) -> UserResponse:
@@ -163,7 +164,7 @@ class User(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = UserResponse.model_validate(self)
-        dispatch("UserPasswordUpdated", event_data)
+        dispatch(UserEvent.USER_PASSWORD_UPDATED, event_data)
         return event_data
 
     def on_removed(self) -> UserResponse:
@@ -173,7 +174,7 @@ class User(IdCreatedUpdated, Base):
         session.flush()
 
         event_data = UserResponse.model_validate(self)
-        dispatch("UserRemoved", event_data)
+        dispatch(UserEvent.USER_REMOVED, event_data)
         return event_data
 
     def on_logged_in(self) -> Token:
@@ -182,7 +183,7 @@ class User(IdCreatedUpdated, Base):
             raise UnknownSystemException500()
         session.flush()
 
-        dispatch("UserLoggedIn", UserResponse.model_validate(self))
+        dispatch(UserEvent.USER_LOGGED_IN, UserResponse.model_validate(self))
         if self.token is None:
             raise UnknownSystemException500()
         return Token(
