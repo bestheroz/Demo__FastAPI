@@ -19,6 +19,7 @@ class Settings(CustomBaseSettings):
 
     # from.env files
     sentry_dsn: str
+    jwt_secret_key: str
     db_name: str
     db_host: str
     db_username: str

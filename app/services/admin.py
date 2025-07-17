@@ -96,7 +96,7 @@ async def update_admin(
     with transactional() as session:
         admin = session.scalar(select(Admin).filter_by(id=admin_id))
         if admin is None or admin.removed_flag is True:
-            raise BadRequestException400(Code.UNKNOWN_USER)
+            raise BadRequestException400(Code.UNKNOWN_ADMIN)
         if admin.manager_flag is False and admin.id == operator.id:
             raise BadRequestException400(Code.CANNOT_UPDATE_YOURSELF)
         if admin.manager_flag != data.manager_flag and operator.manager_flag is False:

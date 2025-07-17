@@ -7,7 +7,7 @@ from app.schemas.base import AccessTokenClaims, RefreshTokenClaims
 
 settings = get_settings()
 
-SECRET_KEY = "JOONY.KIM!!demo-api%%jwt^^secret"
+SECRET_KEY = settings.jwt_secret_key + settings.deployment_environment
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_TIME = timedelta(
     minutes=(
