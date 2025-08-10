@@ -3,6 +3,7 @@ from os import getenv
 from pathlib import Path
 
 from pydantic import ValidationError
+from pydantic_settings import SettingsConfigDict
 
 from app.core.settings import CustomBaseSettings
 
@@ -33,9 +34,12 @@ class Settings(CustomBaseSettings):
 
     cors_origins: str = "http://localhost:3000"
 
-    class Config(CustomBaseSettings.Config):
-        env_files = get_dotenv_paths()
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(
+        env_file=get_dotenv_paths(),
+        env_file_encoding="utf-8",
+        frozen=True,
+        extra="ignore",
+    )
 
 
 @lru_cache

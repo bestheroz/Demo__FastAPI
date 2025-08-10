@@ -84,7 +84,6 @@ class DatabaseSessionManager:
             autoflush=False,
             expire_on_commit=False,
             class_=ReadonlySession if readonly else Session,
-            future=True,
         )
 
     def _get_session_factory(self, readonly: bool = False) -> sessionmaker:
