@@ -3,9 +3,7 @@ from os import getenv
 from pathlib import Path
 
 from pydantic import ValidationError
-from pydantic_settings import SettingsConfigDict
-
-from app.core.settings import CustomBaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent.parent
 
@@ -16,7 +14,7 @@ def get_dotenv_paths() -> list[Path]:
     return [dotenv_path / f".env.{env}", dotenv_path / ".env"]
 
 
-class Settings(CustomBaseSettings):
+class Settings(BaseSettings):
     # from environment variables
     deployment_environment: str
 
