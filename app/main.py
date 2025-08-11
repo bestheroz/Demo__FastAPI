@@ -65,10 +65,11 @@ if settings.deployment_environment in ("local", "sandbox", "qa"):
         default_response_class=ORJSONResponse,
         title="Demo API",
         docs_url="/api-docs",
-        description="### 로그인 후 사용자 인증을 위해 헤더에 `Authorization`, `AuthorizationR` 값이 필요함\n\n"
+        description="### 로그인 후 사용자 인증을 위해 헤더에 `Authorization` 값이 필요함\n\n"
         "토큰값을 헤더에서 전달할때는 scheme 정보인 `Bearer ` 를 반드시 붙여줘야 한다. "
         "(예: 토큰이 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9 라면 "
         "`Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9` 로 전달주어야 한다)\n\n"
+        "토큰 갱신 시에도 동일한 `Authorization` 헤더에 refresh token을 Bearer 형식으로 전달한다.\n\n"
         "### 테스트을 위한 JWT 토큰은 아래 값을 사용하세요."
         f"""
         {

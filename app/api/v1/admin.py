@@ -57,9 +57,9 @@ async def _check_login_id(login_id: Annotated[str, Query()], admin_id: Annotated
     "(동시에 여러 사용자가 접속하고 있다면 *리플래시 토큰* 값이 달라서 갱신이 안될 수 있습니다.)",
 )
 async def _renew_token(
-    refresh_token: str = Header(alias="AuthorizationR"),
+    authorization: str = Header(),
 ) -> Token:
-    return await renew_token(refresh_token)
+    return await renew_token(authorization)
 
 
 @admin_router.get(

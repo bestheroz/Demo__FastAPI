@@ -185,10 +185,10 @@ async def login_admin(
         return admin.on_logged_in()
 
 
-async def renew_token(refresh_token: str) -> Token:
+async def renew_token(authorization: str) -> Token:
     with transactional() as session:
         try:
-            _scheme, credentials = get_authorization_scheme_param(refresh_token)
+            _scheme, credentials = get_authorization_scheme_param(authorization)
             admin_id = get_refresh_token_claims(credentials).id
             admin = session.scalar(select(Admin).filter_by(id=admin_id))
 
