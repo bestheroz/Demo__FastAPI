@@ -1,6 +1,7 @@
 import jwt
 from fastapi.security.utils import get_authorization_scheme_param
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.functions import count
 from structlog import get_logger
 
@@ -69,7 +70,12 @@ async def get_admins(
 
 async def get_admin(admin_id: int) -> AdminResponse:
     with transactional(readonly=True) as session:
-        result = session.scalar(select(Admin).filter_by(id=admin_id).filter_by(removed_flag=False))
+        result = session.scalar(
+            select(Admin)
+            .options(joinedload(Admin.created_by), joinedload(Admin.updated_by))
+            .filter_by(id=admin_id)
+            .filter_by(removed_flag=False)
+        )
         if result is None:
             raise BadRequestException400(Code.UNKNOWN_ADMIN)
         return AdminResponse.model_validate(result)
@@ -144,8 +150,13 @@ async def change_password(
             raise BadRequestException400(Code.UNKNOWN_ADMIN)
 
         if not verify_password(data.old_password.get_secret_value(), admin.password):
-            log.warning("password not match")
-            raise BadRequestException400(Code.UNKNOWN_ADMIN)
+            log.warning(
+                "Admin password change failed - invalid old password",
+                admin_id=admin_id,
+                login_id=admin.login_id,
+                operator_id=operator.id,
+            )
+            raise BadRequestException400(Code.INVALID_PASSWORD)
 
         if data.old_password.get_secret_value() == data.new_password.get_secret_value():
             raise BadRequestException400(Code.CHANGE_TO_SAME_PASSWORD)
@@ -166,8 +177,8 @@ async def login_admin(
             raise BadRequestException400(Code.UNKNOWN_ADMIN)
 
         if verify_password(data.password.get_secret_value(), admin.password) is False:
-            log.warning("password not match")
-            raise BadRequestException400(Code.UNKNOWN_ADMIN)
+            log.warning("Admin login failed - invalid password", login_id=data.login_id, admin_id=admin.id)
+            raise BadRequestException400(Code.INVALID_PASSWORD)
 
         admin.renew_token()
 

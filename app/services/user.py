@@ -129,7 +129,7 @@ async def login_user(
             raise BadRequestException400(Code.UNKNOWN_USER)
 
         if verify_password(data.password.get_secret_value(), user.password) is False:
-            log.warning("password not match")
+            log.warning("User login failed - invalid password", login_id=data.login_id, user_id=user.id)
             raise BadRequestException400(Code.UNKNOWN_USER)
 
         user.renew_token()

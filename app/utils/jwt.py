@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from jwt import DecodeError, InvalidTokenError, decode, encode
 
@@ -17,22 +18,27 @@ ACCESS_TOKEN_EXPIRE_TIME = timedelta(
 REFRESH_TOKEN_EXPIRE_TIME = timedelta(minutes=30)
 
 
-def create_access_token(data) -> str:
+def create_access_token(data: AccessTokenClaims | Any) -> str:
     _dict = AccessTokenClaims.model_validate(data).model_dump(by_alias=True)
     _dict.update({"exp": int((datetime.now(UTC) + ACCESS_TOKEN_EXPIRE_TIME).timestamp())})
     return encode(_dict, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def create_refresh_token(data) -> str:
+def create_refresh_token(data: RefreshTokenClaims | Any) -> str:
     _dict = RefreshTokenClaims.model_validate(data).model_dump(by_alias=True)
     _dict.update({"exp": int((datetime.now(UTC) + REFRESH_TOKEN_EXPIRE_TIME).timestamp())})
     return encode(_dict, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def is_validated_jwt(token: str) -> bool:
+    """JWT 토큰의 유효성을 검증합니다."""
+    if not token or not token.strip():
+        return False
+
     try:
-        decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return True
+        payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # 토큰에 필수 필드가 있는지 확인
+        return "exp" in payload
     except (DecodeError, InvalidTokenError):
         return False
 
@@ -49,7 +55,7 @@ def issued_refresh_token_in_10_seconds(token: str) -> bool:
         return False
 
 
-def get_claims(token: str) -> dict:
+def get_claims(token: str) -> dict[str, Any]:
     return decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
 
