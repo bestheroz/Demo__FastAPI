@@ -36,10 +36,6 @@ pyright = "1.1.404"
 mypy = "1.17.1"
 ruff = "0.12.10"
 
-[tool.poetry.group.types.dependencies]
-types-python-jose = "3.5.0.20250531"
-types-aiobotocore = "2.24.1"
-
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
