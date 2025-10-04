@@ -24,8 +24,19 @@ def _truncate_password_to_72_bytes(password: str) -> bytes:
     return b""
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """비밀번호 검증"""
+def verify_password(plain_password: str, hashed_password: str | None) -> bool:
+    """비밀번호 검증
+
+    Args:
+        plain_password: 평문 비밀번호
+        hashed_password: 해시된 비밀번호 (None인 경우 False 반환)
+
+    Returns:
+        비밀번호 일치 여부
+    """
+    if hashed_password is None:
+        return False
+
     password_bytes = _truncate_password_to_72_bytes(plain_password)
     hashed_bytes = hashed_password.encode("utf-8")
     return bcrypt.checkpw(password_bytes, hashed_bytes)
