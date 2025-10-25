@@ -7,10 +7,10 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13,<4.0"
 dependencies = [
-    "fastapi (==0.119.1)",
+    "fastapi (==0.120.0)",
     "pydantic[email] (==2.12.3)",
     "pydantic-settings (==2.11.0)",
-    "orjson (==3.11.3)",
+    "orjson (==3.11.4)",
     "uvicorn (==0.38.0)",
     "aiomysql (==0.3.2)",
     "sqlalchemy (==2.0.44)",
@@ -32,9 +32,9 @@ package-mode = false
 
 
 [tool.poetry.group.dev.dependencies]
-pyright = "1.1.406"
+pyright = "1.1.407"
 mypy = "1.18.2"
-ruff = "0.14.1"
+ruff = "0.14.2"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
