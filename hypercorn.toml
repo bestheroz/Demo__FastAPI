@@ -1,0 +1,46 @@
+# Hypercorn Configuration for EKS/Kubernetes
+# https://hypercorn.readthedocs.io/en/latest/how_to_guides/configuring.html
+
+# Server socket binding
+bind = ["0.0.0.0:8000"]
+
+# Worker processes
+# Formula: (CPU cores * 2) + 1
+# Default: 5 workers for 2 CPU cores
+workers = 5
+
+# Worker class - use asyncio for async FastAPI
+worker_class = "asyncio"
+
+# Graceful timeout for shutdown
+graceful_timeout = 30
+
+# Keep-alive timeout
+keep_alive_timeout = 5
+
+# Request timeout
+timeout = 120
+
+# Enable access logging
+accesslog = "-"  # stdout
+errorlog = "-"   # stderr
+
+# Log level
+loglevel = "info"
+
+# HTTP/2 support
+# h2 protocol is automatically enabled by Hypercorn
+# No additional configuration needed
+
+# SSL/TLS (if needed - usually handled by Ingress/ALB)
+# certfile = "/path/to/cert.pem"
+# keyfile = "/path/to/key.pem"
+
+# Server name
+server_names = ["fastapi-app"]
+
+# Backlog for connections
+backlog = 100
+
+# Maximum concurrent connections per worker
+worker_connections = 1000
