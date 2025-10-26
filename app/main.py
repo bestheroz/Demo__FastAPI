@@ -11,6 +11,7 @@ from fastapi.responses import ORJSONResponse
 from fastapi.routing import APIRoute
 from fastapi_events.handlers.local import local_handler
 from fastapi_events.middleware import EventHandlerASGIMiddleware
+from mangum import Mangum
 from sentry_sdk import capture_exception, init
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
@@ -216,3 +217,6 @@ public_paths = [
     "/health/liveness",
     "/health/readiness",
 ]
+
+
+handler = Mangum(app, lifespan="off")
