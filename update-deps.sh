@@ -35,30 +35,26 @@ while IFS= read -r line; do
         echo "⬆️  $package_name: $current_version -> $latest_version"
 
         # pyproject.toml에서 해당 패키지 버전 업데이트
+        # extras 구문 ([email], [fastapi] 등)을 포함한 패턴 매칭
         # macOS의 sed는 -i 옵션에 백업 확장자가 필요
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s/\"$package_name (==$current_version)\"/\"$package_name (==$latest_version)\"/" pyproject.toml
-            sed -i '' "s/$package_name = \"$current_version\"/$package_name = \"$latest_version\"/" pyproject.toml
+            # 패턴 1: "package[extras] (==version)" 형태
+            sed -i '' -E "s/\"$package_name(\[[^]]+\])? \(==$current_version\)\"/\"$package_name\1 (==$latest_version)\"/" pyproject.toml
+            # 패턴 2: package[extras] = "version" 형태
+            sed -i '' -E "s/$package_name(\[[^]]+\])? = \"$current_version\"/$package_name\1 = \"$latest_version\"/" pyproject.toml
         else
-            sed -i "s/\"$package_name (==$current_version)\"/\"$package_name (==$latest_version)\"/" pyproject.toml
-            sed -i "s/$package_name = \"$current_version\"/$package_name = \"$latest_version\"/" pyproject.toml
+            sed -i -E "s/\"$package_name(\[[^]]+\])? \(==$current_version\)\"/\"$package_name\1 (==$latest_version)\"/" pyproject.toml
+            sed -i -E "s/$package_name(\[[^]]+\])? = \"$current_version\"/$package_name\1 = \"$latest_version\"/" pyproject.toml
         fi
     fi
 done <<< "$outdated_packages"
 
 echo ""
 echo "✅ pyproject.toml 업데이트 완료"
-echo ""
-echo "📝 변경사항 확인:"
-git diff pyproject.toml
 
 echo ""
-echo "🔄 Poetry lock 파일 업데이트 중..."
-poetry lock --no-update
-
-echo ""
-echo "📦 패키지 설치 중..."
-poetry install
+echo "🔄 Poetry lock 업데이트 및 패키지 설치 중..."
+poetry update
 
 echo ""
 echo "✨ 모든 업데이트가 완료되었습니다!"
