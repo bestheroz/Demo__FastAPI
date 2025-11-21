@@ -16,7 +16,7 @@ FastAPI는 ASGI(Asynchronous Server Gateway Interface) 프레임워크이므로,
 
 ### 프로젝트 현황
 - **프레임워크**: FastAPI 0.120.0
-- **Python 버전**: 3.13
+- **Python 버전**: 3.14
 - **주요 의존성**:
   - uvicorn 0.38.0
   - SQLAlchemy 2.0.44 (비동기 지원)
@@ -172,7 +172,7 @@ API Gateway/ALB
 
 ```dockerfile
 # Dockerfile.lambda (현재 구성)
-FROM public.ecr.aws/lambda/python:3.13
+FROM public.ecr.aws/lambda/python:3.14
 LABEL maintainer="joony.kim <bestheroz@gmail.com>"
 
 ENV POETRY_VERSION=2.2.1
@@ -248,7 +248,7 @@ aws lambda update-function-code \
 
 ```dockerfile
 # Dockerfile.eks (EKS 배포용)
-FROM public.ecr.aws/docker/library/python:3.13-bookworm as builder
+FROM public.ecr.aws/docker/library/python:3.14-bookworm as builder
 LABEL maintainer="joony.kim <bestheroz@gmail.com>"
 
 ENV POETRY_VERSION=2.2.1
@@ -262,7 +262,7 @@ COPY poetry.lock pyproject.toml ./
 RUN poetry config virtualenvs.create false \
     && poetry install --only=main --no-root
 
-FROM public.ecr.aws/docker/library/python:3.13-slim-bookworm as runner
+FROM public.ecr.aws/docker/library/python:3.14-slim-bookworm as runner
 LABEL maintainer="joony.kim <bestheroz@gmail.com>"
 
 RUN useradd --create-home appuser
@@ -948,5 +948,5 @@ Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 ## 문서 버전
 - **작성일**: 2025-01-26
-- **프로젝트 버전**: FastAPI 0.120.0, Python 3.13
+- **프로젝트 버전**: FastAPI 0.120.0, Python 3.14
 - **마지막 업데이트**: 2025-01-26

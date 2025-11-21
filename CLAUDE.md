@@ -82,7 +82,7 @@ The application is organized around three main domains:
 
 ### Code Style and Quality
 - **Line length**: 120 characters (configured in `ruff.toml`)
-- **Python version**: 3.13
+- **Python version**: 3.14
 - **Import sorting**: Using ruff's isort integration
 - **Quote style**: Double quotes preferred
 - **Async/await**: Extensively used throughout the application
