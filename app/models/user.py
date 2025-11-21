@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from fastapi_events.dispatcher import dispatch
 from pydantic import AwareDatetime
 from sqlalchemy import JSON
@@ -37,20 +39,20 @@ class User(IdCreatedUpdated, Base):
     removed_flag: Mapped[bool]
     removed_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=True)
 
-    created_by_admin: Mapped["Admin"] = relationship(  # type: ignore # noqa: F821
+    created_by_admin: Mapped[Admin] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
         primaryjoin="foreign(User.created_object_id) == remote(Admin.id)",
     )
-    updated_by_admin: Mapped["Admin"] = relationship(  # type: ignore # noqa: F821
+    updated_by_admin: Mapped[Admin] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
         primaryjoin="foreign(User.updated_object_id) == remote(Admin.id)",
     )
 
-    created_by_user: Mapped["User"] = relationship(
+    created_by_user: Mapped[User] = relationship(
         viewonly=True,
         primaryjoin="foreign(User.created_object_id) == remote(User.id)",
     )
-    updated_by_user: Mapped["User"] = relationship(
+    updated_by_user: Mapped[User] = relationship(
         viewonly=True,
         primaryjoin="foreign(User.updated_object_id) == remote(User.id)",
     )
