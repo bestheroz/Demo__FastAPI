@@ -59,7 +59,8 @@ include = ["app"]
 exclude = [
     "**/node_modules",
     "**/__pycache__",
-    "**/venv"
+    "**/venv",
+    "**/.venv"
 ]
 defineConstant = { DEBUG = true }
 
@@ -67,7 +68,6 @@ reportMissingImports = false
 reportMissingTypeStubs = false
 reportGeneralTypeIssues = false
 reportMissingModuleSource = false
-reportInvalidTypeForm = false
 
 pythonVersion = "3.14"
 pythonPlatform = "Linux"
