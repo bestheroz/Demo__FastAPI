@@ -12,6 +12,7 @@ from fastapi.routing import APIRoute
 from fastapi_events.handlers.local import local_handler
 from fastapi_events.middleware import EventHandlerASGIMiddleware
 from mangum import Mangum
+from pydantic.alias_generators import to_camel
 from sentry_sdk import capture_exception, init
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
@@ -41,7 +42,6 @@ from app.dependencies.logger import setup_logger
 from app.schemas.base import AccessTokenClaims
 from app.types.base import UserTypeEnum
 from app.utils.jwt import create_access_token
-from app.utils.string import camelize
 
 setup_logger()
 log = structlog.get_logger()
@@ -131,9 +131,11 @@ async def add_process_time_header(request: Request, call_next):
 
     start_time = time.perf_counter()
     response = await call_next(request)
-    process_time = time.perf_counter() - start_time
-    log.info(f"Response[{request.method} {path_and_query}] status={response.status_code}, time: {process_time:.2f}ms")
-    response.headers["X-Process-Time"] = str(process_time)
+    process_time_ms = (time.perf_counter() - start_time) * 1000
+    log.info(
+        f"Response[{request.method} {path_and_query}] status={response.status_code}, time: {process_time_ms:.2f}ms"
+    )
+    response.headers["X-Process-Time"] = str(process_time_ms)
     return response
 
 
@@ -144,7 +146,7 @@ app.include_router(user_router, prefix="/api")
 for route in app.routes:
     if isinstance(route, APIRoute):
         for param in route.dependant.query_params:
-            param.field_info.alias = camelize(param.name)
+            param.field_info.alias = to_camel(param.name)
 
 
 @app.exception_handler(RequestValidationError)

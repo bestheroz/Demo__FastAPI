@@ -4,7 +4,6 @@ from fastapi.security.utils import get_authorization_scheme_param
 from structlog import get_logger
 
 from app.core.code import Code
-from app.core.config import get_settings
 from app.core.exception import (
     ForbiddenException403,
     UnauthorizedException401,
@@ -12,8 +11,6 @@ from app.core.exception import (
 from app.schemas.base import AccessTokenClaims, Operator
 from app.types.base import AuthorityEnum, UserTypeEnum
 from app.utils.jwt import get_access_token_claims, is_validated_jwt
-
-settings = get_settings()
 
 log = get_logger()
 
@@ -92,11 +89,8 @@ class AuthorityChecker:
         self,
         credentials: HTTPAuthorizationCredentials,
     ) -> bool:
-        access_token = credentials.credentials
-        if not is_validated_jwt(access_token):
-            raise UnauthorizedException401(Code.EXPIRED_TOKEN)
-
-        claims = get_access_token_claims(access_token)
+        # JWT 검증은 verify_jwt dependency에서 이미 완료됨
+        claims = get_access_token_claims(credentials.credentials)
         if claims.manager_flag:
             return True
 
@@ -124,11 +118,8 @@ class SuperManagerOnly:
 
     @staticmethod
     def is_authorized(credentials: HTTPAuthorizationCredentials) -> bool:
-        access_token = credentials.credentials
-        if not is_validated_jwt(access_token):
-            raise UnauthorizedException401(Code.EXPIRED_TOKEN)
-
-        claims = get_access_token_claims(access_token)
+        # JWT 검증은 verify_jwt dependency에서 이미 완료됨
+        claims = get_access_token_claims(credentials.credentials)
         result = bool(claims.manager_flag)
         if not result:
             log.warning(f"You are not super admin: {claims}")
