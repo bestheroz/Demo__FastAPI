@@ -1,6 +1,7 @@
 import jwt
 from fastapi.security.utils import get_authorization_scheme_param
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.functions import count
 from structlog import get_logger
 
@@ -46,7 +47,7 @@ async def get_users(
             initial_query = initial_query.filter_by(use_flag=request.use_flag)
             count_query = count_query.filter_by(use_flag=request.use_flag)
 
-        return await get_pagination_list(
+        return get_pagination_list(
             session=session,
             initial_query=initial_query,
             count_query=count_query,
@@ -59,7 +60,17 @@ async def get_users(
 
 async def get_user(user_id: int) -> UserResponse:
     with transactional(readonly=True) as session:
-        result = session.scalar(select(User).filter_by(id=user_id).filter_by(removed_flag=False))
+        result = session.scalar(
+            select(User)
+            .options(
+                joinedload(User.created_by_admin),
+                joinedload(User.created_by_user),
+                joinedload(User.updated_by_admin),
+                joinedload(User.updated_by_user),
+            )
+            .filter_by(id=user_id)
+            .filter_by(removed_flag=False)
+        )
         if result is None:
             raise BadRequestException400(Code.UNKNOWN_USER)
         return UserResponse.model_validate(result)

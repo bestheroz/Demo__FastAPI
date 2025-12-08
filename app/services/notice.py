@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.functions import count
 
 from app.core.code import Code
@@ -29,7 +30,7 @@ async def get_notices(
             initial_query = initial_query.filter_by(use_flag=request.use_flag)
             count_query = count_query.filter_by(use_flag=request.use_flag)
 
-        return await get_pagination_list(
+        return get_pagination_list(
             session=session,
             initial_query=initial_query,
             count_query=count_query,
@@ -42,7 +43,17 @@ async def get_notices(
 
 async def get_notice(notice_id: int) -> NoticeResponse:
     with transactional(readonly=True) as session:
-        result = session.scalar(select(Notice).filter_by(id=notice_id))
+        result = session.scalar(
+            select(Notice)
+            .options(
+                joinedload(Notice.created_by_admin),
+                joinedload(Notice.created_by_user),
+                joinedload(Notice.updated_by_admin),
+                joinedload(Notice.updated_by_user),
+            )
+            .filter_by(id=notice_id)
+            .filter_by(removed_flag=False)
+        )
         if result is None:
             raise BadRequestException400(Code.UNKNOWN_NOTICE)
         return NoticeResponse.model_validate(result)
