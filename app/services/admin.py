@@ -57,7 +57,7 @@ async def get_admins(
             initial_query = initial_query.filter_by(manager_flag=request.manager_flag)
             count_query = count_query.filter_by(manager_flag=request.manager_flag)
 
-        return await get_pagination_list(
+        return get_pagination_list(
             session=session,
             initial_query=initial_query,
             count_query=count_query,

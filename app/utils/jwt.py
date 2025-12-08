@@ -5,6 +5,7 @@ from jwt import DecodeError, InvalidTokenError, decode, encode
 
 from app.core.config import get_settings
 from app.schemas.base import AccessTokenClaims, RefreshTokenClaims
+from app.utils.datetime_utils import utcnow
 
 settings = get_settings()
 
@@ -20,13 +21,13 @@ REFRESH_TOKEN_EXPIRE_TIME = timedelta(minutes=30)
 
 def create_access_token(data: AccessTokenClaims | Any) -> str:
     _dict = AccessTokenClaims.model_validate(data).model_dump(by_alias=True)
-    _dict.update({"exp": int((datetime.now(UTC) + ACCESS_TOKEN_EXPIRE_TIME).timestamp())})
+    _dict.update({"exp": int((utcnow() + ACCESS_TOKEN_EXPIRE_TIME).timestamp())})
     return encode(_dict, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def create_refresh_token(data: RefreshTokenClaims | Any) -> str:
     _dict = RefreshTokenClaims.model_validate(data).model_dump(by_alias=True)
-    _dict.update({"exp": int((datetime.now(UTC) + REFRESH_TOKEN_EXPIRE_TIME).timestamp())})
+    _dict.update({"exp": int((utcnow() + REFRESH_TOKEN_EXPIRE_TIME).timestamp())})
     return encode(_dict, SECRET_KEY, algorithm=ALGORITHM)
 
 
@@ -48,7 +49,7 @@ def issued_refresh_token_in_10_seconds(token: str) -> bool:
         return False
     try:
         payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        expiration_time_from_current = datetime.now(UTC) + REFRESH_TOKEN_EXPIRE_TIME
+        expiration_time_from_current = utcnow() + REFRESH_TOKEN_EXPIRE_TIME
         expiration_time = datetime.fromtimestamp(payload["exp"], tz=UTC).replace(tzinfo=UTC)
         return expiration_time_from_current - expiration_time < timedelta(seconds=10)
     except (DecodeError, InvalidTokenError):
