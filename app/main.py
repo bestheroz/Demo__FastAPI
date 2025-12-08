@@ -206,7 +206,7 @@ def liveness():
 
 
 @app.get("/health/readiness", include_in_schema=False)
-async def readiness(session=Depends(get_session)):
+def readiness(session=Depends(get_session)):
     session.execute(text("SELECT now()"))
     return {"status": f"{settings.deployment_environment} UP"}
 
