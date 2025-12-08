@@ -127,7 +127,7 @@ class Admin(IdCreatedUpdated, Base):
 
         event_data = AdminResponse.model_validate(self)
         dispatch(AdminEvent.ADMIN_CREATED, event_data)
-        return AdminResponse.model_validate(self)
+        return event_data
 
     def on_updated(self) -> AdminResponse:
         session = object_session(self)
