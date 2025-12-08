@@ -43,15 +43,15 @@ class Base(DeclarativeBase):
     __allow_unmapped__ = True
 
 
-mapped_intpk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
-mapped_created_at = Annotated[
+type mapped_intpk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
+type mapped_created_at = Annotated[
     AwareDatetime,
     mapped_column(
         "created_at",
         TZDateTime,
     ),
 ]
-mapped_updated_at = Annotated[
+type mapped_updated_at = Annotated[
     AwareDatetime,
     mapped_column(
         "updated_at",

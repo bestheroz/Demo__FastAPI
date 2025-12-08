@@ -206,17 +206,9 @@ def liveness():
 
 
 @app.get("/health/readiness", include_in_schema=False)
-def readiness(session=Depends(get_session)):
+async def readiness(session=Depends(get_session)):
     session.execute(text("SELECT now()"))
     return {"status": f"{settings.deployment_environment} UP"}
-
-
-public_paths = [
-    "/openapi.json",
-    "/docs",
-    "/health/liveness",
-    "/health/readiness",
-]
 
 
 handler = Mangum(app, lifespan="off")

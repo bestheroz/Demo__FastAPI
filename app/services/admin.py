@@ -101,11 +101,11 @@ async def update_admin(
 ) -> AdminResponse:
     with transactional() as session:
         admin = session.scalar(select(Admin).filter_by(id=admin_id))
-        if admin is None or admin.removed_flag is True:
+        if admin is None or admin.removed_flag:
             raise BadRequestException400(Code.UNKNOWN_ADMIN)
-        if admin.manager_flag is False and admin.id == operator.id:
+        if not admin.manager_flag and admin.id == operator.id:
             raise BadRequestException400(Code.CANNOT_UPDATE_YOURSELF)
-        if admin.manager_flag != data.manager_flag and operator.manager_flag is False:
+        if admin.manager_flag != data.manager_flag and not operator.manager_flag:
             raise BadRequestException400(Code.UNKNOWN_AUTHORITY)
         if (
             session.scalar(
@@ -143,7 +143,7 @@ async def change_password(
 ) -> AdminResponse:
     with transactional() as session:
         admin = session.scalar(select(Admin).filter_by(id=admin_id))
-        if admin is None or admin.removed_flag is True:
+        if admin is None or admin.removed_flag:
             raise BadRequestException400(Code.UNKNOWN_ADMIN)
 
         if not admin.password:
@@ -173,10 +173,10 @@ async def login_admin(
         if admin is None:
             raise BadRequestException400(Code.UNJOINED_ACCOUNT)
 
-        if admin.use_flag is False:
+        if not admin.use_flag:
             raise BadRequestException400(Code.UNKNOWN_ADMIN)
 
-        if verify_password(data.password.get_secret_value(), admin.password) is False:
+        if not verify_password(data.password.get_secret_value(), admin.password):
             log.warning("Admin login failed - invalid password", login_id=data.login_id, admin_id=admin.id)
             raise BadRequestException400(Code.INVALID_PASSWORD)
 
@@ -192,7 +192,7 @@ async def renew_token(authorization: str) -> Token:
             admin_id = get_refresh_token_claims(credentials).id
             admin = session.scalar(select(Admin).filter_by(id=admin_id))
 
-            if admin is None or admin.removed_flag is True or admin.token is None or not is_validated_jwt(admin.token):
+            if admin is None or admin.removed_flag or admin.token is None or not is_validated_jwt(admin.token):
                 raise UnauthorizedException401()
 
             if admin.token and issued_refresh_token_in_10_seconds(admin.token):

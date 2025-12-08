@@ -78,7 +78,7 @@ async def create_user(data: UserCreate, operator: Operator) -> UserResponse:
 async def update_user(user_id: int, data: UserUpdate, operator: Operator) -> UserResponse:
     with transactional() as session:
         user = session.scalar(select(User).filter_by(id=user_id))
-        if user is None or user.removed_flag is True:
+        if user is None or user.removed_flag:
             raise BadRequestException400(Code.UNKNOWN_USER)
 
         if (
@@ -96,7 +96,7 @@ async def update_user(user_id: int, data: UserUpdate, operator: Operator) -> Use
 async def change_password(user_id: int, data: UserChangePassword, operator: Operator) -> UserResponse:
     with transactional() as session:
         user = session.scalar(select(User).filter_by(id=user_id))
-        if user is None or user.removed_flag is True:
+        if user is None or user.removed_flag:
             raise BadRequestException400(Code.UNKNOWN_USER)
         if operator.type == UserTypeEnum.USER and user.id != operator.id:
             raise BadRequestException400(Code.CANNOT_CHANGE_OTHERS_PASSWORD)
@@ -111,7 +111,7 @@ async def change_password(user_id: int, data: UserChangePassword, operator: Oper
 async def remove_user(user_id: int, operator: Operator) -> None:
     with transactional() as session:
         user = session.scalar(select(User).filter_by(id=user_id))
-        if user is None or user.removed_flag is True:
+        if user is None or user.removed_flag:
             raise BadRequestException400(Code.UNKNOWN_USER)
         user.remove(operator)
         user.on_removed()
@@ -125,10 +125,10 @@ async def login_user(
         if user is None:
             raise BadRequestException400(Code.UNJOINED_ACCOUNT)
 
-        if user.use_flag is False:
+        if not user.use_flag:
             raise BadRequestException400(Code.UNKNOWN_USER)
 
-        if verify_password(data.password.get_secret_value(), user.password) is False:
+        if not verify_password(data.password.get_secret_value(), user.password):
             log.warning("User login failed - invalid password", login_id=data.login_id, user_id=user.id)
             raise BadRequestException400(Code.UNKNOWN_USER)
 
@@ -144,7 +144,7 @@ async def renew_token(authorization: str) -> Token:
             user_id = get_refresh_token_claims(credentials).id
             user = session.scalar(select(User).filter_by(id=user_id))
 
-            if user is None or user.removed_flag is True or user.token is None or not is_validated_jwt(user.token):
+            if user is None or user.removed_flag or user.token is None or not is_validated_jwt(user.token):
                 raise UnauthorizedException401()
 
             if user.token and issued_refresh_token_in_10_seconds(user.token):
