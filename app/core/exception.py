@@ -3,7 +3,7 @@ from app.core.code import Code
 
 class BaseException(Exception):
     """Base exception class to reduce code duplication."""
-    
+
     def __init__(self, code: Code, data: dict | list | None = None):
         self.code = code.name
         self.message = code.value
@@ -13,12 +13,13 @@ class BaseException(Exception):
 
 class BadRequestException400(BaseException):
     """400 Bad Request exception."""
+
     pass
 
 
 class UnauthorizedException401(BaseException):
     """401 Unauthorized exception."""
-    
+
     def __init__(
         self,
         code: Code = Code.UNKNOWN_AUTHENTICATION,
@@ -29,7 +30,7 @@ class UnauthorizedException401(BaseException):
 
 class ForbiddenException403(BaseException):
     """403 Forbidden exception."""
-    
+
     def __init__(
         self,
         code: Code = Code.UNKNOWN_AUTHORITY,
@@ -40,7 +41,7 @@ class ForbiddenException403(BaseException):
 
 class UnknownSystemException500(BaseException):
     """500 Internal Server Error exception."""
-    
+
     def __init__(
         self,
         code: Code = Code.UNKNOWN_SYSTEM_ERROR,

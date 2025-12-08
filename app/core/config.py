@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # from environment variables
     deployment_environment: str
 
-    # from.env files
+    # from .env files
     sentry_dsn: str
     jwt_secret_key: str
     db_name: str

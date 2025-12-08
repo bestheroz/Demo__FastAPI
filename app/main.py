@@ -211,12 +211,4 @@ def readiness(session=Depends(get_session)):
     return {"status": f"{settings.deployment_environment} UP"}
 
 
-public_paths = [
-    "/openapi.json",
-    "/docs",
-    "/health/liveness",
-    "/health/readiness",
-]
-
-
 handler = Mangum(app, lifespan="off")
