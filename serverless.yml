@@ -16,9 +16,6 @@ provider:
   name: aws
   region: ${self:custom.env.AWS_PROFILE_REGION}
   stage: ${opt:stage, 'sandbox'}
-  apiGateway:
-    binaryMediaTypes:
-      - '*/*'
   memorySize: 1024
   timeout: 30
   iam:
@@ -40,17 +37,22 @@ functions:
       name: demo-api
     name: ${self:custom.env.SERVICE_NAME}-${self:custom.env.STAGE}
     maximumRetryAttempts: 0
-    events:
-      - http:
-          method: ANY
-          path: /
-          cors: true
-          private: false
-      - http:
-          method: ANY
-          path: "{proxy+}"
-          cors: true
-          private: false
+    url:
+      cors:
+        allowedOrigins:
+          - '*'
+        allowedHeaders:
+          - Content-Type
+          - Authorization
+          - X-Requested-With
+        allowedMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        allowCredentials: false
 
 plugins:
   - serverless-python-requirements
