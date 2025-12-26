@@ -44,5 +44,13 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Cache Docker layers
+        uses: satackey/action-docker-layer-caching@master
+        continue-on-error: true
+        with:
+          key: docker-layer-prod-${{ hashFiles('Dockerfile.lambda', 'poetry.lock') }}
+          restore-keys: |
+            docker-layer-prod-
+
       - name: deploy-prod
         run: sls deploy -s prod
