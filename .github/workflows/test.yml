@@ -24,6 +24,15 @@ jobs:
       - name: Install dependencies
         run: poetry install --only=main,dev
 
+      - name: Cache mypy
+        uses: actions/cache@main
+        with:
+          path: .mypy_cache
+          key: mypy-${{ runner.os }}-${{ hashFiles('poetry.lock') }}-${{ hashFiles('app/**/*.py') }}
+          restore-keys: |
+            mypy-${{ runner.os }}-${{ hashFiles('poetry.lock') }}-
+            mypy-${{ runner.os }}-
+
       - name: Run mypy
         run: poetry run mypy app/
 
@@ -48,6 +57,14 @@ jobs:
 
       - name: Install dependencies
         run: poetry install --only=main,dev
+
+      - name: Cache pyright
+        uses: actions/cache@main
+        with:
+          path: ~/.cache/pyright
+          key: pyright-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            pyright-${{ runner.os }}-
 
       - name: Run pyright
         run: poetry run pyright app/
