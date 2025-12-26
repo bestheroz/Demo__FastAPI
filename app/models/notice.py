@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
 from fastapi_events.dispatcher import dispatch
 from sqlalchemy import Column
@@ -40,7 +40,7 @@ class NoticeCreate(NoticeBase):
 class NoticeTable(NoticeBase, table=True):
     """Notice 테이블 모델"""
 
-    __tablename__: ClassVar[str] = "notice"
+    __tablename__ = "notice"  # pyright: ignore[reportIncompatibleVariableOverride]
 
     # Primary Key
     id: int | None = Field(default=None, primary_key=True)
