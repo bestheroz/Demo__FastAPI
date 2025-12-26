@@ -16,15 +16,15 @@ async def get_notices(
 ) -> ListResult[NoticeResponse]:
     with transactional(readonly=True) as session:
         initial_query = select(Notice).filter_by(removed_flag=False)
-        count_query = select(count(Notice.id)).filter_by(removed_flag=False)
+        count_query = select(count(Notice.id)).filter_by(removed_flag=False)  # type: ignore[arg-type]
 
         if request.id is not None:
             initial_query = initial_query.filter_by(id=request.id)
             count_query = count_query.filter_by(id=request.id)
 
         if request.title is not None:
-            initial_query = initial_query.filter(Notice.title.ilike(f"%{request.title}%"))
-            count_query = count_query.filter(Notice.title.ilike(f"%{request.title}%"))
+            initial_query = initial_query.filter(Notice.title.ilike(f"%{request.title}%"))  # type: ignore[union-attr]
+            count_query = count_query.filter(Notice.title.ilike(f"%{request.title}%"))  # type: ignore[union-attr]
 
         if request.use_flag is not None:
             initial_query = initial_query.filter_by(use_flag=request.use_flag)
