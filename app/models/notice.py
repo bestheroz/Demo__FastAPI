@@ -43,7 +43,10 @@ class NoticeTable(NoticeBase, table=True):
     __tablename__ = "notice"  # pyright: ignore[reportAssignmentType]
 
     # Primary Key
-    id: int | None = Field(default=None, primary_key=True)
+    id: int | None = Field(
+        default=None,
+        sa_column=Column("id", Integer, primary_key=True, autoincrement=True),
+    )
 
     # NoticeBase 필드 재정의 (sa_column 추가)
     title: str = Field(  # type: ignore[assignment]
