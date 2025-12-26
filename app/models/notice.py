@@ -4,10 +4,9 @@ from datetime import datetime
 from typing import TYPE_CHECKING, ClassVar
 
 from fastapi_events.dispatcher import dispatch
-from pydantic import Field
 from sqlalchemy import Column
 from sqlalchemy.orm import relationship
-from sqlmodel import Relationship
+from sqlmodel import Field, Relationship
 
 from app.core.exception import UnknownSystemException500
 from app.dependencies.orm import SQLModelBase, TZDateTime
@@ -27,8 +26,8 @@ if TYPE_CHECKING:
 class NoticeBase(SQLModelBase):
     """Notice 기본 필드 - 스키마와 모델 공통"""
 
-    title: str = Field(..., description="제목")
-    content: str = Field(..., description="내용")
+    title: str = Field(description="제목")
+    content: str = Field(description="내용")
     use_flag: bool = Field(default=True, description="사용 여부")
 
 
@@ -70,7 +69,7 @@ class NoticeTable(NoticeBase, table=True):
     )
 
     # Relationships - Admin
-    created_by_admin: Admin = Relationship(  # type: ignore
+    created_by_admin: Admin = Relationship(  # type: ignore[assignment]
         sa_relationship=relationship(
             "Admin",
             viewonly=True,
@@ -78,7 +77,7 @@ class NoticeTable(NoticeBase, table=True):
             lazy="joined",
         )
     )
-    updated_by_admin: Admin = Relationship(  # type: ignore
+    updated_by_admin: Admin = Relationship(  # type: ignore[assignment]
         sa_relationship=relationship(
             "Admin",
             viewonly=True,
@@ -88,7 +87,7 @@ class NoticeTable(NoticeBase, table=True):
     )
 
     # Relationships - User
-    created_by_user: User = Relationship(  # type: ignore
+    created_by_user: User = Relationship(  # type: ignore[assignment]
         sa_relationship=relationship(
             "User",
             viewonly=True,
@@ -96,7 +95,7 @@ class NoticeTable(NoticeBase, table=True):
             lazy="joined",
         )
     )
-    updated_by_user: User = Relationship(  # type: ignore
+    updated_by_user: User = Relationship(  # type: ignore[assignment]
         sa_relationship=relationship(
             "User",
             viewonly=True,
@@ -199,13 +198,15 @@ class NoticeTable(NoticeBase, table=True):
 # Response 스키마 - 조회용
 # =============================================================================
 
-from app.schemas.base import IdCreatedUpdatedDto  # noqa: E402
+from app.schemas.base import IdCreatedUpdatedDto, Schema  # noqa: E402
 
 
-class NoticeResponse(IdCreatedUpdatedDto, NoticeBase):
-    """Notice 응답 스키마"""
+class NoticeResponse(IdCreatedUpdatedDto, Schema):
+    """Notice 응답 스키마 - Pydantic 기반"""
 
-    pass
+    title: str = Field(description="제목")  # type: ignore[assignment]
+    content: str = Field(description="내용")  # type: ignore[assignment]
+    use_flag: bool = Field(default=True, description="사용 여부")
 
 
 # =============================================================================
