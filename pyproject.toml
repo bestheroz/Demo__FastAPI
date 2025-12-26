@@ -16,7 +16,7 @@ dependencies = [
     "hypercorn (==0.18.0)",
     "pymysql (==1.1.2)",
     "sqlalchemy (==2.0.45)",
-    "sqlmodel (==0.0.22)",
+    "sqlmodel (==0.0.29)",
     "greenlet (==3.3.0)",
     "python-dotenv (==1.2.1)",
     "uvloop (==0.22.1)",
