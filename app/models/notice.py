@@ -4,9 +4,9 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from fastapi_events.dispatcher import dispatch
-from sqlalchemy import Column
-from sqlalchemy.orm import relationship
-from sqlmodel import Field, Relationship
+from sqlalchemy import Column, Integer
+from sqlalchemy.orm import Mapped, relationship
+from sqlmodel import Field
 
 from app.core.exception import UnknownSystemException500
 from app.dependencies.orm import SQLModelBase, TZDateTime
@@ -50,7 +50,10 @@ class NoticeTable(NoticeBase, table=True):
         default=None,
         sa_column=Column("created_at", TZDateTime, nullable=False),
     )
-    created_object_id: int = Field(default=0)
+    created_object_id: int = Field(
+        default=0,
+        sa_column=Column("created_object_id", Integer, nullable=False),
+    )
     created_object_type: UserTypeEnum = Field(default=UserTypeEnum.ADMIN)
 
     # Audit 필드 - Updated
@@ -58,7 +61,10 @@ class NoticeTable(NoticeBase, table=True):
         default=None,
         sa_column=Column("updated_at", TZDateTime, nullable=False),
     )
-    updated_object_id: int = Field(default=0)
+    updated_object_id: int = Field(
+        default=0,
+        sa_column=Column("updated_object_id", Integer, nullable=False),
+    )
     updated_object_type: UserTypeEnum = Field(default=UserTypeEnum.ADMIN)
 
     # Soft delete
@@ -68,40 +74,30 @@ class NoticeTable(NoticeBase, table=True):
         sa_column=Column("removed_at", TZDateTime, nullable=True),
     )
 
-    # Relationships - Admin
-    created_by_admin: Admin = Relationship(  # type: ignore[assignment]
-        sa_relationship=relationship(
-            "Admin",
-            viewonly=True,
-            primaryjoin="foreign(NoticeTable.created_object_id) == remote(Admin.id)",
-            lazy="joined",
-        )
+    # Relationships - SQLAlchemy relationship 직접 사용
+    created_by_admin: Mapped[Admin] = relationship(  # type: ignore[assignment]
+        "Admin",
+        viewonly=True,
+        primaryjoin="foreign(NoticeTable.created_object_id) == Admin.id",
+        lazy="joined",
     )
-    updated_by_admin: Admin = Relationship(  # type: ignore[assignment]
-        sa_relationship=relationship(
-            "Admin",
-            viewonly=True,
-            primaryjoin="foreign(NoticeTable.updated_object_id) == remote(Admin.id)",
-            lazy="joined",
-        )
+    updated_by_admin: Mapped[Admin] = relationship(  # type: ignore[assignment]
+        "Admin",
+        viewonly=True,
+        primaryjoin="foreign(NoticeTable.updated_object_id) == Admin.id",
+        lazy="joined",
     )
-
-    # Relationships - User
-    created_by_user: User = Relationship(  # type: ignore[assignment]
-        sa_relationship=relationship(
-            "User",
-            viewonly=True,
-            primaryjoin="foreign(NoticeTable.created_object_id) == remote(User.id)",
-            lazy="joined",
-        )
+    created_by_user: Mapped[User] = relationship(  # type: ignore[assignment]
+        "User",
+        viewonly=True,
+        primaryjoin="foreign(NoticeTable.created_object_id) == User.id",
+        lazy="joined",
     )
-    updated_by_user: User = Relationship(  # type: ignore[assignment]
-        sa_relationship=relationship(
-            "User",
-            viewonly=True,
-            primaryjoin="foreign(NoticeTable.updated_object_id) == remote(User.id)",
-            lazy="joined",
-        )
+    updated_by_user: Mapped[User] = relationship(  # type: ignore[assignment]
+        "User",
+        viewonly=True,
+        primaryjoin="foreign(NoticeTable.updated_object_id) == User.id",
+        lazy="joined",
     )
 
     @property
