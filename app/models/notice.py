@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from fastapi_events.dispatcher import dispatch
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import Mapped, relationship
 from sqlmodel import Field
 
@@ -54,7 +54,10 @@ class NoticeTable(NoticeBase, table=True):
         default=0,
         sa_column=Column("created_object_id", Integer, nullable=False),
     )
-    created_object_type: UserTypeEnum = Field(default=UserTypeEnum.ADMIN)
+    created_object_type: UserTypeEnum = Field(
+        default=UserTypeEnum.ADMIN,
+        sa_column=Column("created_object_type", String(10), nullable=False),
+    )
 
     # Audit 필드 - Updated
     updated_at: datetime | None = Field(
@@ -65,7 +68,10 @@ class NoticeTable(NoticeBase, table=True):
         default=0,
         sa_column=Column("updated_object_id", Integer, nullable=False),
     )
-    updated_object_type: UserTypeEnum = Field(default=UserTypeEnum.ADMIN)
+    updated_object_type: UserTypeEnum = Field(
+        default=UserTypeEnum.ADMIN,
+        sa_column=Column("updated_object_type", String(10), nullable=False),
+    )
 
     # Soft delete
     removed_flag: bool = Field(default=False)
