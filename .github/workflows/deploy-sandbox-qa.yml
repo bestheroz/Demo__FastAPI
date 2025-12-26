@@ -15,42 +15,53 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: checkout
-        uses: actions/checkout@main
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
       - name: setup node.js 24
-        uses: actions/setup-node@main
+        uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
 
       - name: Cache serverless CLI
-        uses: actions/cache@main
+        id: cache-serverless
+        uses: actions/cache@v4
         with:
-          path: |
-            ~/.npm
-            ~/.serverless
-          key: ${{ runner.os }}-serverless-v3-${{ hashFiles('serverless.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-serverless-v3-
+          path: ~/.serverless
+          key: ${{ runner.os }}-serverless-v3
 
       - name: install serverless
         run: npm i -g serverless@3
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@main
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Cache Docker layers
-        uses: satackey/action-docker-layer-caching@master
-        continue-on-error: true
+        uses: actions/cache@v4
         with:
-          key: docker-layer-${{ github.ref_name }}-${{ hashFiles('Dockerfile.lambda', 'poetry.lock') }}
+          path: /tmp/.buildx-cache
+          key: docker-${{ github.ref_name }}-${{ hashFiles('Dockerfile.lambda', 'poetry.lock') }}
           restore-keys: |
-            docker-layer-${{ github.ref_name }}-
+            docker-${{ github.ref_name }}-
 
       - name: deploy-${{ github.ref_name }}
         run: sls deploy -s ${{ github.ref_name }}
+        env:
+          BUILDX_CACHE_FROM: type=local,src=/tmp/.buildx-cache
+          BUILDX_CACHE_TO: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      - name: Move Docker cache
+        if: always()
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
