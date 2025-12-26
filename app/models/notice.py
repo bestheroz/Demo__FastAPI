@@ -40,7 +40,7 @@ class NoticeCreate(NoticeBase):
 class NoticeTable(NoticeBase, table=True):
     """Notice 테이블 모델"""
 
-    __tablename__ = "notice"  # pyright: ignore[reportIncompatibleVariableOverride]
+    __tablename__ = "notice"  # pyright: ignore[reportAssignmentType]
 
     # Primary Key
     id: int | None = Field(default=None, primary_key=True)
