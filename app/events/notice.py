@@ -2,7 +2,7 @@ from enum import StrEnum
 
 from fastapi_events.registry.payload_schema import registry as payload_schema
 
-from app.models.notice import NoticeResponse
+from app.schemas.notice import NoticeResponse
 
 
 class NoticeEvent(StrEnum):
