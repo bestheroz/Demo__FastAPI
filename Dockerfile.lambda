@@ -1,14 +1,19 @@
-FROM public.ecr.aws/lambda/python:3.14
+FROM public.ecr.aws/lambda/python:3.14 AS builder
 LABEL maintainer="joony.kim <bestheroz@gmail.com>"
 
 ENV POETRY_VERSION=2.2.1
 RUN pip install --disable-pip-version-check --no-cache-dir poetry==$POETRY_VERSION
 
-COPY poetry.lock pyproject.toml ${LAMBDA_TASK_ROOT}/
+COPY poetry.lock pyproject.toml ./
+RUN poetry export -f requirements.txt -o requirements.txt --only=main --without-hashes
+
+FROM public.ecr.aws/lambda/python:3.14
+LABEL maintainer="joony.kim <bestheroz@gmail.com>"
+
+COPY --from=builder requirements.txt ${LAMBDA_TASK_ROOT}/
 WORKDIR ${LAMBDA_TASK_ROOT}
 
-RUN poetry config virtualenvs.create false \
-    && poetry install --only=main --no-root
+RUN pip install --disable-pip-version-check --no-cache-dir -r requirements.txt
 
 COPY ./dotenvs ${LAMBDA_TASK_ROOT}/dotenvs/
 COPY ./app ${LAMBDA_TASK_ROOT}/app/
