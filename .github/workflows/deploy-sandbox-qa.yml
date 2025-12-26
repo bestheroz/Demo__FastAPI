@@ -15,11 +15,13 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@main
+        with:
+          fetch-depth: 1
 
-      - name: setup node.js 22
+      - name: setup node.js 24
         uses: actions/setup-node@main
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Cache serverless CLI
         uses: actions/cache@main
@@ -32,7 +34,7 @@ jobs:
             ${{ runner.os }}-serverless-v3-
 
       - name: install serverless
-        run: npm i -g serverless@3 serverless-python-requirements
+        run: npm i -g serverless@3
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@main
@@ -41,19 +43,5 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@main
-
-      - name: Cache Docker layers
-        uses: actions/cache@main
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
       - name: deploy-${{ github.ref_name }}
-        run: |
-          sls deploy -s ${{ github.ref_name }}
-        env:
-          DOCKER_BUILDKIT: 1
+        run: sls deploy -s ${{ github.ref_name }}

@@ -9,8 +9,6 @@ package:
 
 custom:
   env: ${file(./serverless-env/${opt:stage,'local'}.json)}
-  pythonRequirements:
-    dockerizePip: true
 
 provider:
   name: aws
@@ -53,6 +51,3 @@ functions:
           - DELETE
           - OPTIONS
         allowCredentials: false
-
-plugins:
-  - serverless-python-requirements
