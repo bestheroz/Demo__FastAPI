@@ -22,7 +22,7 @@ from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
     HTTP_403_FORBIDDEN,
-    HTTP_422_UNPROCESSABLE_ENTITY,
+    HTTP_422_UNPROCESSABLE_CONTENT,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
@@ -156,7 +156,7 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
     log.error(f"Full error details: {details}")
     log.exception(exc)
     return ORJSONResponse(
-        status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=HTTP_422_UNPROCESSABLE_CONTENT,
         content=jsonable_encoder(
             {
                 "code": Code.INVALID_PARAMETER,
