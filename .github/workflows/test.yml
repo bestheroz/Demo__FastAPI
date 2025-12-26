@@ -12,17 +12,17 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Install Poetry
+        run: pipx install poetry==2.2.1
+
       - name: Set up Python 3.14
         uses: actions/setup-python@main
         with:
           python-version: "3.14"
           cache: 'poetry'
 
-      - name: Install Poetry
-        run: pipx install poetry==2.2.1
-
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --only=main,dev
 
       - name: Run mypy
         run: poetry run mypy app/
@@ -37,17 +37,17 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Install Poetry
+        run: pipx install poetry==2.2.1
+
       - name: Set up Python 3.14
         uses: actions/setup-python@main
         with:
           python-version: "3.14"
           cache: 'poetry'
 
-      - name: Install Poetry
-        run: pipx install poetry==2.2.1
-
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --only=main,dev
 
       - name: Run pyright
         run: poetry run pyright app/
