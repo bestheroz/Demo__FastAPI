@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from fastapi_events.dispatcher import dispatch
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String, Text
 from sqlalchemy.orm import Mapped, relationship
 from sqlmodel import Field
 
@@ -45,6 +45,21 @@ class NoticeTable(NoticeBase, table=True):
     # Primary Key
     id: int | None = Field(default=None, primary_key=True)
 
+    # NoticeBase 필드 재정의 (sa_column 추가)
+    title: str = Field(  # type: ignore[assignment]
+        sa_column=Column("title", String(255), nullable=False),
+        description="제목",
+    )
+    content: str = Field(  # type: ignore[assignment]
+        sa_column=Column("content", Text, nullable=False),
+        description="내용",
+    )
+    use_flag: bool = Field(  # type: ignore[assignment]
+        default=True,
+        sa_column=Column("use_flag", Boolean, nullable=False, default=True),
+        description="사용 여부",
+    )
+
     # Audit 필드 - Created
     created_at: datetime | None = Field(
         default=None,
@@ -74,7 +89,10 @@ class NoticeTable(NoticeBase, table=True):
     )
 
     # Soft delete
-    removed_flag: bool = Field(default=False)
+    removed_flag: bool = Field(
+        default=False,
+        sa_column=Column("removed_flag", Boolean, nullable=False, default=False),
+    )
     removed_at: datetime | None = Field(
         default=None,
         sa_column=Column("removed_at", TZDateTime, nullable=True),
