@@ -1,20 +1,17 @@
+"""
+Notice 스키마 - SQLModel 기반 모델에서 re-export
+
+스키마 정의는 app/models/notice.py로 통합되었습니다.
+하위 호환성을 위해 기존 import 경로를 유지합니다.
+"""
+
 from pydantic import Field
 
-from app.schemas.base import IdCreatedUpdatedDto, Pagination, Schema
+from app.models.notice import NoticeBase, NoticeCreate, NoticeResponse
+from app.schemas.base import Pagination
 
-
-class NoticeBase(Schema):
-    title: str = Field(..., description="제목")
-    content: str = Field(..., description="내용")
-    use_flag: bool = Field(True, description="사용 여부")
-
-
-class NoticeCreate(NoticeBase):
-    pass
-
-
-class NoticeResponse(IdCreatedUpdatedDto, NoticeBase):
-    pass
+# Re-export for backward compatibility
+__all__ = ["NoticeBase", "NoticeCreate", "NoticeResponse", "NoticeListRequest"]
 
 
 class NoticeListRequest(Pagination):
