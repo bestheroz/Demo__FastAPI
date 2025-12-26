@@ -23,8 +23,8 @@ async def get_notices(
             count_query = count_query.filter_by(id=request.id)
 
         if request.title is not None:
-            initial_query = initial_query.filter(Notice.title.ilike(f"%{request.title}%"))  # type: ignore[union-attr]
-            count_query = count_query.filter(Notice.title.ilike(f"%{request.title}%"))  # type: ignore[union-attr]
+            initial_query = initial_query.filter(Notice.title.ilike(f"%{request.title}%"))  # type: ignore[attr-defined]
+            count_query = count_query.filter(Notice.title.ilike(f"%{request.title}%"))  # type: ignore[attr-defined]
 
         if request.use_flag is not None:
             initial_query = initial_query.filter_by(use_flag=request.use_flag)
