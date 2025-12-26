@@ -3,10 +3,8 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from pydantic import AwareDatetime
-from pydantic.alias_generators import to_camel
 from sqlalchemy import DateTime, TypeDecorator
 from sqlalchemy.orm import DeclarativeBase, mapped_column
-from sqlmodel import SQLModel
 
 
 class TZDateTime(TypeDecorator, ABC):
@@ -43,25 +41,6 @@ class TZDateTime(TypeDecorator, ABC):
 
 class Base(DeclarativeBase):
     __allow_unmapped__ = True
-
-
-# SQLModel Base 설정 - 기존 SQLAlchemy Base와 메타데이터 공유
-class SQLModelBase(SQLModel):
-    """SQLModel 기반 모델을 위한 Base 클래스
-
-    model_config는 클래스 외부에서 설정 (mypy 호환성)
-    """
-
-    pass
-
-
-# SQLModel config 설정
-SQLModelBase.model_config["alias_generator"] = to_camel  # type: ignore[literal-required]
-SQLModelBase.model_config["populate_by_name"] = True
-SQLModelBase.model_config["from_attributes"] = True
-
-# SQLModel과 SQLAlchemy가 같은 메타데이터 공유
-SQLModelBase.metadata = Base.metadata
 
 
 mapped_intpk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]

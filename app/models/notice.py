@@ -1,130 +1,45 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING
-
 from fastapi_events.dispatcher import dispatch
-from sqlalchemy import Boolean, Column, Integer, String, Text
-from sqlalchemy.orm import Mapped, relationship
-from sqlmodel import Field
+from pydantic import AwareDatetime
+from sqlalchemy.orm import Mapped, mapped_column, object_session, relationship
 
 from app.core.exception import UnknownSystemException500
-from app.dependencies.orm import SQLModelBase, TZDateTime
+from app.dependencies.orm import Base, TZDateTime
+from app.events.notice import NoticeEvent
+from app.models.base import IdCreatedUpdated
+from app.schemas.notice import NoticeCreate, NoticeResponse
 from app.types.base import UserTypeEnum
 from app.utils.datetime_utils import utcnow
 
-if TYPE_CHECKING:
-    from app.models.admin import Admin
-    from app.models.user import User
 
+class Notice(IdCreatedUpdated, Base):
+    __tablename__ = "notice"
 
-# =============================================================================
-# Notice SQLModel - 모델과 스키마 통합
-# =============================================================================
+    title: Mapped[str]
+    content: Mapped[str]
 
+    use_flag: Mapped[bool]
 
-class NoticeBase(SQLModelBase):
-    """Notice 기본 필드 - 스키마와 모델 공통"""
+    removed_flag: Mapped[bool]
+    removed_at: Mapped[AwareDatetime | None] = mapped_column(TZDateTime, nullable=True)
 
-    title: str = Field(description="제목")
-    content: str = Field(description="내용")
-    use_flag: bool = Field(default=True, description="사용 여부")
-
-
-class NoticeCreate(NoticeBase):
-    """Notice 생성 스키마"""
-
-    pass
-
-
-class NoticeTable(NoticeBase, table=True):
-    """Notice 테이블 모델"""
-
-    __tablename__ = "notice"  # pyright: ignore[reportAssignmentType]
-
-    # Primary Key
-    id: int | None = Field(
-        default=None,
-        sa_column=Column("id", Integer, primary_key=True, autoincrement=True),
-    )
-
-    # NoticeBase 필드 재정의 (sa_column 추가)
-    title: str = Field(  # type: ignore[assignment]
-        sa_column=Column("title", String(255), nullable=False),
-        description="제목",
-    )
-    content: str = Field(  # type: ignore[assignment]
-        sa_column=Column("content", Text, nullable=False),
-        description="내용",
-    )
-    use_flag: bool = Field(  # type: ignore[assignment]
-        default=True,
-        sa_column=Column("use_flag", Boolean, nullable=False, default=True),
-        description="사용 여부",
-    )
-
-    # Audit 필드 - Created
-    created_at: datetime | None = Field(
-        default=None,
-        sa_column=Column("created_at", TZDateTime, nullable=False),
-    )
-    created_object_id: int = Field(
-        default=0,
-        sa_column=Column("created_object_id", Integer, nullable=False),
-    )
-    created_object_type: UserTypeEnum = Field(
-        default=UserTypeEnum.ADMIN,
-        sa_column=Column("created_object_type", String(10), nullable=False),
-    )
-
-    # Audit 필드 - Updated
-    updated_at: datetime | None = Field(
-        default=None,
-        sa_column=Column("updated_at", TZDateTime, nullable=False),
-    )
-    updated_object_id: int = Field(
-        default=0,
-        sa_column=Column("updated_object_id", Integer, nullable=False),
-    )
-    updated_object_type: UserTypeEnum = Field(
-        default=UserTypeEnum.ADMIN,
-        sa_column=Column("updated_object_type", String(10), nullable=False),
-    )
-
-    # Soft delete
-    removed_flag: bool = Field(
-        default=False,
-        sa_column=Column("removed_flag", Boolean, nullable=False, default=False),
-    )
-    removed_at: datetime | None = Field(
-        default=None,
-        sa_column=Column("removed_at", TZDateTime, nullable=True),
-    )
-
-    # Relationships - SQLAlchemy relationship 직접 사용
-    created_by_admin: Mapped[Admin] = relationship(  # type: ignore[assignment]
-        "Admin",
+    created_by_admin: Mapped[Admin] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
-        primaryjoin="foreign(NoticeTable.created_object_id) == Admin.id",
-        lazy="joined",
+        primaryjoin="foreign(Notice.created_object_id) == remote(Admin.id)",
     )
-    updated_by_admin: Mapped[Admin] = relationship(  # type: ignore[assignment]
-        "Admin",
+    updated_by_admin: Mapped[Admin] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
-        primaryjoin="foreign(NoticeTable.updated_object_id) == Admin.id",
-        lazy="joined",
+        primaryjoin="foreign(Notice.updated_object_id) == remote(Admin.id)",
     )
-    created_by_user: Mapped[User] = relationship(  # type: ignore[assignment]
-        "User",
+
+    created_by_user: Mapped[User] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
-        primaryjoin="foreign(NoticeTable.created_object_id) == User.id",
-        lazy="joined",
+        primaryjoin="foreign(Notice.created_object_id) == remote(User.id)",
     )
-    updated_by_user: Mapped[User] = relationship(  # type: ignore[assignment]
-        "User",
+    updated_by_user: Mapped[User] = relationship(  # type: ignore # noqa: F821
         viewonly=True,
-        primaryjoin="foreign(NoticeTable.updated_object_id) == User.id",
-        lazy="joined",
+        primaryjoin="foreign(Notice.updated_object_id) == remote(User.id)",
     )
 
     @property
@@ -144,9 +59,9 @@ class NoticeTable(NoticeBase, table=True):
         raise UnknownSystemException500()
 
     @staticmethod
-    def new(data: NoticeCreate, operator_id: int) -> NoticeTable:
+    def new(data: NoticeCreate, operator_id: int):
         now = utcnow()
-        return NoticeTable(
+        return Notice(
             **data.model_dump(),
             created_at=now,
             created_object_id=operator_id,
@@ -175,10 +90,6 @@ class NoticeTable(NoticeBase, table=True):
         self.updated_object_type = UserTypeEnum.ADMIN
 
     def on_created(self) -> NoticeResponse:
-        from sqlalchemy.orm import object_session
-
-        from app.events.notice import NoticeEvent
-
         session = object_session(self)
         if not session:
             raise UnknownSystemException500()
@@ -189,10 +100,6 @@ class NoticeTable(NoticeBase, table=True):
         return event_data
 
     def on_updated(self) -> NoticeResponse:
-        from sqlalchemy.orm import object_session
-
-        from app.events.notice import NoticeEvent
-
         session = object_session(self)
         if not session:
             raise UnknownSystemException500()
@@ -203,10 +110,6 @@ class NoticeTable(NoticeBase, table=True):
         return event_data
 
     def on_removed(self) -> NoticeResponse:
-        from sqlalchemy.orm import object_session
-
-        from app.events.notice import NoticeEvent
-
         session = object_session(self)
         if not session:
             raise UnknownSystemException500()
@@ -215,26 +118,3 @@ class NoticeTable(NoticeBase, table=True):
         event_data = NoticeResponse.model_validate(self)
         dispatch(NoticeEvent.NOTICE_REMOVED, event_data)
         return event_data
-
-
-# =============================================================================
-# Response 스키마 - 조회용
-# =============================================================================
-
-from app.schemas.base import IdCreatedUpdatedDto, Schema  # noqa: E402
-
-
-class NoticeResponse(IdCreatedUpdatedDto, Schema):
-    """Notice 응답 스키마 - Pydantic 기반"""
-
-    title: str = Field(description="제목")  # type: ignore[assignment]
-    content: str = Field(description="내용")  # type: ignore[assignment]
-    use_flag: bool = Field(default=True, description="사용 여부")
-
-
-# =============================================================================
-# 하위 호환성을 위한 별칭
-# =============================================================================
-
-# 기존 코드 호환을 위한 별칭
-Notice = NoticeTable
