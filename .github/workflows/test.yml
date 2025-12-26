@@ -8,7 +8,7 @@ jobs:
       DEPLOYMENT_ENVIRONMENT: test
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
         with:
           fetch-depth: 1
 
@@ -16,7 +16,7 @@ jobs:
         run: pipx install poetry==2.2.1
 
       - name: Set up Python 3.14
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@main
         with:
           python-version: "3.14"
           cache: 'poetry'
@@ -25,7 +25,7 @@ jobs:
         run: poetry install --only=main,dev
 
       - name: Cache mypy
-        uses: actions/cache@v4
+        uses: actions/cache@main
         with:
           path: .mypy_cache
           key: mypy-${{ runner.os }}-${{ hashFiles('poetry.lock') }}-${{ hashFiles('app/**/*.py') }}
@@ -42,7 +42,7 @@ jobs:
       DEPLOYMENT_ENVIRONMENT: test
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
         with:
           fetch-depth: 1
 
@@ -50,7 +50,7 @@ jobs:
         run: pipx install poetry==2.2.1
 
       - name: Set up Python 3.14
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@main
         with:
           python-version: "3.14"
           cache: 'poetry'
@@ -59,7 +59,7 @@ jobs:
         run: poetry install --only=main,dev
 
       - name: Cache pyright
-        uses: actions/cache@v4
+        uses: actions/cache@main
         with:
           path: ~/.cache/pyright
           key: pyright-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
@@ -72,7 +72,7 @@ jobs:
   ruff:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: chartboost/ruff-action@v1
+      - uses: actions/checkout@main
+      - uses: chartboost/ruff-action@main
         with:
           src: './app'

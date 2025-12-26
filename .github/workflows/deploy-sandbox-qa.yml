@@ -15,12 +15,12 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
         with:
           fetch-depth: 1
 
       - name: setup node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@main
         with:
           node-version: 24
           cache: 'npm'
@@ -28,7 +28,7 @@ jobs:
 
       - name: Cache serverless CLI
         id: cache-serverless
-        uses: actions/cache@v4
+        uses: actions/cache@main
         with:
           path: ~/.serverless
           key: ${{ runner.os }}-serverless-v3
@@ -37,17 +37,17 @@ jobs:
         run: npm i -g serverless@3
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@main
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@master
 
       - name: Cache Docker layers
-        uses: actions/cache@v4
+        uses: actions/cache@main
         with:
           path: /tmp/.buildx-cache
           key: docker-${{ github.ref_name }}-${{ hashFiles('Dockerfile.lambda', 'poetry.lock') }}

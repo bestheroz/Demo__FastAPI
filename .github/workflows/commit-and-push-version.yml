@@ -14,16 +14,16 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Checkout 코드
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
         with:
           ref: main
 
       - name: 태그 가져오기
         id: tag
-        uses: olegtarasov/get-tag@v2.1.3
+        uses: olegtarasov/get-tag@master
 
       - name: pyproject.toml 버전 업데이트
-        uses: jacobtomlinson/gha-find-replace@v3
+        uses: jacobtomlinson/gha-find-replace@master
         with:
           find: '^version = "(.+?)"'
           replace: 'version = "${{ steps.tag.outputs.tag }}"'
@@ -31,7 +31,7 @@ jobs:
           regex: true
 
       - name: 변경사항 커밋 및 푸시
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@master
         with:
           commit_message: "⬆️ 버전 업데이트 (pyproject.toml) v${{ steps.tag.outputs.tag }}"
           branch: main
