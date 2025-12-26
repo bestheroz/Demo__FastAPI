@@ -11,7 +11,6 @@ from sqlmodel import Relationship
 
 from app.core.exception import UnknownSystemException500
 from app.dependencies.orm import SQLModelBase, TZDateTime
-from app.events.notice import NoticeEvent
 from app.types.base import UserTypeEnum
 from app.utils.datetime_utils import utcnow
 
@@ -156,6 +155,8 @@ class NoticeTable(NoticeBase, table=True):
     def on_created(self) -> NoticeResponse:
         from sqlalchemy.orm import object_session
 
+        from app.events.notice import NoticeEvent
+
         session = object_session(self)
         if not session:
             raise UnknownSystemException500()
@@ -168,6 +169,8 @@ class NoticeTable(NoticeBase, table=True):
     def on_updated(self) -> NoticeResponse:
         from sqlalchemy.orm import object_session
 
+        from app.events.notice import NoticeEvent
+
         session = object_session(self)
         if not session:
             raise UnknownSystemException500()
@@ -179,6 +182,8 @@ class NoticeTable(NoticeBase, table=True):
 
     def on_removed(self) -> NoticeResponse:
         from sqlalchemy.orm import object_session
+
+        from app.events.notice import NoticeEvent
 
         session = object_session(self)
         if not session:
