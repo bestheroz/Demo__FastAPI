@@ -23,8 +23,6 @@ jobs:
         uses: actions/setup-node@main
         with:
           node-version: 24
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
 
       - name: Cache serverless CLI
         id: cache-serverless
