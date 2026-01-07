@@ -3,6 +3,7 @@ on:
   push:
     tags: ['^[0-9]+\.[0-9]+\.[0-9]+$']
 env:
+  APP_NAME: 'demo-fastapi'
   AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOYER_AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.DEPLOYER_AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: ap-northeast-2
@@ -17,19 +18,18 @@ jobs:
       - name: checkout
         uses: actions/checkout@main
         with:
-          fetch-depth: 1
+          fetch-depth: 2
 
       - name: setup node.js 24
         uses: actions/setup-node@main
         with:
           node-version: 24
 
-      - name: Cache serverless CLI
-        id: cache-serverless
+      - name: Cache npm
         uses: actions/cache@main
         with:
-          path: ~/.serverless
-          key: ${{ runner.os }}-serverless-v3
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-serverless-v3
 
       - name: install serverless
         run: npm i -g serverless@3
@@ -41,25 +41,56 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@main
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@master
 
-      - name: Cache Docker layers
-        uses: actions/cache@main
+      - name: Set ECR repository info
+        id: ecr-repo
+        run: |
+          REPO_NAME="serverless-${{ env.APP_NAME }}-prod"
+          REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+          echo "uri=$REGISTRY/$REPO_NAME" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@master
         with:
-          path: /tmp/.buildx-cache
-          key: docker-prod-${{ hashFiles('Dockerfile.lambda', 'poetry.lock') }}
-          restore-keys: |
-            docker-prod-
+          context: .
+          push: true
+          tags: ${{ steps.ecr-repo.outputs.uri }}:latest
+          platforms: linux/amd64
+          cache-from: type=registry,ref=${{ steps.ecr-repo.outputs.uri }}:cache
+          cache-to: type=registry,ref=${{ steps.ecr-repo.outputs.uri }}:cache,mode=max
+          provenance: false
+
+      - name: Check infrastructure changes
+        id: infra-check
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -qE '^(serverless\.yml|serverless-env/)'; then
+            echo "full_deploy=true" >> $GITHUB_OUTPUT
+            echo "📦 Infrastructure changes detected - full deploy"
+          else
+            echo "full_deploy=false" >> $GITHUB_OUTPUT
+            echo "⚡ Code only changes - function deploy"
+          fi
 
       - name: deploy-prod
-        run: sls deploy -s prod
-        env:
-          BUILDX_CACHE_FROM: type=local,src=/tmp/.buildx-cache
-          BUILDX_CACHE_TO: type=local,dest=/tmp/.buildx-cache-new,mode=max
-
-      - name: Move Docker cache
-        if: always()
         run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
+          IMAGE_URI="${{ steps.ecr-repo.outputs.uri }}:latest"
+          FUNCTION_NAME="${{ env.APP_NAME }}-prod"
+
+          if [ "${{ steps.infra-check.outputs.full_deploy }}" = "true" ]; then
+            echo "📦 Full deploy with Serverless"
+            SLS_ECR_IMAGE_URI="$IMAGE_URI" sls deploy -s prod
+          else
+            echo "⚡ Quick deploy with AWS CLI"
+            aws lambda update-function-code \
+              --function-name "$FUNCTION_NAME" \
+              --image-uri "$IMAGE_URI" \
+              --no-cli-pager
+
+            echo "✅ Lambda updated"
+          fi
