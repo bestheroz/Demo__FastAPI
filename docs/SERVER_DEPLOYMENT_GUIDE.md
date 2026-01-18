@@ -175,7 +175,7 @@ API Gateway/ALB
 FROM public.ecr.aws/lambda/python:3.14
 LABEL maintainer="joony.kim <bestheroz@gmail.com>"
 
-ENV POETRY_VERSION=2.2.1
+ENV POETRY_VERSION=2.3.0
 RUN pip install --disable-pip-version-check --no-cache-dir poetry==$POETRY_VERSION
 
 COPY poetry.lock pyproject.toml ${LAMBDA_TASK_ROOT}/
@@ -251,7 +251,7 @@ aws lambda update-function-code \
 FROM public.ecr.aws/docker/library/python:3.14-bookworm as builder
 LABEL maintainer="joony.kim <bestheroz@gmail.com>"
 
-ENV POETRY_VERSION=2.2.1
+ENV POETRY_VERSION=2.3.0
 RUN pip install --disable-pip-version-check --no-cache-dir poetry==$POETRY_VERSION
 
 ENV VIRTUAL_ENV=/opt/venv
