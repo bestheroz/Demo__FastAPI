@@ -19,7 +19,7 @@ dependencies = [
     "uvloop (==0.22.1)",
     "httptools (==0.7.1)",
     "bcrypt (==5.0.0)",
-    "sentry-sdk[fastapi] (==2.48.0)",
+    "sentry-sdk[fastapi] (==2.49.0)",
     "structlog (==25.5.0)",
     "pyjwt (==2.10.1)",
     "fastapi-events (==0.12.2)",
@@ -30,9 +30,9 @@ package-mode = false
 
 
 [tool.poetry.group.dev.dependencies]
-pyright = "1.1.407"
+pyright = "1.1.408"
 mypy = "1.19.1"
-ruff = "0.14.10"
+ruff = "0.14.13"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
