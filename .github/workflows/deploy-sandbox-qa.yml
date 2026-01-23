@@ -28,8 +28,8 @@ jobs:
       - name: Cache npm
         uses: actions/cache@main
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-serverless-v3
+          path: ~/.npm/_npx
+          key: ${{ runner.os }}-npx-serverless-v3
 
       - name: install serverless
         run: npm i -g serverless@3
@@ -84,7 +84,7 @@ jobs:
 
           if [ "${{ steps.infra-check.outputs.full_deploy }}" = "true" ]; then
             echo "📦 Full deploy with Serverless"
-            SLS_ECR_IMAGE_URI="$IMAGE_URI" sls deploy -s ${{ github.ref_name }}
+            SLS_ECR_IMAGE_URI="$IMAGE_URI" npx serverless@3 deploy -s ${{ github.ref_name }}
           else
             echo "⚡ Quick deploy with AWS CLI"
             aws lambda update-function-code \
