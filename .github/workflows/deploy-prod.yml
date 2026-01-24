@@ -87,10 +87,18 @@ jobs:
             SLS_ECR_IMAGE_URI="$IMAGE_URI" npx serverless@3 deploy -s prod
           else
             echo "⚡ Quick deploy with AWS CLI"
-            aws lambda update-function-code \
+            if aws lambda update-function-code \
               --function-name "$FUNCTION_NAME" \
               --image-uri "$IMAGE_URI" \
-              --no-cli-pager
-
-            echo "✅ Lambda updated"
+              --no-cli-pager 2>&1; then
+              echo "✅ Lambda updated"
+            else
+              echo "⚠️ Quick deploy failed (function may not exist), falling back to full deploy"
+              echo "📦 Full deploy with Serverless"
+              SLS_ECR_IMAGE_URI="$IMAGE_URI" npx serverless@3 deploy -s ${{ github.ref_name }}
+            fi
+          
+            echo "⏳ Waiting for function update..."
+            aws lambda wait function-updated --function-name "$FUNCTION_NAME"
+            echo "✅ Lambda function updated successfully"
           fi

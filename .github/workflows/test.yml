@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         python-version: [ "3.14" ]
-        poetry-version: [ "2.3.0" ]
+        poetry-version: [ "2.3.1" ]
     runs-on: ubuntu-latest
     env:
       DEPLOYMENT_ENVIRONMENT: test
@@ -69,7 +69,7 @@ jobs:
     strategy:
       matrix:
         python-version: [ "3.14" ]
-        poetry-version: [ "2.3.0" ]
+        poetry-version: [ "2.3.1" ]
     runs-on: ubuntu-latest
     env:
       DEPLOYMENT_ENVIRONMENT: test

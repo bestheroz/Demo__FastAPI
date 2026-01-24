@@ -136,3 +136,5 @@ node_modules
 
 file:memory
 test.db
+
+.serena
