@@ -79,7 +79,7 @@ jobs:
 
       - name: deploy-${{ github.ref_name }}
         run: |
-          IMAGE_URI="${{ steps.ecr-repo.outputs.uri }}:latest"
+          IMAGE_URI="${{ steps.ecr-repo.outputs.uri }}:${{ github.ref_name }}"
           FUNCTION_NAME="${{ env.APP_NAME }}-${{ github.ref_name }}"
 
           if [ "${{ steps.infra-check.outputs.full_deploy }}" = "true" ]; then
