@@ -32,7 +32,7 @@ functions:
   main:
     image:
       name: demo-api
-    name: ${self:custom.env.SERVICE_NAME}-${self:custom.env.STAGE}
+    name: ${env:SLS_FUNCTION_NAME}
     maximumRetryAttempts: 0
     url:
       cors:

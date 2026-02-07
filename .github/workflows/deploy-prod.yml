@@ -45,6 +45,21 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@main
 
+      - name: Ensure ECR repository exists
+        run: |
+          REPO_NAME="serverless-${{ env.APP_NAME }}-prod"
+          if aws ecr describe-repositories --repository-names "$REPO_NAME" --region ${{ env.AWS_REGION }} 2>/dev/null; then
+            echo "✅ ECR repository already exists: $REPO_NAME"
+          else
+            echo "📦 Creating ECR repository: $REPO_NAME"
+            aws ecr create-repository \
+              --repository-name "$REPO_NAME" \
+              --region ${{ env.AWS_REGION }} \
+              --image-scanning-configuration scanOnPush=true \
+              --tags Key=Environment,Value=prod Key=Application,Value=${{ env.APP_NAME }}
+            echo "✅ ECR repository created with image scanning enabled"
+          fi
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@master
 
@@ -84,7 +99,7 @@ jobs:
 
           if [ "${{ steps.infra-check.outputs.full_deploy }}" = "true" ]; then
             echo "📦 Full deploy with Serverless"
-            SLS_ECR_IMAGE_URI="$IMAGE_URI" npx serverless@3 deploy -s prod
+            SLS_ECR_IMAGE_URI="$IMAGE_URI" SLS_FUNCTION_NAME="$FUNCTION_NAME" npx serverless@3 deploy -s prod
           else
             echo "⚡ Quick deploy with AWS CLI"
             if aws lambda update-function-code \
@@ -95,7 +110,7 @@ jobs:
             else
               echo "⚠️ Quick deploy failed (function may not exist), falling back to full deploy"
               echo "📦 Full deploy with Serverless"
-              SLS_ECR_IMAGE_URI="$IMAGE_URI" npx serverless@3 deploy -s ${{ github.ref_name }}
+              SLS_ECR_IMAGE_URI="$IMAGE_URI" SLS_FUNCTION_NAME="$FUNCTION_NAME" npx serverless@3 deploy -s prod
             fi
           
             echo "⏳ Waiting for function update..."
