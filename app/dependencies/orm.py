@@ -1,4 +1,3 @@
-from abc import ABC
 from datetime import UTC, datetime
 from typing import Annotated
 
@@ -7,7 +6,7 @@ from sqlalchemy import DateTime, TypeDecorator
 from sqlalchemy.orm import DeclarativeBase, mapped_column
 
 
-class TZDateTime(TypeDecorator, ABC):
+class TZDateTime(TypeDecorator):
     impl = DateTime
     cache_ok = True
 

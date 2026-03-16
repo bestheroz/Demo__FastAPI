@@ -1,7 +1,6 @@
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from urllib.parse import urlparse
 from uuid import uuid4
 
 import sentry_sdk
@@ -118,11 +117,10 @@ app.add_middleware(
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
-    # URL에서 경로와 쿼리 파라미터만 추출
-    parsed_url = urlparse(str(request.url))
-    path_and_query = parsed_url.path
-    if parsed_url.query:
-        path_and_query += f"?{parsed_url.query}"
+    # Starlette URL 객체에서 경로와 쿼리 파라미터 추출
+    path_and_query = request.url.path
+    if request.url.query:
+        path_and_query += f"?{request.url.query}"
 
     trace_id = str(uuid4())
     request.state.trace_id = trace_id

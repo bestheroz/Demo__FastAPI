@@ -117,6 +117,16 @@ select = [
     "RET",
     # Print statements
     "T20",
+    # flake8-logging
+    "LOG",
+    # flake8-use-pathlib
+    "PTH",
+    # flake8-datetime
+    "DTZ",
+    # flynt (f-string conversion)
+    "FLY",
+    # flake8-future-annotations
+    "FA",
 ]
 ignore = [
     "B008",

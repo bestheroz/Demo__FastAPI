@@ -2,10 +2,9 @@ from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager, suppress
 from typing import Any, cast
-from urllib.parse import quote
 
 from orjson import dumps, loads
-from sqlalchemy import CursorResult, Engine, create_engine
+from sqlalchemy import URL, CursorResult, Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from structlog import get_logger
 
@@ -54,9 +53,13 @@ class DatabaseSessionManager:
         pool_size = int(self.config.db_pool_size * (2 / 3 if readonly else 1 / 3))
         max_overflow = int(self.config.db_max_overflow * (2 / 3 if readonly else 1 / 3))
 
-        connection_url = (
-            f"mysql+pymysql://{self.config.db_username}:{quote(self.config.db_password)}"
-            f"@{self.config.db_host}:{self.config.db_port}/{self.config.db_name}"
+        connection_url = URL.create(
+            "mysql+pymysql",
+            username=self.config.db_username,
+            password=self.config.db_password,
+            host=self.config.db_host,
+            port=int(self.config.db_port),
+            database=self.config.db_name,
         )
 
         engine_kwargs = {
@@ -103,7 +106,7 @@ class DatabaseSessionManager:
     @staticmethod
     def _handle_session_error(session: Session, error: Exception, readonly: bool) -> None:
         error_type = "Read operation" if readonly else "Database"
-        log.error("database_error", error_type=error_type, error=str(error), exc_info=True)
+        log.exception("database_error", error_type=error_type, error=str(error))
         if not readonly:
             session.rollback()
         raise

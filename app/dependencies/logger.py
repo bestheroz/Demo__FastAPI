@@ -30,10 +30,13 @@ sql_logger = logging.getLogger("sqlalchemy.engine")
 sql_logger.setLevel(logging.INFO)
 
 
-# structlog 핸들러 생성
 class StructLogHandler(logging.Handler):
-    def emit(self, record):
-        log.debug(record.getMessage(), level=record.levelname)
+    """stdlib 로그를 structlog으로 라우팅하는 핸들러"""
+
+    def emit(self, record: logging.LogRecord) -> None:
+        level = record.levelname.lower()
+        logger = structlog.get_logger()
+        getattr(logger, level, logger.info)(record.getMessage(), logger_name=record.name)
 
 
 logging.basicConfig(

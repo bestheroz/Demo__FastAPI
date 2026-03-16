@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from fastapi_events.dispatcher import dispatch
 from pydantic import AwareDatetime
 from sqlalchemy import JSON
