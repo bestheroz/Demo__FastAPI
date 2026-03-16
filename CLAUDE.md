@@ -23,6 +23,10 @@
 - **의존성 설치**: `poetry install`
 - **새 패키지 추가**: `poetry add <package-name>`
 - **개발 의존성 추가**: `poetry add --group dev <package-name>`
+- **패키지 버전 확인**: `poetry show` 또는 `poetry show <package-name>`
+- **최신 버전 확인**: `poetry show --outdated`
+- **패키지 업데이트**: `poetry update <package-name>`
+- **⚠️ pip 사용 금지**: 모든 패키지 관리는 반드시 `poetry` 명령어로만 수행할 것 (`pip install`, `pip index` 등 사용 금지)
 
 ## 아키텍처 개요
 
@@ -62,7 +66,7 @@
 #### 설정 관리
 - 커스텀 `CustomBaseSettings`를 사용한 **환경 기반 설정**
 - **다중 dotenv 지원**: `dotenvs/.env.{environment}` 및 `dotenvs/.env`에서 읽기
-- Pydantic v1 호환성을 갖춘 **설정 검증**
+- Pydantic v2 기반 **설정 검증**
 
 #### API 설계
 - 명확한 라우트 구성을 갖춘 **버전 관리 API** (v1)
@@ -72,7 +76,7 @@
 
 ### 개발 환경 설정
 1. **환경 변수**: 적절한 `.env` 파일을 `dotenvs/` 디렉토리에 복사
-2. **데이터베이스**: 환경 변수에서 MySQL 연결 설정 (aiomysql 사용)
+2. **데이터베이스**: 환경 변수에서 MySQL 연결 설정 (pymysql 사용)
 3. **배포 환경**: `DEPLOYMENT_ENVIRONMENT` 설정 (local/sandbox/qa/production)
 4. **의존성**: `poetry install`로 설치 (Poetry 패키지 관리 사용)
 
@@ -81,7 +85,7 @@
 - **현재 마이그레이션**: V1 (admins), V2 (users), V3 (notices)
 
 ### 코드 스타일 및 품질
-- **줄 길이**: 120자 (`ruff.toml`에서 설정)
+- **줄 길이**: 120자 (`pyproject.toml`에서 설정)
 - **Python 버전**: 3.14
 - **임포트 정렬**: ruff의 isort 통합 사용
 - **따옴표 스타일**: 큰따옴표 선호
@@ -89,20 +93,20 @@
 
 ### 테스트 설정
 - **테스트 프레임워크**: 비동기 지원이 포함된 pytest
-- **커버리지 리포팅**: `pytest.ini`에서 term-missing 리포트로 설정
+- **커버리지 리포팅**: `pyproject.toml`의 `[tool.pytest.ini_options]`에서 term-missing 리포트로 설정
 - **환경 파일**: `dotenvs/.env` 및 `dotenvs/.env.test` 사용
 - **테스트 경로**: 테스트는 `tests/` 디렉토리에 위치
 - **비동기 테스트**: 자동 비동기 테스트 처리를 위해 `asyncio_mode=auto` 설정
 
 ### 주요 도구 및 의존성
-- **FastAPI 0.116.1**: 자동 OpenAPI 문서화가 포함된 웹 프레임워크
-- **SQLAlchemy 2.0.42**: 비동기 지원이 포함된 ORM
-- **Pydantic 2.11.7**: 데이터 검증 및 설정 관리
-- **aiomysql 0.2.0**: 비동기 MySQL 커넥터
-- **uvicorn 0.35.0**: 성능을 위한 uvloop이 포함된 ASGI 서버
-- **Sentry SDK**: 에러 모니터링 및 로깅
-- **structlog**: 구조화된 로깅
-- **PyJWT**: JWT 토큰 처리
+- **FastAPI 0.135.1**: 자동 OpenAPI 문서화가 포함된 웹 프레임워크
+- **SQLAlchemy 2.0.48**: 동기 지원이 포함된 ORM (pymysql 드라이버)
+- **Pydantic 2.12.5**: 데이터 검증 및 설정 관리
+- **pymysql 1.1.2**: MySQL 커넥터
+- **uvicorn 0.42.0**: 성능을 위한 uvloop이 포함된 ASGI 서버
+- **Sentry SDK 2.54.0**: 에러 모니터링 및 성능 트레이싱
+- **structlog 25.5.0**: 구조화된 로깅
+- **PyJWT 2.12.1**: JWT 토큰 처리
 
 ## 배포
 

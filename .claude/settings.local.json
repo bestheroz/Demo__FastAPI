@@ -74,7 +74,15 @@
       "Bash(poetry add:*)",
       "Bash(poetry run python:*)",
       "Bash(timeout 5 poetry run uvicorn:*)",
-      "mcp__context7__resolve-library-id"
+      "mcp__context7__resolve-library-id",
+      "Bash(python:*)",
+      "Bash(ruff format:*)",
+      "Bash(pip index:*)",
+      "Bash(pip install:*)",
+      "Bash(./.venv/bin/pip list:*)",
+      "Bash(./.venv/bin/python -c \"from app.main import app; print\\('=== IMPORT OK ==='\\)\" 2>&1)",
+      "mcp__plugin_oh-my-claudecode_t__state_list_active",
+      "mcp__plugin_oh-my-claudecode_t__state_clear"
     ],
     "deny": [
       "Bash(git push:*)",
@@ -96,5 +104,11 @@
       "Bash(npx serverless deploy:*)"
     ],
     "ask": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "exa",
+    "filesystem",
+    "github"
+  ]
 }

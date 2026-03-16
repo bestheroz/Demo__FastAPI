@@ -1,11 +1,7 @@
-from typing import TypeVar
-
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
 from app.types.base import AuthorityEnum, UserTypeEnum
-
-T = TypeVar("T")
 
 
 class Schema(BaseModel):

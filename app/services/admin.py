@@ -200,14 +200,13 @@ async def renew_token(authorization: str) -> Token:
                     access_token=create_access_token(admin),
                     refresh_token=admin.token,
                 )
-            elif admin.token == credentials:
+            if admin.token == credentials:
                 admin.renew_token()
                 return Token(
                     access_token=create_access_token(admin),
                     refresh_token=admin.token,
                 )
-            else:
-                raise UnauthorizedException401()
+            raise UnauthorizedException401()
         except (jwt.DecodeError, jwt.InvalidTokenError) as e:
             log.exception(e)
             raise UnauthorizedException401() from None

@@ -14,10 +14,10 @@ from app.core.config import get_settings
 log = get_logger()
 
 
-def custom_json_serializer(obj: Any) -> bytes:
+def custom_json_serializer(obj: Any) -> str:
     if isinstance(obj, set):
-        return dumps(sorted(list(obj)))
-    return dumps(obj)
+        return dumps(sorted(obj)).decode()
+    return dumps(obj).decode()
 
 
 class ReadonlySession(Session):
@@ -29,7 +29,7 @@ class ReadonlySession(Session):
     def execute(self, *args, **kwargs) -> CursorResult[Any]:
         """쿼리 실행을 자동으로 병렬 처리"""
         future = db_manager._thread_pool.submit(super().execute, *args, **kwargs)
-        return cast(CursorResult[Any], future.result())
+        return cast("CursorResult[Any]", future.result())
 
 
 class DatabaseSessionManager:
@@ -103,7 +103,7 @@ class DatabaseSessionManager:
     @staticmethod
     def _handle_session_error(session: Session, error: Exception, readonly: bool) -> None:
         error_type = "Read operation" if readonly else "Database"
-        log.error(f"{error_type} error", error=str(error), exc_info=True)
+        log.error("database_error", error_type=error_type, error=str(error), exc_info=True)
         if not readonly:
             session.rollback()
         raise

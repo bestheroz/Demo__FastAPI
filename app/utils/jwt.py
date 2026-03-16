@@ -40,7 +40,7 @@ def is_validated_jwt(token: str) -> bool:
         payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         # 토큰에 필수 필드가 있는지 확인
         return "exp" in payload
-    except (DecodeError, InvalidTokenError):
+    except (DecodeError, InvalidTokenError):  # fmt: skip
         return False
 
 
@@ -52,7 +52,7 @@ def issued_refresh_token_in_10_seconds(token: str) -> bool:
         expiration_time_from_current = utcnow() + REFRESH_TOKEN_EXPIRE_TIME
         expiration_time = datetime.fromtimestamp(payload["exp"], tz=UTC).replace(tzinfo=UTC)
         return expiration_time_from_current - expiration_time < timedelta(seconds=10)
-    except (DecodeError, InvalidTokenError):
+    except (DecodeError, InvalidTokenError):  # fmt: skip
         return False
 
 

@@ -46,7 +46,7 @@ class Notice(IdCreatedUpdated, Base):
     def created_by(self):
         if self.created_object_type == UserTypeEnum.USER:
             return self.created_by_user
-        elif self.created_object_type == UserTypeEnum.ADMIN:
+        if self.created_object_type == UserTypeEnum.ADMIN:
             return self.created_by_admin
         raise UnknownSystemException500()
 
@@ -54,7 +54,7 @@ class Notice(IdCreatedUpdated, Base):
     def updated_by(self):
         if self.updated_object_type == UserTypeEnum.USER:
             return self.updated_by_user
-        elif self.updated_object_type == UserTypeEnum.ADMIN:
+        if self.updated_object_type == UserTypeEnum.ADMIN:
             return self.updated_by_admin
         raise UnknownSystemException500()
 

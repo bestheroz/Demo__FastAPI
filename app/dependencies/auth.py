@@ -17,7 +17,7 @@ log = get_logger()
 
 def get_operator(request: Request) -> Operator:
     authorization = request.headers.get("Authorization")
-    scheme, credentials = get_authorization_scheme_param(authorization)
+    _scheme, credentials = get_authorization_scheme_param(authorization)
     claims = get_access_token_claims(credentials)
     return Operator.model_validate(claims.model_dump())
 
@@ -25,7 +25,7 @@ def get_operator(request: Request) -> Operator:
 def get_admin_id(request: Request) -> int:
     operator = get_operator(request)
     if operator.type != UserTypeEnum.ADMIN:
-        log.warning(f"You are not admin: {operator}")
+        log.warning("unauthorized_access", reason="not_admin", operator_id=operator.id, operator_type=operator.type)
         raise ForbiddenException403()
     return operator.id
 
@@ -33,7 +33,7 @@ def get_admin_id(request: Request) -> int:
 def get_user_id(request: Request) -> int:
     operator = get_operator(request)
     if operator.type != UserTypeEnum.USER:
-        log.warning(f"You are not user: {operator}")
+        log.warning("unauthorized_access", reason="not_user", operator_id=operator.id, operator_type=operator.type)
         raise ForbiddenException403()
     return operator.id
 
@@ -81,7 +81,9 @@ class AuthorityChecker:
         if not self.require_authorities or self.is_authorized(credentials):
             return credentials
         log.warning(
-            f"Need: {self.require_authorities}, Yours: {get_access_token_claims(credentials.credentials).authorities}"
+            "insufficient_authorities",
+            required=self.require_authorities,
+            actual=get_access_token_claims(credentials.credentials).authorities,
         )
         raise ForbiddenException403()
 
@@ -122,5 +124,5 @@ class SuperManagerOnly:
         claims = get_access_token_claims(credentials.credentials)
         result = bool(claims.manager_flag)
         if not result:
-            log.warning(f"You are not super admin: {claims}")
+            log.warning("unauthorized_access", reason="not_super_admin", user_id=claims.id)
         return result

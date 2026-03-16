@@ -35,7 +35,7 @@ class TZDateTime(TypeDecorator, ABC):
 
         try:
             return value.astimezone(UTC)
-        except (ValueError, AttributeError):
+        except (ValueError, AttributeError):  # fmt: skip
             return value.replace(tzinfo=UTC)
 
 
