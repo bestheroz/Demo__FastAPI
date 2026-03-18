@@ -35,3 +35,46 @@ jobs:
         with:
           commit_message: "⬆️ 버전 업데이트 (pyproject.toml) v${{ steps.tag.outputs.tag }}"
           branch: main
+
+  update-env-branches:
+    needs: commit-and-push-version
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        branch: [sandbox, qa]
+    concurrency:
+      group: update-version-${{ matrix.branch }}
+      cancel-in-progress: false
+    steps:
+      - name: ${{ matrix.branch }} 브랜치 존재 여부 확인
+        id: check
+        run: |
+          git ls-remote --exit-code --heads https://x-access-token:${{ secrets.WRITABLE_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git ${{ matrix.branch }} && echo "exists=true" >> $GITHUB_OUTPUT || echo "exists=false" >> $GITHUB_OUTPUT
+
+      - name: ${{ matrix.branch }} 브랜치 Checkout
+        if: steps.check.outputs.exists == 'true'
+        uses: actions/checkout@main
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 1
+
+      - name: 태그 가져오기
+        if: steps.check.outputs.exists == 'true'
+        id: tag
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: pyproject.toml 버전 업데이트
+        if: steps.check.outputs.exists == 'true'
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          find: '^version = "(.+?)"'
+          replace: 'version = "${{ steps.tag.outputs.tag }}"'
+          include: "pyproject.toml"
+          regex: true
+
+      - name: 변경사항 커밋 및 푸시
+        if: steps.check.outputs.exists == 'true'
+        uses: stefanzweifel/git-auto-commit-action@master
+        with:
+          commit_message: "⬆️ 버전 업데이트 (pyproject.toml) v${{ steps.tag.outputs.tag }}"
+          branch: ${{ matrix.branch }}
